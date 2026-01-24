@@ -699,9 +699,9 @@
 
         function getStatusConfig(status) {
             switch(status) {
-                case 'READY': return { label: 'Ready', color: '#fff' }; // Branco estilo Vercel
-                case 'ERROR': return { label: 'Error', color: '#ff4444' };
-                case 'BUILDING': return { label: 'Building', color: '#0070f3' }; // Azul Vercel
+                case 'READY': return { label: 'Ready', color: '#22c55e' }; // Verde
+                case 'ERROR': return { label: 'Error', color: '#ff4444' }; // Vermelho
+                case 'BUILDING': return { label: 'Building', color: '#eab308' }; // Amarelo
                 case 'QUEUED': return { label: 'Queued', color: '#888' };
                 default: return { label: 'Unknown', color: '#444' };
             }
