@@ -3,30 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeployMaster | Painel de Deploy Estático</title>
+    <title>DeployMaster Pro | Painel de Deploy</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Configuração do Tailwind -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        gray: {
-                            850: '#1f2937',
-                            900: '#111827',
-                            950: '#0B0F19'
-                        },
-                        accent: {
-                            500: '#3b82f6',
-                            600: '#2563eb'
-                        }
+                        gray: { 850: '#1f2937', 900: '#111827', 950: '#0B0F19' },
                     },
                     animation: {
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
                     },
                     keyframes: {
@@ -39,586 +27,541 @@
             }
         }
     </script>
-
-    <!-- Ícones (Lucide) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Estilos Personalizados -->
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0B0F19;
-            color: #e5e7eb;
-        }
-        
-        /* Scrollbar Personalizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111827; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #374151; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563; 
-        }
-
-        .glass-panel {
-            background: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.4);
-        }
-
-        .code-input {
-            font-family: 'Fira Code', monospace;
-            background-color: #0f131a;
-        }
-
-        .terminal-log {
-            font-family: 'Fira Code', monospace;
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-
-        .status-dot {
-            height: 8px;
-            width: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #e5e7eb; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .glass-panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(75, 85, 99, 0.4); }
+        .code-input { font-family: 'Fira Code', monospace; background-color: #0f131a; }
+        .terminal-log { font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.4; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navegação -->
+    <!-- Navbar -->
     <nav class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="rocket" class="text-blue-500 w-6 h-6"></i>
-                    <span class="font-bold text-xl tracking-tight text-white">DeployMaster</span>
+                    <div class="bg-blue-600 p-1.5 rounded-lg">
+                        <i data-lucide="rocket" class="text-white w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-white">DeployMaster Pro</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleSettings()" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800 transition text-sm text-gray-300">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                        <span>Configurar API Keys</span>
+                    <button onclick="updateAllStatuses()" class="p-2 text-gray-400 hover:text-white transition" title="Atualizar Status dos Projetos">
+                        <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
                     </button>
-                    <div id="api-status" class="flex items-center gap-2 text-xs">
-                        <span class="status-dot bg-red-500" id="status-indicator"></span>
-                        <span class="text-gray-400" id="status-text">Desconectado</span>
-                    </div>
+                    <button onclick="toggleSettings()" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800 transition text-sm text-gray-300 border border-transparent hover:border-gray-700">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>Configurações</span>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Coluna da Esquerda: Formulário de Novo Projeto -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="glass-panel rounded-xl p-6 shadow-lg animate-fade-in">
-                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <!-- Coluna Esquerda: Novo Deploy (4 colunas) -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-panel rounded-xl p-6 shadow-lg animate-fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                    
+                    <h2 class="text-lg font-semibold text-white mb-5 flex items-center gap-2">
                         <i data-lucide="plus-circle" class="w-5 h-5 text-blue-500"></i>
-                        Novo Deploy
+                        Novo Projeto
                     </h2>
                     
                     <form id="deploy-form" onsubmit="handleDeploy(event)">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1">Nome do Projeto</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Nome do Projeto</label>
                                 <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
                                     title="Apenas letras minúsculas, números e hífens."
                                     placeholder="ex: meu-portfolio-v1"
-                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-600">
-                                <p class="text-xs text-gray-500 mt-1">Sem espaços ou caracteres especiais.</p>
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-600 text-sm">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1">Código HTML (index.html)</label>
-                                <textarea id="html-code" required rows="10"
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Código HTML (index.html)</label>
+                                <textarea id="html-code" required rows="12"
                                     class="code-input w-full border border-gray-700 rounded-lg p-3 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                                    placeholder="<!DOCTYPE html>..."></textarea>
+                                    spellcheck="false"></textarea>
                             </div>
 
                             <button type="submit" id="deploy-btn"
-                                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+                                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg shadow-lg transform transition active:scale-[0.98] flex items-center justify-center gap-2">
                                 <i data-lucide="zap" class="w-4 h-4"></i>
-                                <span>Publicar Projeto</span>
+                                <span>Iniciar Deploy</span>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Painel de Logs (Status em Tempo Real) -->
-                <div id="log-panel" class="hidden glass-panel rounded-xl p-4 shadow-lg border-l-4 border-blue-500 bg-gray-900">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-blue-400">Status do Deploy</h3>
-                        <div class="animate-pulse-fast h-2 w-2 bg-blue-500 rounded-full"></div>
+                <!-- Log Panel -->
+                <div id="log-panel" class="hidden glass-panel rounded-xl p-0 shadow-lg border-l-4 border-blue-500 bg-gray-900 overflow-hidden">
+                    <div class="bg-gray-800/50 px-4 py-2 flex justify-between items-center border-b border-gray-800">
+                        <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">Terminal de Deploy</h3>
+                        <div class="animate-pulse h-1.5 w-1.5 bg-blue-500 rounded-full"></div>
                     </div>
-                    <div id="terminal-output" class="terminal-log text-gray-400 h-32 overflow-y-auto pr-2 space-y-1">
-                        <!-- Logs aparecerão aqui -->
-                    </div>
+                    <div id="terminal-output" class="terminal-log p-4 text-gray-400 h-40 overflow-y-auto space-y-1.5"></div>
                 </div>
             </div>
 
-            <!-- Coluna da Direita: Dashboard de Projetos -->
-            <div class="lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i data-lucide="layout-grid" class="w-6 h-6 text-purple-500"></i>
-                        Meus Projetos
-                    </h2>
-                    <span id="project-count" class="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded-full border border-gray-700">0 Projetos</span>
+            <!-- Coluna Direita: Dashboard (8 colunas) -->
+            <div class="lg:col-span-8">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-1">Meus Projetos</h2>
+                        <p class="text-sm text-gray-400">Gerencie seus deploys e verifique status em tempo real.</p>
+                    </div>
+                    <span id="project-count" class="bg-gray-800/80 text-gray-300 text-xs font-medium px-3 py-1 rounded-full border border-gray-700">0 Projetos</span>
                 </div>
 
-                <!-- Lista de Projetos -->
-                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Cards de projetos serão injetados aqui -->
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Cards aqui -->
                 </div>
 
-                <!-- Estado Vazio -->
-                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-12 text-gray-500 border-2 border-dashed border-gray-800 rounded-xl">
-                    <i data-lucide="box" class="w-12 h-12 mb-3 opacity-50"></i>
-                    <p>Nenhum projeto implantado ainda.</p>
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-gray-500 border border-dashed border-gray-800 rounded-xl bg-gray-900/30">
+                    <div class="bg-gray-800 p-4 rounded-full mb-4">
+                        <i data-lucide="layers" class="w-8 h-8 opacity-50"></i>
+                    </div>
+                    <p class="text-lg font-medium text-gray-400">Nenhum projeto encontrado</p>
+                    <p class="text-sm">Preencha o formulário à esquerda para criar seu primeiro deploy.</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal de Configuração de API Keys -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300" id="settings-content">
+    <!-- Modal Settings -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all duration-300 opacity-0">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-all duration-300" id="settings-content">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white">Configuração de APIs</h3>
-                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="key" class="w-5 h-5 text-blue-500"></i>
+                    Chaves de API
+                </h3>
+                <button onclick="toggleSettings()" class="text-gray-500 hover:text-white transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             
-            <div class="space-y-4">
-                <div class="p-3 bg-blue-900/20 border border-blue-800/50 rounded-lg text-xs text-blue-200">
-                    <p class="font-semibold mb-1">🔒 Segurança e Privacidade</p>
-                    <p>Suas chaves são salvas apenas no <strong>localStorage</strong> do seu navegador. Nada é enviado para servidores intermediários.</p>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-medium text-gray-300">GitHub Personal Access Token</label>
-                        <a href="https://github.com/settings/tokens/new?scopes=repo&description=DeployMaster" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition">
-                            Gerar Token (Repo) <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
+            <div class="space-y-5">
+                <div class="p-4 bg-blue-900/10 border border-blue-800/30 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-blue-400 mt-0.5"></i>
+                        <div class="text-xs text-blue-200/80">
+                            <p class="font-bold text-blue-200 mb-1">Armazenamento Local e Seguro</p>
+                            <p>Seus tokens são salvos apenas no navegador (localStorage). Nenhuma informação passa por nossos servidores.</p>
+                        </div>
                     </div>
-                    <input type="password" id="github-token" placeholder="ghp_..." class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Necessário escopo: <code>repo</code></p>
                 </div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-medium text-gray-300">Vercel Access Token</label>
-                        <a href="https://vercel.com/account/tokens" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition">
-                            Gerar Token <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="text-sm font-medium text-gray-300">GitHub Token</label>
+                            <a href="https://github.com/settings/tokens/new?scopes=repo&description=DeployMaster" target="_blank" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition uppercase font-bold tracking-wide">
+                                Gerar Token <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <i data-lucide="github" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
+                            <input type="password" id="github-token" placeholder="ghp_..." class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
                     </div>
-                    <input type="password" id="vercel-token" placeholder="Possui ~24 caracteres" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="text-sm font-medium text-gray-300">Vercel Token</label>
+                            <a href="https://vercel.com/account/tokens" target="_blank" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition uppercase font-bold tracking-wide">
+                                Gerar Token <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <i data-lucide="triangle" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500 rotate-180"></i> <!-- Vercel icon inverted triangle -->
+                            <input type="password" id="vercel-token" placeholder="Token da Vercel" class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
                 </div>
 
-                <button onclick="saveKeys()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition mt-2">
-                    Salvar e Conectar
+                <button onclick="saveKeys()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition mt-2 shadow-lg">
+                    Salvar Configurações
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Script da Aplicação -->
+    <!-- Script Lógica -->
     <script>
-        // --- 1. Estado e Inicialização ---
-        
         let projects = JSON.parse(localStorage.getItem('dm_projects')) || [];
-        
-        // Inicializa ícones e carrega dados
+
+        // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadKeys();
             renderProjects();
             
-            // Texto padrão no editor
+            // Texto padrão
             const defaultHTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <title>Meu Site Incrível</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #333; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #000; color: #fff; margin: 0; }
+        .card { padding: 2rem; border: 1px solid #333; border-radius: 12px; text-align: center; }
+        h1 { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>Olá, Mundo! 🚀</h1>
-        <p>Deploy realizado com DeployMaster.</p>
+        <h1>Olá, Vercel! 🚀</h1>
+        <p>Site implantado via DeployMaster Pro</p>
     </div>
 </body>
 </html>`;
-            if(!document.getElementById('html-code').value) {
-                document.getElementById('html-code').value = defaultHTML;
+            const area = document.getElementById('html-code');
+            if(!area.value) area.value = defaultHTML;
+
+            // Atualiza status se houver tokens
+            if(localStorage.getItem('dm_vc_token')) {
+                updateAllStatuses();
             }
         });
 
-        // --- 2. Gerenciamento de Keys ---
-
-        function toggleSettings() {
-            const modal = document.getElementById('settings-modal');
-            const content = document.getElementById('settings-content');
-            
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                // Pequeno delay para permitir que o display block seja processado antes da opacidade
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    content.classList.remove('scale-95');
-                    content.classList.add('scale-100');
-                }, 10);
-            } else {
-                modal.classList.add('opacity-0');
-                content.classList.remove('scale-100');
-                content.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            }
-        }
-
-        function saveKeys() {
-            const ghToken = document.getElementById('github-token').value;
-            const vcToken = document.getElementById('vercel-token').value;
-
-            if (ghToken) localStorage.setItem('dm_gh_token', ghToken);
-            if (vcToken) localStorage.setItem('dm_vc_token', vcToken);
-
-            updateStatusIndicator();
-            toggleSettings();
-            log('Sistema', 'Chaves de API salvas localmente.');
-        }
-
-        function loadKeys() {
-            const ghToken = localStorage.getItem('dm_gh_token');
-            const vcToken = localStorage.getItem('dm_vc_token');
-            
-            if (ghToken) document.getElementById('github-token').value = ghToken;
-            if (vcToken) document.getElementById('vercel-token').value = vcToken;
-            
-            updateStatusIndicator();
-        }
-
-        function updateStatusIndicator() {
-            const ghToken = localStorage.getItem('dm_gh_token');
-            const vcToken = localStorage.getItem('dm_vc_token');
-            const indicator = document.getElementById('status-indicator');
-            const text = document.getElementById('status-text');
-
-            if (ghToken && vcToken) {
-                indicator.className = 'status-dot bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]';
-                text.textContent = 'APIs Conectadas';
-                text.classList.add('text-green-400');
-                text.classList.remove('text-gray-400');
-            } else {
-                indicator.className = 'status-dot bg-red-500';
-                text.textContent = 'Configuração Pendente';
-                text.classList.remove('text-green-400');
-                text.classList.add('text-gray-400');
-            }
-        }
-
-        // --- 3. Sistema de Logs e UI ---
-
-        function log(source, message, type = 'info') {
-            const panel = document.getElementById('log-panel');
-            const output = document.getElementById('terminal-output');
-            
-            panel.classList.remove('hidden');
-            
-            const time = new Date().toLocaleTimeString('pt-BR');
-            let colorClass = 'text-gray-300';
-            if (type === 'success') colorClass = 'text-green-400';
-            if (type === 'error') colorClass = 'text-red-400';
-            if (type === 'warn') colorClass = 'text-yellow-400';
-
-            const line = document.createElement('div');
-            line.innerHTML = `<span class="text-gray-600">[${time}]</span> <span class="text-blue-500 font-bold">${source}:</span> <span class="${colorClass}">${message}</span>`;
-            
-            output.appendChild(line);
-            output.scrollTop = output.scrollHeight;
-        }
-
-        function setDeploying(isDeploying) {
-            const btn = document.getElementById('deploy-btn');
-            if (isDeploying) {
-                btn.disabled = true;
-                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...`;
-                btn.classList.add('opacity-75', 'cursor-not-allowed');
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> Publicar Projeto`;
-                btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            }
-            lucide.createIcons();
-        }
-
-        // --- 4. Lógica Core de Deploy ---
-
+        // --- Core: Deploy ---
+        
         async function handleDeploy(e) {
             e.preventDefault();
-            
             const ghToken = localStorage.getItem('dm_gh_token');
             const vcToken = localStorage.getItem('dm_vc_token');
-
+            
             if (!ghToken || !vcToken) {
-                alert('Por favor, configure as chaves de API do GitHub e Vercel nas configurações.');
                 toggleSettings();
-                return;
+                return alert('Configure as chaves de API primeiro.');
             }
 
-            const projectName = document.getElementById('project-name').value.trim();
+            const projectName = document.getElementById('project-name').value.trim().toLowerCase();
             const htmlContent = document.getElementById('html-code').value;
 
-            setDeploying(true);
-            document.getElementById('terminal-output').innerHTML = ''; // Limpa logs anteriores
-
+            setLoading(true);
+            clearLogs();
+            
             try {
-                // Passo 1: Obter usuário GitHub
-                log('GitHub', 'Autenticando usuário...', 'info');
-                const user = await fetchGitHubUser(ghToken);
-                log('GitHub', `Autenticado como: ${user.login}`, 'success');
+                // 1. GitHub
+                log('GitHub', 'Autenticando...');
+                const ghUser = await fetchGitHubUser(ghToken);
+                log('GitHub', `Usuário: ${ghUser.login}`, 'success');
 
-                // Passo 2: Criar Repositório
-                log('GitHub', `Criando repositório '${projectName}'...`, 'info');
-                const repo = await createGitHubRepo(ghToken, projectName);
-                log('GitHub', 'Repositório criado com sucesso.', 'success');
-
-                // Passo 3: Upload do arquivo index.html
-                log('GitHub', 'Enviando arquivos (commit)...', 'info');
-                await uploadFileToGitHub(ghToken, user.login, projectName, htmlContent);
-                log('GitHub', 'Arquivo index.html enviado.', 'success');
-
-                // Passo 4: Criar Projeto na Vercel (Configuração)
-                log('Vercel', 'Inicializando ambiente do projeto...', 'info');
-                const project = await createVercelProject(vcToken, projectName, repo.name, user.login); // Tentamos linkar o repo no metadata
+                log('GitHub', `Verificando repositório '${projectName}'...`);
+                const repo = await ensureGitHubRepo(ghToken, projectName);
                 
-                // Passo 5: Deploy (Usando Vercel API Direct Upload para garantir funcionamento sem Git Hook complexo)
-                // Nota: A API de 'Create Project' da Vercel linka o repositório, mas o deploy automático
-                // geralmente requer a instalação do Vercel App no GitHub.
-                // Para garantir que o usuário veja o site, faremos um deploy "manual" via API dos arquivos.
-                log('Vercel', 'Iniciando build e deploy...', 'info');
-                const deployment = await triggerVercelDeploy(vcToken, projectName, htmlContent);
+                log('GitHub', 'Enviando index.html...');
+                await uploadToGitHub(ghToken, ghUser.login, projectName, htmlContent);
                 
-                log('Vercel', `Deploy finalizado! URL: https://${deployment.url}`, 'success');
+                // 2. Vercel - Criar Projeto
+                log('Vercel', 'Obtendo informações da conta...');
+                const vcUser = await fetchVercelUser(vcToken);
+                
+                log('Vercel', `Configurando projeto '${projectName}'...`);
+                const projectData = await ensureVercelProject(vcToken, projectName);
+                
+                // 3. Vercel - Deploy
+                log('Vercel', 'Iniciando build...');
+                const deployment = await createVercelDeployment(vcToken, projectData.id, htmlContent, projectName);
+                
+                log('Vercel', 'Aguardando propagação da URL...');
+                
+                // 4. Buscar URL Canônica
+                // A URL do deployment é longa, buscamos a production target do projeto
+                const updatedProjectData = await fetchVercelProject(vcToken, projectData.id);
+                
+                // Tenta pegar: URL do Target Production ou Alias[0] do target ou gera padrão
+                let finalUrl = '';
+                if (updatedProjectData.targets?.production?.url) {
+                    finalUrl = updatedProjectData.targets.production.url;
+                } else if (updatedProjectData.targets?.production?.alias?.length > 0) {
+                    finalUrl = updatedProjectData.targets.production.alias[0];
+                } else {
+                    // Fallback para a padrão se não tiver target production ainda (primeiro deploy as vezes demora ms)
+                    finalUrl = `${projectName}.vercel.app`;
+                }
 
-                // Salvar projeto
+                log('Sucesso', `Deploy concluído: ${finalUrl}`, 'success');
+
+                // Salvar dados completos
                 const newProject = {
                     id: Date.now(),
                     name: projectName,
-                    githubUrl: repo.html_url,
-                    vercelUrl: `https://${deployment.url}`, // Usamos o alias gerado
-                    date: new Date().toLocaleDateString()
+                    ghUrl: repo.html_url,
+                    vcUrl: `https://${finalUrl}`,
+                    vcDashboardUrl: `https://vercel.com/${vcUser.username}/${projectName}`,
+                    vcProjectId: projectData.id,
+                    vcDeploymentId: deployment.id, // ID do deploy específico para logs
+                    status: 'READY',
+                    lastUpdate: new Date().toLocaleString()
                 };
 
+                // Remove duplicatas se existir e adiciona novo
+                projects = projects.filter(p => p.name !== projectName);
                 projects.unshift(newProject);
                 localStorage.setItem('dm_projects', JSON.stringify(projects));
-                renderProjects();
                 
-                // Reset form
+                renderProjects();
                 document.getElementById('project-name').value = '';
 
-            } catch (error) {
-                console.error(error);
-                log('ERRO', error.message, 'error');
+            } catch (err) {
+                console.error(err);
+                log('ERRO FATAL', err.message, 'error');
             } finally {
-                setDeploying(false);
+                setLoading(false);
             }
         }
 
-        // --- 5. Funções de API ---
+        // --- API Functions ---
 
         async function fetchGitHubUser(token) {
-            const res = await fetch('https://api.github.com/user', {
-                headers: { 'Authorization': `token ${token}` }
-            });
-            if (!res.ok) throw new Error('Falha ao autenticar no GitHub. Verifique o token.');
-            return await res.json();
+            const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
+            if (!res.ok) throw new Error('Erro Auth GitHub');
+            return res.json();
         }
 
-        async function createGitHubRepo(token, name) {
+        async function ensureGitHubRepo(token, name) {
+            // Tenta criar
             const res = await fetch('https://api.github.com/user/repos', {
                 method: 'POST',
-                headers: { 
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: name,
-                    description: 'Deploy automatizado via DeployMaster',
-                    auto_init: true,
-                    private: false // Pode mudar para true se o token tiver escopo correto
-                })
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, auto_init: true, private: false })
             });
-
-            // Se o repo já existe (422), tentamos pegar os dados dele
-            if (res.status === 422) {
-                log('GitHub', 'Repositório já existe. Usando o existente...', 'warn');
+            
+            if (res.status === 422) { // Já existe
                 const user = await fetchGitHubUser(token);
                 const existing = await fetch(`https://api.github.com/repos/${user.login}/${name}`, {
-                     headers: { 'Authorization': `token ${token}` }
+                    headers: { Authorization: `token ${token}` }
                 });
-                return await existing.json();
+                return existing.json();
             }
-
-            if (!res.ok) throw new Error('Falha ao criar repositório.');
-            return await res.json();
+            if (!res.ok) throw new Error('Erro ao criar Repo GitHub');
+            return res.json();
         }
 
-        async function uploadFileToGitHub(token, owner, repo, content) {
-            // Encode content to Base64 handling UTF-8
-            const contentEncoded = btoa(unescape(encodeURIComponent(content)));
-            
-            // Verificar se arquivo existe para pegar o SHA (para update)
+        async function uploadToGitHub(token, owner, repo, content) {
+            // Get SHA if exists
             let sha = null;
             try {
                 const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, {
-                    headers: { 'Authorization': `token ${token}` }
+                    headers: { Authorization: `token ${token}` }
                 });
-                if (check.ok) {
-                    const data = await check.json();
-                    sha = data.sha;
-                }
-            } catch (e) {}
+                if (check.ok) sha = (await check.json()).sha;
+            } catch {}
 
             const body = {
-                message: 'Automated deploy from DeployMaster',
-                content: contentEncoded,
+                message: 'Update via DeployMaster',
+                content: btoa(unescape(encodeURIComponent(content))),
+                sha: sha || undefined
             };
-            if (sha) body.sha = sha;
 
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, {
                 method: 'PUT',
-                headers: { 
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
-
-            if (!res.ok) throw new Error('Falha ao fazer upload do arquivo para o GitHub.');
-            return await res.json();
+            if (!res.ok) throw new Error('Erro ao enviar arquivo pro GitHub');
         }
 
-        async function createVercelProject(token, name, repoName, gitUser) {
-            // Criar projeto
+        async function fetchVercelUser(token) {
+            const res = await fetch('https://api.vercel.com/v2/user', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Erro Auth Vercel');
+            const data = await res.json();
+            return data.user;
+        }
+
+        async function ensureVercelProject(token, name) {
+            // Tenta criar projeto Vercel
             const res = await fetch('https://api.vercel.com/v9/projects', {
                 method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: name,
-                    framework: null // HTML estático
-                })
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, framework: null })
             });
             
-            // Se já existe (409) ou criado (200), seguimos
-            if (!res.ok && res.status !== 409) {
-                const err = await res.json();
-                throw new Error(`Erro Vercel: ${err.error?.message || 'Falha ao criar projeto'}`);
+            if (!res.ok) {
+                // Se erro for diferente de 409 (conflict), tenta buscar o projeto existente
+                // A API de create retorna o projeto se já existe em alguns casos, mas vamos garantir
+                if (res.status === 409 || !res.ok) {
+                    return fetchVercelProjectByName(token, name);
+                }
+                throw new Error('Erro ao criar Projeto Vercel');
             }
-            return await res.json();
+            return res.json();
         }
 
-        async function triggerVercelDeploy(token, name, content) {
-            // Realiza um deploy direto dos arquivos (File-based deployment)
-            // Isso garante o deploy sem depender de Git Hooks configurados
+        async function fetchVercelProject(token, id) {
+             const res = await fetch(`https://api.vercel.com/v9/projects/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return res.json();
+        }
+        
+        async function fetchVercelProjectByName(token, name) {
+             const res = await fetch(`https://api.vercel.com/v9/projects/${name}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if(!res.ok) throw new Error('Projeto não encontrado ou acesso negado');
+            return res.json();
+        }
+
+        async function createVercelDeployment(token, projectId, content, name) {
             const res = await fetch('https://api.vercel.com/v13/deployments', {
                 method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name,
-                    files: [
-                        {
-                            file: 'index.html',
-                            data: content
-                        }
-                    ],
-                    projectSettings: {
-                        framework: null
-                    },
-                    target: 'production' // Deploy direto para prod
+                    project: projectId, // Associa ao projeto existente para pegar as configs de URL
+                    files: [{ file: 'index.html', data: content }],
+                    projectSettings: { framework: null },
+                    target: 'production'
                 })
             });
-
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(`Erro Deploy Vercel: ${err.error?.message || 'Falha desconhecida'}`);
+                throw new Error(err.error?.message || 'Erro Deploy Vercel');
             }
-            
-            const data = await res.json();
-            return data;
+            return res.json();
         }
 
-        // --- 6. Renderização da Dashboard ---
+        async function getProjectStatus(token, projectId) {
+            // Busca o último deploy do projeto
+            const res = await fetch(`https://api.vercel.com/v6/deployments?projectId=${projectId}&limit=1`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if(!res.ok) return 'UNKNOWN';
+            const data = await res.json();
+            if(data.deployments && data.deployments.length > 0) {
+                return {
+                    state: data.deployments[0].state, // READY, ERROR, BUILDING, QUEUED
+                    id: data.deployments[0].uid
+                };
+            }
+            return { state: 'UNKNOWN', id: null };
+        }
+
+        // --- Status Update Logic ---
+
+        async function updateAllStatuses() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('animate-spin');
+            
+            const token = localStorage.getItem('dm_vc_token');
+            if(!token) return;
+
+            const updatedProjects = await Promise.all(projects.map(async (p) => {
+                try {
+                    if (!p.vcProjectId) return p;
+                    const statusData = await getProjectStatus(token, p.vcProjectId);
+                    
+                    // Se houver um novo deploy ID detectado na Vercel (ex: via git push), atualizamos
+                    if (statusData.id) p.vcDeploymentId = statusData.id;
+                    p.status = statusData.state;
+                    
+                    // Tenta atualizar a URL se estiver incorreta
+                    if (p.vcUrl.length > 60) {
+                         const proj = await fetchVercelProject(token, p.vcProjectId);
+                         if (proj.targets?.production?.url) {
+                             p.vcUrl = `https://${proj.targets.production.url}`;
+                         }
+                    }
+                    
+                    return p;
+                } catch (e) {
+                    return p;
+                }
+            }));
+
+            projects = updatedProjects;
+            localStorage.setItem('dm_projects', JSON.stringify(projects));
+            renderProjects();
+            
+            setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+        }
+
+        // --- UI Rendering ---
 
         function renderProjects() {
             const grid = document.getElementById('projects-grid');
             const empty = document.getElementById('empty-state');
-            const count = document.getElementById('project-count');
-            
-            grid.innerHTML = '';
-            count.innerText = `${projects.length} Projetos`;
+            document.getElementById('project-count').textContent = `${projects.length} Projetos`;
 
+            grid.innerHTML = '';
+            
             if (projects.length === 0) {
                 empty.classList.remove('hidden');
                 return;
-            } else {
-                empty.classList.add('hidden');
             }
+            empty.classList.add('hidden');
 
-            projects.forEach(project => {
+            projects.forEach(p => {
+                const statusConfig = getStatusConfig(p.status);
+                // Extrai usuário da URL do dashboard se não tivermos salvo
+                let userSlug = p.vcDashboardUrl ? p.vcDashboardUrl.split('/')[3] : 'user';
+                // Link para a página de erro/deploy específico
+                const logUrl = `https://vercel.com/${userSlug}/${p.name}/deployments/${p.vcDeploymentId || ''}`;
+
                 const card = document.createElement('div');
-                card.className = 'glass-panel rounded-xl p-5 border-l-4 border-gray-700 hover:border-blue-500 transition-all group animate-fade-in';
+                card.className = 'glass-panel rounded-xl p-5 border-l-4 transition-all hover:shadow-xl group animate-fade-in flex flex-col h-full';
+                card.style.borderLeftColor = statusConfig.color;
+                
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-bold text-lg text-white group-hover:text-blue-400 transition">${project.name}</h3>
-                        <button onclick="deleteProject(${project.id})" class="text-gray-500 hover:text-red-500 transition" title="Remover da lista">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-white group-hover:text-blue-400 transition">${p.name}</h3>
+                            <a href="${p.vcUrl}" target="_blank" class="text-xs text-gray-400 hover:text-white hover:underline truncate block max-w-[200px] mt-1">
+                                ${p.vcUrl.replace('https://', '')}
+                            </a>
+                        </div>
+                        <div class="flex gap-2">
+                             <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusConfig.bg} ${statusConfig.text} border-${statusConfig.border}">
+                                ${statusConfig.label}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow space-y-2 mb-4">
+                        <!-- Links Principais -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="${p.vcDashboardUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
+                                <i data-lucide="layout-dashboard" class="w-3 h-3"></i>
+                                Vercel Dash
+                            </a>
+                            <a href="${p.ghUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
+                                <i data-lucide="github" class="w-3 h-3"></i>
+                                Repo Git
+                            </a>
+                        </div>
+
+                        <!-- Botão de Erro Condicional -->
+                        ${p.status === 'ERROR' ? `
+                        <a href="${logUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-bold bg-red-900/30 hover:bg-red-900/50 text-red-400 py-2 rounded border border-red-900/50 transition w-full">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                            Ver Logs de Erro
+                        </a>
+                        ` : ''}
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-800 flex justify-between items-center mt-auto">
+                        <a href="${p.vcUrl}" target="_blank" class="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                            Acessar Site <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
+                        <button onclick="deleteProject(${p.id})" class="text-gray-600 hover:text-red-500 transition">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
-                    </div>
-                    
-                    <div class="flex flex-col gap-2 mb-4">
-                        <a href="${project.githubUrl}" target="_blank" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition bg-gray-800/50 p-2 rounded hover:bg-gray-800">
-                            <i data-lucide="github" class="w-4 h-4"></i>
-                            <span>Repositório GitHub</span>
-                            <i data-lucide="external-link" class="w-3 h-3 ml-auto opacity-50"></i>
-                        </a>
-                        <a href="${project.vercelUrl}" target="_blank" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition bg-gray-800/50 p-2 rounded hover:bg-gray-800">
-                            <i data-lucide="triangle" class="w-4 h-4 fill-current"></i> <!-- Simula Vercel logo -->
-                            <span class="truncate">${project.vercelUrl.replace('https://', '')}</span>
-                            <i data-lucide="external-link" class="w-3 h-3 ml-auto opacity-50"></i>
-                        </a>
-                    </div>
-
-                    <div class="flex items-center gap-2 mt-2 pt-3 border-t border-gray-800 text-xs text-green-400">
-                        <span class="status-dot bg-green-500 animate-pulse"></span>
-                        <span>Deploy ativo</span>
-                        <span class="ml-auto text-gray-600">${project.date}</span>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -626,14 +569,82 @@
             lucide.createIcons();
         }
 
+        function getStatusConfig(status) {
+            switch(status) {
+                case 'READY': return { label: 'Online', color: '#22c55e', text: 'text-green-400', bg: 'bg-green-900/20', border: 'green-900/50' };
+                case 'ERROR': return { label: 'Falhou', color: '#ef4444', text: 'text-red-400', bg: 'bg-red-900/20', border: 'red-900/50' };
+                case 'BUILDING': return { label: 'Buildando', color: '#eab308', text: 'text-yellow-400', bg: 'bg-yellow-900/20', border: 'yellow-900/50' };
+                case 'QUEUED': return { label: 'Fila', color: '#a855f7', text: 'text-purple-400', bg: 'bg-purple-900/20', border: 'purple-900/50' };
+                default: return { label: 'Desconhecido', color: '#6b7280', text: 'text-gray-400', bg: 'bg-gray-800', border: 'gray-700' };
+            }
+        }
+
+        // --- Utilities ---
+
+        function setLoading(isLoading) {
+            const btn = document.getElementById('deploy-btn');
+            if(isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...`;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> Iniciar Deploy`;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            lucide.createIcons();
+        }
+
+        function log(src, msg, type) {
+            const panel = document.getElementById('log-panel');
+            const out = document.getElementById('terminal-output');
+            panel.classList.remove('hidden');
+            
+            const color = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : 'text-gray-300';
+            out.innerHTML += `<div class="mb-1"><span class="text-blue-500 font-bold text-xs">[${src}]</span> <span class="${color}">${msg}</span></div>`;
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('terminal-output').innerHTML = '';
+        }
+
         function deleteProject(id) {
-            if(confirm('Isso removerá o projeto apenas deste painel. O repositório e o site continuarão online. Confirmar?')) {
+            if(confirm('Remover este projeto do painel? (Não apaga da Vercel/GitHub)')) {
                 projects = projects.filter(p => p.id !== id);
                 localStorage.setItem('dm_projects', JSON.stringify(projects));
                 renderProjects();
             }
         }
 
+        // Settings Logic
+        function toggleSettings() {
+            const m = document.getElementById('settings-modal');
+            const c = document.getElementById('settings-content');
+            if(m.classList.contains('hidden')) {
+                m.classList.remove('hidden');
+                setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10);
+            } else {
+                m.classList.add('opacity-0'); c.classList.add('scale-95');
+                setTimeout(() => m.classList.add('hidden'), 300);
+            }
+        }
+
+        function saveKeys() {
+            const gh = document.getElementById('github-token').value;
+            const vc = document.getElementById('vercel-token').value;
+            if(gh) localStorage.setItem('dm_gh_token', gh);
+            if(vc) localStorage.setItem('dm_vc_token', vc);
+            toggleSettings();
+            updateAllStatuses(); // Tenta atualizar assim que salva
+        }
+
+        function loadKeys() {
+            const gh = localStorage.getItem('dm_gh_token');
+            const vc = localStorage.getItem('dm_vc_token');
+            if(gh) document.getElementById('github-token').value = gh;
+            if(vc) document.getElementById('vercel-token').value = vc;
+        }
     </script>
 </body>
 </html>
