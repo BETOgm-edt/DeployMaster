@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeployMaster Pro | Painel de Deploy</title>
-    <script src="https://imgur.com/McSXrEh.png"></script>
+    <title>DeployMaster Pro</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,15 +11,27 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
                     colors: {
-                        gray: { 850: '#1f2937', 900: '#111827', 950: '#0B0F19' },
+                        background: '#030303',
+                        surface: '#0A0A0A',
+                        surfaceHighlight: '#111111',
+                        border: '#222222',
+                        borderHighlight: '#333333',
+                        textMain: '#EDEDED',
+                        textMuted: '#888888',
+                        accent: '#FFFFFF',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
@@ -28,178 +39,253 @@
             }
         }
     </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #e5e7eb; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        .glass-panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(75, 85, 99, 0.4); }
-        .code-input { font-family: 'Fira Code', monospace; background-color: #0f131a; }
-        .terminal-log { font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.4; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #030303; 
+            color: #EDEDED;
+            background-image: 
+                radial-gradient(circle at 50% 0%, #1a1a1a 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-position: 0 0, 0 0, 0 0;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        .panel {
+            background: #0A0A0A;
+            border: 1px solid #222;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .input-field {
+            background: #050505;
+            border: 1px solid #222;
+            color: #EDEDED;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            border-color: #444;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.05);
+        }
+        
+        .btn-primary {
+            background: #EDEDED;
+            color: #000;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #333;
+            color: #888;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: #666;
+            color: #EDEDED;
+            background: #111;
+        }
+
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #050505;
+            line-height: 1.5;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-white/20">
 
-    <!-- Navbar -->
-    <nav class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-2">
-                    <div class="bg-blue-600 p-1.5 rounded-lg">
-                        <i data-lucide="rocket" class="text-white w-5 h-5"></i>
+    <!-- Navbar Minimalista -->
+    <nav class="border-b border-[#222] bg-[#030303]/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                        <i data-lucide="triangle" class="w-4 h-4 fill-current rotate-180"></i> <!-- Logo abstrato -->
                     </div>
-                    <span class="font-bold text-xl tracking-tight text-white">DeployMaster Pro</span>
+                    <span class="font-medium text-sm tracking-wide text-gray-300">DeployMaster</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#222] text-[#888]">PRO</span>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="syncProjects()" class="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white transition rounded-md hover:bg-gray-800" title="Sincronizar Projetos">
+                
+                <div class="flex items-center gap-3">
+                    <div id="sync-status" class="hidden flex items-center gap-2 text-xs text-[#666] animate-pulse">
+                        <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i>
+                        <span>Syncing...</span>
+                    </div>
+                    
+                    <div class="h-4 w-[1px] bg-[#333] mx-1"></div>
+
+                    <button onclick="syncProjects()" class="p-2 text-[#666] hover:text-white transition rounded hover:bg-[#111]" title="Sincronizar">
                         <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
-                        <span class="text-sm font-medium hidden sm:inline">Sincronizar</span>
                     </button>
-                    <button onclick="toggleSettings()" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800 transition text-sm text-gray-300 border border-transparent hover:border-gray-700">
+                    <button onclick="toggleSettings()" class="p-2 text-[#666] hover:text-white transition rounded hover:bg-[#111]" title="Configurações">
                         <i data-lucide="settings" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Configurações</span>
                     </button>
+                    <a href="https://github.com" target="_blank" class="p-2 text-[#666] hover:text-white transition rounded hover:bg-[#111]">
+                         <img src="https://github.com/favicon.ico" class="w-4 h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition">
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="flex-grow w-full max-w-7xl mx-auto px-6 py-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <!-- Coluna Esquerda: Novo Deploy (4 colunas) -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel rounded-xl p-6 shadow-lg animate-fade-in relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <!-- Coluna Esquerda: Editor e Configuração (4 colunas) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <div class="panel rounded-xl p-0 overflow-hidden animate-fade-in transition-all duration-300" id="editor-panel">
+                    <div class="p-5 border-b border-[#222] bg-[#080808] flex justify-between items-center">
+                        <h2 class="text-sm font-medium text-white flex items-center gap-2" id="form-title">
+                            <i data-lucide="plus" class="w-4 h-4 text-[#666]" id="form-icon"></i>
+                            Novo Deployment
+                        </h2>
+                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-[#666] hover:text-white transition">
+                            Cancelar
+                        </button>
+                    </div>
                     
-                    <h2 class="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                        <i data-lucide="plus-circle" class="w-5 h-5 text-blue-500"></i>
-                        Novo Projeto
-                    </h2>
-                    
-                    <form id="deploy-form" onsubmit="handleDeploy(event)">
-                        <div class="space-y-4">
+                    <div class="p-5">
+                        <form id="deploy-form" onsubmit="handleDeploy(event)" class="space-y-5">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Nome do Projeto</label>
-                                <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
-                                    title="Apenas letras minúsculas, números e hífens."
-                                    placeholder="ex: meu-portfolio-v1"
-                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-600 text-sm">
+                                <label class="block text-xs font-mono text-[#666] mb-2 uppercase tracking-wider">Project Slug</label>
+                                <div class="relative group">
+                                    <span class="absolute left-3 top-2.5 text-[#444] text-sm font-mono">/</span>
+                                    <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
+                                        placeholder="my-awesome-project"
+                                        class="input-field w-full rounded-lg pl-6 pr-4 py-2 text-sm font-mono placeholder-[#333] group-hover:border-[#333] transition">
+                                </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Código HTML (index.html)</label>
-                                <textarea id="html-code" required rows="12"
-                                    class="code-input w-full border border-gray-700 rounded-lg p-3 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                                    spellcheck="false"></textarea>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-xs font-mono text-[#666] uppercase tracking-wider">index.html</label>
+                                    <div class="flex gap-2">
+                                        <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono">RESET TEMPLATE</button>
+                                        <span class="text-[10px] text-[#444] font-mono">HTML5 ONLY</span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <textarea id="html-code" required rows="14"
+                                        class="code-editor input-field w-full rounded-lg p-3 text-xs text-[#CCC] resize-none"
+                                        spellcheck="false"></textarea>
+                                </div>
                             </div>
 
                             <button type="submit" id="deploy-btn"
-                                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg shadow-lg transform transition active:scale-[0.98] flex items-center justify-center gap-2">
-                                <i data-lucide="zap" class="w-4 h-4"></i>
-                                <span>Iniciar Deploy</span>
+                                class="btn-primary w-full py-2.5 rounded-lg text-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 group">
+                                <span id="deploy-btn-text">Deploy to Production</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
                             </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- Log Panel -->
-                <div id="log-panel" class="hidden glass-panel rounded-xl p-0 shadow-lg border-l-4 border-blue-500 bg-gray-900 overflow-hidden">
-                    <div class="bg-gray-800/50 px-4 py-2 flex justify-between items-center border-b border-gray-800">
-                        <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">Terminal de Deploy</h3>
-                        <div class="animate-pulse h-1.5 w-1.5 bg-blue-500 rounded-full"></div>
+                <!-- Terminal Log (Minimal) -->
+                <div id="log-panel" class="hidden panel rounded-xl p-0 overflow-hidden border border-[#222]">
+                    <div class="bg-[#050505] px-4 py-2 border-b border-[#222] flex justify-between items-center">
+                        <span class="text-[10px] font-mono text-[#666]">BUILD LOGS</span>
+                        <div class="flex gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-[#333]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#333]"></div>
+                        </div>
                     </div>
-                    <div id="terminal-output" class="terminal-log p-4 text-gray-400 h-40 overflow-y-auto space-y-1.5"></div>
+                    <div id="terminal-output" class="font-mono text-[11px] p-4 h-32 overflow-y-auto text-[#888] space-y-1 bg-black"></div>
                 </div>
             </div>
 
-            <!-- Coluna Direita: Dashboard (8 colunas) -->
+            <!-- Coluna Direita: Lista de Projetos (8 colunas) -->
             <div class="lg:col-span-8">
                 <div class="flex justify-between items-end mb-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-white mb-1">Meus Projetos</h2>
-                        <div class="flex items-center gap-2 text-sm text-gray-400">
-                            <span>Gerencie seus deploys.</span>
-                            <span id="sync-status" class="hidden text-blue-400 flex items-center gap-1">
-                                <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i> Sincronizando com a Vercel...
-                            </span>
-                        </div>
+                        <h1 class="text-xl font-medium text-white tracking-tight">Visão Geral</h1>
+                        <p class="text-sm text-[#666] mt-1">Gerencie seus deploys ativos e monitore o status.</p>
                     </div>
-                    <span id="project-count" class="bg-gray-800/80 text-gray-300 text-xs font-medium px-3 py-1 rounded-full border border-gray-700">0 Projetos</span>
+                    <span id="project-count" class="text-xs font-mono text-[#444] border border-[#222] px-2 py-1 rounded">0 PROJECTS</span>
                 </div>
 
-                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <!-- Cards aqui -->
+                <div id="projects-grid" class="grid grid-cols-1 gap-3">
+                    <!-- Cards serão injetados aqui -->
                 </div>
 
-                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-gray-500 border border-dashed border-gray-800 rounded-xl bg-gray-900/30">
-                    <div class="bg-gray-800 p-4 rounded-full mb-4">
-                        <i data-lucide="layers" class="w-8 h-8 opacity-50"></i>
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 border border-dashed border-[#222] rounded-xl bg-[#050505]">
+                    <div class="w-12 h-12 bg-[#111] rounded-full flex items-center justify-center mb-4 border border-[#222]">
+                        <i data-lucide="box" class="w-5 h-5 text-[#444]"></i>
                     </div>
-                    <p class="text-lg font-medium text-gray-400">Nenhum projeto encontrado</p>
-                    <p class="text-sm">Preencha o formulário à esquerda para criar seu primeiro deploy.</p>
+                    <p class="text-sm text-[#888]">No deployments found</p>
+                    <button onclick="document.getElementById('project-name').focus()" class="mt-4 text-xs text-white hover:underline">
+                        Create your first project
+                    </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal Settings -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all duration-300 opacity-0">
-        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-all duration-300" id="settings-content">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i data-lucide="key" class="w-5 h-5 text-blue-500"></i>
-                    Chaves de API
-                </h3>
-                <button onclick="toggleSettings()" class="text-gray-500 hover:text-white transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-5">
-                <div class="p-4 bg-blue-900/10 border border-blue-800/30 rounded-lg">
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-blue-400 mt-0.5"></i>
-                        <div class="text-xs text-blue-200/80">
-                            <p class="font-bold text-blue-200 mb-1">Armazenamento Local e Seguro</p>
-                            <p>Seus tokens são salvos apenas no navegador (localStorage). Nenhuma informação passa por nossos servidores.</p>
+    <!-- Modal Settings (Clean) -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all duration-300 opacity-0">
+        <div class="panel rounded-xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300 overflow-hidden" id="settings-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-sm font-medium text-white">API Configuration</h3>
+                    <button onclick="toggleSettings()" class="text-[#666] hover:text-white transition">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-5">
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between">
+                            <label class="text-xs text-[#888]">GitHub Token (repo scope)</label>
+                            <a href="https://github.com/settings/tokens/new?scopes=repo&description=DeployMaster" target="_blank" class="text-[10px] text-white underline decoration-[#444] hover:decoration-white transition">Create Token</a>
                         </div>
+                        <input type="password" id="github-token" class="input-field w-full rounded px-3 py-2 text-sm font-mono placeholder-[#333]">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between">
+                            <label class="text-xs text-[#888]">Vercel Token</label>
+                            <a href="https://vercel.com/account/tokens" target="_blank" class="text-[10px] text-white underline decoration-[#444] hover:decoration-white transition">Create Token</a>
+                        </div>
+                        <input type="password" id="vercel-token" class="input-field w-full rounded px-3 py-2 text-sm font-mono placeholder-[#333]">
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="saveKeys()" class="btn-primary w-full py-2 rounded text-xs uppercase tracking-wide">
+                            Save Changes
+                        </button>
+                        <p class="text-[10px] text-[#444] text-center mt-3">Tokens are stored locally on your device.</p>
                     </div>
                 </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-sm font-medium text-gray-300">GitHub Token</label>
-                            <a href="https://github.com/settings/tokens/new?scopes=repo&description=DeployMaster" target="_blank" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition uppercase font-bold tracking-wide">
-                                Gerar Token <i data-lucide="external-link" class="w-3 h-3"></i>
-                            </a>
-                        </div>
-                        <div class="relative">
-                            <i data-lucide="github" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
-                            <input type="password" id="github-token" placeholder="ghp_..." class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-sm font-medium text-gray-300">Vercel Token</label>
-                            <a href="https://vercel.com/account/tokens" target="_blank" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline transition uppercase font-bold tracking-wide">
-                                Gerar Token <i data-lucide="external-link" class="w-3 h-3"></i>
-                            </a>
-                        </div>
-                        <div class="relative">
-                            <i data-lucide="triangle" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500 rotate-180"></i>
-                            <input type="password" id="vercel-token" placeholder="Token da Vercel" class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="saveKeys()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition mt-2 shadow-lg">
-                    Salvar e Sincronizar
-                </button>
             </div>
         </div>
     </div>
@@ -208,34 +294,10 @@
     <script>
         let projects = JSON.parse(localStorage.getItem('dm_projects')) || [];
 
-        // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadKeys();
-            
-            // Texto padrão no editor
-            const defaultHTML = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Meu Site Incrível</title>
-    <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #000; color: #fff; margin: 0; }
-        .card { padding: 2rem; border: 1px solid #333; border-radius: 12px; text-align: center; }
-        h1 { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Olá, Vercel! 🚀</h1>
-        <p>Site implantado via DeployMaster Pro</p>
-    </div>
-</body>
-</html>`;
-            const area = document.getElementById('html-code');
-            if(!area.value) area.value = defaultHTML;
-
-            // Renderiza cache inicial e busca atualização
+            loadTemplate();
             renderProjects();
             
             if(localStorage.getItem('dm_vc_token')) {
@@ -243,12 +305,42 @@
             }
         });
 
-        // --- Core: Sincronização (NOVO) ---
-        
+        function loadTemplate() {
+            const defaultHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        h1 { font-weight: 800; letter-spacing: -0.05em; margin: 0; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <div style="text-align: center">
+        <h1>Deployed.</h1>
+        <p>Your site is live on Vercel.</p>
+    </div>
+</body>
+</html>`;
+            const area = document.getElementById('html-code');
+            if(!area.value || area.value.trim() === '') area.value = defaultHTML;
+        }
+
+        // --- Core: Sincronização ---
         async function syncProjects() {
             const vcToken = localStorage.getItem('dm_vc_token');
             const ghToken = localStorage.getItem('dm_gh_token');
-            
             if (!vcToken) return;
 
             const icon = document.getElementById('refresh-icon');
@@ -256,69 +348,67 @@
             
             icon.classList.add('animate-spin');
             statusLabel.classList.remove('hidden');
+            statusLabel.classList.add('flex');
 
             try {
-                // 1. Buscar Informações do Usuário Vercel (para links do dashboard)
-                const vcUserRes = await fetch('https://api.vercel.com/v2/user', {
-                    headers: { Authorization: `Bearer ${vcToken}` }
-                });
-                const vcUser = await vcUserRes.json();
-                const vercelUsername = vcUser.user.username;
+                // Info User Vercel
+                const [userRes, teamsRes] = await Promise.all([
+                    fetch('https://api.vercel.com/v2/user', { headers: { Authorization: `Bearer ${vcToken}` } }),
+                    fetch('https://api.vercel.com/v2/teams', { headers: { Authorization: `Bearer ${vcToken}` } })
+                ]);
+                const userData = await userRes.json();
+                const teamsData = await teamsRes.json();
+                const user = userData.user;
+                const teams = teamsData.teams || [];
 
-                // 2. Buscar Todos os Projetos da Vercel
+                // Projetos Vercel
                 const vcRes = await fetch('https://api.vercel.com/v9/projects?limit=50', {
                     headers: { Authorization: `Bearer ${vcToken}` }
                 });
-                if (!vcRes.ok) throw new Error('Falha ao listar projetos da Vercel');
+                if (!vcRes.ok) throw new Error('API Sync Failed');
                 const vcData = await vcRes.json();
                 const vcProjects = vcData.projects || [];
 
-                // 3. Buscar Repositórios do GitHub (Opcional, para enriquecer dados)
+                // GitHub Repos
                 let ghRepos = [];
                 let ghUsername = '';
-                
                 if (ghToken) {
                     try {
                         const ghUserRes = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${ghToken}` } });
                         if(ghUserRes.ok) {
                             const ghUserData = await ghUserRes.json();
                             ghUsername = ghUserData.login;
-                            
                             const reposRes = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
                                 headers: { Authorization: `token ${ghToken}` }
                             });
                             if (reposRes.ok) ghRepos = await reposRes.json();
                         }
-                    } catch (e) {
-                        console.warn('Erro ao buscar GitHub:', e);
-                    }
+                    } catch (e) {}
                 }
 
-                // 4. Cruzar Dados e Mapear para Formato Interno
+                // Cruzamento
                 const syncedProjects = vcProjects.map(p => {
-                    // Tenta encontrar repo GitHub pelo nome
+                    let scopeSlug = user.username;
+                    if (p.accountId !== user.id) {
+                        const team = teams.find(t => t.id === p.accountId);
+                        if (team) scopeSlug = team.slug;
+                    }
+
+                    let finalUrl = `https://${p.name}.vercel.app`;
+                    if (p.targets?.production?.alias?.length > 0) finalUrl = `https://${p.targets.production.alias[0]}`;
+                    else if (p.targets?.production?.url) finalUrl = `https://${p.targets.production.url}`;
+
                     const repo = ghRepos.find(r => r.name === p.name);
                     const ghUrl = repo ? repo.html_url : (ghUsername ? `https://github.com/${ghUsername}/${p.name}` : '#');
                     
-                    // Definir URL Final
-                    let finalUrl = `https://${p.name}.vercel.app`;
-                    if (p.targets?.production?.url) {
-                        finalUrl = `https://${p.targets.production.url}`;
-                    } else if (p.targets?.production?.alias?.length > 0) {
-                        finalUrl = `https://${p.targets.production.alias[0]}`;
-                    }
-
-                    // Definir Status
-                    // Vercel retorna latestDeployments no objeto do projeto
                     let status = 'UNKNOWN';
                     let deployId = null;
                     if (p.latestDeployments && p.latestDeployments.length > 0) {
                         const last = p.latestDeployments[0];
-                        status = last.readyState || last.state; // Vercel API inconsistente entre endpoints
+                        status = last.readyState || last.state;
                         deployId = last.id;
                     }
 
-                    // Normalizar status
                     const statusMap = { 'READY': 'READY', 'ERROR': 'ERROR', 'BUILDING': 'BUILDING', 'QUEUED': 'QUEUED', 'CANCELED': 'ERROR', 'INITIALIZING': 'BUILDING' };
                     const appStatus = statusMap[status] || (status ? status : 'UNKNOWN');
 
@@ -327,130 +417,197 @@
                         name: p.name,
                         ghUrl: ghUrl,
                         vcUrl: finalUrl,
-                        vcDashboardUrl: `https://vercel.com/${vercelUsername}/${p.name}`,
+                        vcDashboardUrl: `https://vercel.com/${scopeSlug}/${p.name}`,
                         vcProjectId: p.id,
                         vcDeploymentId: deployId,
                         status: appStatus,
-                        lastUpdate: new Date(p.updatedAt).toLocaleString()
+                        lastUpdate: new Date(p.updatedAt).toLocaleDateString()
                     };
                 });
 
-                // 5. Atualizar Estado Local
                 projects = syncedProjects;
                 localStorage.setItem('dm_projects', JSON.stringify(projects));
                 renderProjects();
-                
             } catch (error) {
                 console.error(error);
-                log('Sincronização', 'Erro: ' + error.message, 'error');
+                log('Sync', 'Error: ' + error.message, 'error');
             } finally {
                 icon.classList.remove('animate-spin');
                 statusLabel.classList.add('hidden');
+                statusLabel.classList.remove('flex');
             }
         }
 
+        // --- Core: Edit Mode ---
+
+        async function editProject(name) {
+            const ghToken = localStorage.getItem('dm_gh_token');
+            if(!ghToken) {
+                toggleSettings();
+                return alert("GitHub Token Required for Editing");
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Visual Updates
+            document.getElementById('project-name').value = name;
+            document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> Editando: ${name}`;
+            
+            // Check if element exists before setting innerText to avoid errors
+            const btnText = document.getElementById('deploy-btn-text');
+            if(btnText) btnText.innerText = "Atualizar Projeto";
+            
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            
+            // Highlight Panel
+            const panel = document.getElementById('editor-panel');
+            panel.classList.add('ring-2', 'ring-blue-500/50');
+
+            setLoading(true, "Buscando código fonte...");
+            clearLogs();
+
+            try {
+                // Fetch User (Owner)
+                const user = await fetchGitHubUser(ghToken);
+                
+                // Fetch Content
+                log('GitHub', `Buscando arquivo index.html de ${name}...`);
+                const res = await fetch(`https://api.github.com/repos/${user.login}/${name}/contents/index.html`, {
+                    headers: { 'Authorization': `token ${ghToken}` }
+                });
+
+                if(!res.ok) throw new Error("Arquivo index.html não encontrado no repositório.");
+                
+                const data = await res.json();
+                
+                // Decode Base64 (Unicode Safe)
+                const content = new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)));
+                
+                document.getElementById('html-code').value = content;
+                log('System', 'Código carregado com sucesso.', 'success');
+
+            } catch (error) {
+                console.error(error);
+                log('ERROR', error.message, 'error');
+                resetForm();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('project-name').value = '';
+            document.getElementById('html-code').value = '';
+            loadTemplate();
+            
+            // Visual Resets
+            document.getElementById('form-title').innerHTML = `<i data-lucide="plus" class="w-4 h-4 text-[#666]"></i> Novo Deployment`;
+            
+            const btnText = document.getElementById('deploy-btn-text');
+            if(btnText) btnText.innerText = "Deploy to Production";
+            
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            document.getElementById('editor-panel').classList.remove('ring-2', 'ring-blue-500/50');
+            
+            lucide.createIcons();
+            clearLogs();
+        }
+
         // --- Core: Deploy ---
-        
         async function handleDeploy(e) {
             e.preventDefault();
             const ghToken = localStorage.getItem('dm_gh_token');
             const vcToken = localStorage.getItem('dm_vc_token');
-            
-            if (!ghToken || !vcToken) {
-                toggleSettings();
-                return alert('Configure as chaves de API primeiro.');
-            }
+            if (!ghToken || !vcToken) { toggleSettings(); return; }
 
             const projectName = document.getElementById('project-name').value.trim().toLowerCase();
             const htmlContent = document.getElementById('html-code').value;
+            
+            // Check based on cancel button visibility which is more robust
+            const isUpdate = !document.getElementById('cancel-edit-btn').classList.contains('hidden');
 
-            setLoading(true);
+            setLoading(true, isUpdate ? "Atualizando..." : "Deploying...");
             clearLogs();
             
             try {
-                // 1. GitHub
-                log('GitHub', 'Autenticando...');
+                log('GitHub', 'Authenticating...');
                 const ghUser = await fetchGitHubUser(ghToken);
-                log('GitHub', `Usuário: ${ghUser.login}`, 'success');
+                log('GitHub', `Verified user: ${ghUser.login}`, 'success');
 
-                log('GitHub', `Verificando repositório '${projectName}'...`);
+                log('GitHub', `Checking repo: ${projectName}...`);
                 await ensureGitHubRepo(ghToken, projectName);
-                
-                log('GitHub', 'Enviando index.html...');
                 await uploadToGitHub(ghToken, ghUser.login, projectName, htmlContent);
+                log('GitHub', 'Code pushed successfully.', 'success');
                 
-                // 2. Vercel - Criar Projeto e Deploy
-                log('Vercel', `Configurando projeto '${projectName}'...`);
+                log('Vercel', `Configuring project...`);
                 const projectData = await ensureVercelProject(vcToken, projectName);
                 
-                log('Vercel', 'Iniciando build...');
+                log('Vercel', 'Triggering production build...');
                 await createVercelDeployment(vcToken, projectData.id, htmlContent, projectName);
                 
-                log('Vercel', 'Deploy enviado! Sincronizando dashboard...');
+                log('Vercel', 'Deployment queued. Refreshing...', 'success');
                 
-                // Limpa form
-                document.getElementById('project-name').value = '';
+                if(!isUpdate) {
+                    document.getElementById('project-name').value = '';
+                } else {
+                    resetForm();
+                }
                 
-                // Aguarda 2s e força sincronização total para pegar o status novo
                 setTimeout(() => {
                     syncProjects();
-                    log('Sucesso', 'Projeto implantado e listado.', 'success');
                     setLoading(false);
                 }, 2000);
 
             } catch (err) {
                 console.error(err);
-                log('ERRO FATAL', err.message, 'error');
+                log('ERROR', err.message, 'error');
                 setLoading(false);
             }
         }
 
-        // --- API Helpers ---
-
+        // --- API Functions (Unchanged Logic) ---
         async function fetchGitHubUser(token) {
             const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
-            if (!res.ok) throw new Error('Erro Auth GitHub');
+            if (!res.ok) throw new Error('GitHub Auth Failed');
             return res.json();
         }
-
         async function ensureGitHubRepo(token, name) {
             const res = await fetch('https://api.github.com/user/repos', {
                 method: 'POST',
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, auto_init: true, private: false })
             });
-            if (res.status === 422 || res.ok) return; // Sucesso ou já existe
-            throw new Error('Erro ao criar Repo GitHub');
+            if (res.status === 422 || res.ok) return;
+            throw new Error('Repo Creation Failed');
         }
-
         async function uploadToGitHub(token, owner, repo, content) {
             let sha = null;
             try {
                 const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, { headers: { Authorization: `token ${token}` } });
                 if (check.ok) sha = (await check.json()).sha;
             } catch {}
-
-            const body = { message: 'DeployMaster Update', content: btoa(unescape(encodeURIComponent(content))), sha };
+            // Encode UTF-8 to Base64
+            const encodedContent = btoa(new TextEncoder().encode(content).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+            
+            const body = { message: 'Deploy via DeployMaster', content: encodedContent, sha };
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, {
                 method: 'PUT',
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
-            if (!res.ok) throw new Error('Erro no upload GitHub');
+            if (!res.ok) throw new Error('GitHub Upload Failed');
         }
-
         async function ensureVercelProject(token, name) {
             const res = await fetch('https://api.vercel.com/v9/projects', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, framework: null })
             });
-            
             if (!res.ok && res.status !== 409) {
-                // Se falhar e não for conflito, tenta buscar pra ver se já existe e temos acesso
                  const getRes = await fetch(`https://api.vercel.com/v9/projects/${name}`, { headers: { Authorization: `Bearer ${token}` } });
                  if(getRes.ok) return getRes.json();
-                 throw new Error('Erro criar Projeto Vercel');
+                 throw new Error('Vercel Project Creation Failed');
             }
             if(res.status === 409) {
                  const getRes = await fetch(`https://api.vercel.com/v9/projects/${name}`, { headers: { Authorization: `Bearer ${token}` } });
@@ -458,7 +615,6 @@
             }
             return res.json();
         }
-
         async function createVercelDeployment(token, projectId, content, name) {
             const res = await fetch('https://api.vercel.com/v13/deployments', {
                 method: 'POST',
@@ -470,74 +626,70 @@
             });
             if (!res.ok) {
                 const e = await res.json();
-                throw new Error(e.error?.message || 'Erro Deploy Vercel');
+                throw new Error(e.error?.message || 'Deploy Failed');
             }
             return res.json();
         }
 
-        // --- UI Rendering ---
-
+        // --- Render UI ---
         function renderProjects() {
             const grid = document.getElementById('projects-grid');
             const empty = document.getElementById('empty-state');
-            document.getElementById('project-count').textContent = `${projects.length} Projetos`;
-
+            document.getElementById('project-count').textContent = `${projects.length} PROJECTS`;
             grid.innerHTML = '';
             
-            if (projects.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
+            if (projects.length === 0) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
             projects.forEach(p => {
-                const statusConfig = getStatusConfig(p.status);
-                // Extrai usuário da URL do dashboard se não tivermos salvo
+                const st = getStatusConfig(p.status);
                 let userSlug = p.vcDashboardUrl ? p.vcDashboardUrl.split('/')[3] : 'user';
-                // Link para a página de erro/deploy específico
                 const logUrl = `https://vercel.com/${userSlug}/${p.name}/deployments/${p.vcDeploymentId || ''}`;
 
                 const card = document.createElement('div');
-                card.className = 'glass-panel rounded-xl p-5 border-l-4 transition-all hover:shadow-xl group animate-fade-in flex flex-col h-full';
-                card.style.borderLeftColor = statusConfig.color;
+                card.className = 'panel rounded-lg p-4 flex items-center justify-between group hover:border-[#444] transition-colors animate-fade-in';
                 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="overflow-hidden">
-                            <h3 class="font-bold text-lg text-white group-hover:text-blue-400 transition truncate" title="${p.name}">${p.name}</h3>
-                            <a href="${p.vcUrl}" target="_blank" class="text-xs text-gray-400 hover:text-white hover:underline truncate block mt-1">
-                                ${p.vcUrl.replace('https://', '')}
-                            </a>
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-10 h-10 rounded border border-[#222] bg-[#050505] flex items-center justify-center flex-shrink-0">
+                            <span class="font-bold text-white text-sm">${p.name.substring(0,2).toUpperCase()}</span>
                         </div>
-                        <div class="flex-shrink-0 ml-2">
-                             <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusConfig.bg} ${statusConfig.text} border-${statusConfig.border}">
-                                ${statusConfig.label}
-                            </span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-medium text-sm text-white truncate" title="${p.name}">${p.name}</h3>
+                                ${p.status === 'ERROR' ? 
+                                    `<a href="${logUrl}" target="_blank" class="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded border border-red-400/20 hover:bg-red-400/20">FAILED</a>` 
+                                    : ''}
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <a href="${p.vcUrl}" target="_blank" class="text-xs text-[#888] hover:text-white truncate transition flex items-center gap-1">
+                                    ${p.vcUrl.replace('https://', '')}
+                                    <i data-lucide="external-link" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex-grow space-y-2 mb-4">
-                        <div class="grid grid-cols-2 gap-2">
-                            <a href="${p.vcDashboardUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
-                                <i data-lucide="layout-dashboard" class="w-3 h-3"></i>
-                                Vercel Dash
+                    <div class="flex items-center gap-4">
+                        <div class="hidden sm:flex flex-col items-end mr-2">
+                            <div class="flex items-center gap-1.5">
+                                <div class="status-dot" style="background-color: ${st.color}; box-shadow: 0 0 5px ${st.color}40"></div>
+                                <span class="text-xs font-medium" style="color: ${st.color}">${st.label}</span>
+                            </div>
+                            <span class="text-[10px] text-[#444]">${p.lastUpdate}</span>
+                        </div>
+
+                        <div class="flex items-center border-l border-[#222] pl-4 gap-1">
+                            <button onclick="editProject('${p.name}')" class="p-2 text-[#666] hover:text-blue-400 hover:bg-[#111] rounded transition" title="Editar Arquivo">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <a href="${p.vcDashboardUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition" title="Vercel Dashboard">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                             </a>
-                            <a href="${p.ghUrl}" target="_blank" class="${p.ghUrl === '#' ? 'opacity-50 pointer-events-none' : ''} flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
-                                <i data-lucide="github" class="w-3 h-3"></i>
-                                Repo Git
+                            <a href="${p.ghUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition ${p.ghUrl === '#' ? 'opacity-30 pointer-events-none' : ''}" title="GitHub Repo">
+                                <i data-lucide="github" class="w-4 h-4"></i>
                             </a>
                         </div>
-                        ${p.status === 'ERROR' ? `
-                        <a href="${logUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-bold bg-red-900/30 hover:bg-red-900/50 text-red-400 py-2 rounded border border-red-900/50 transition w-full">
-                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
-                            Ver Logs de Erro
-                        </a>` : ''}
-                    </div>
-
-                    <div class="pt-3 border-t border-gray-800 flex justify-between items-center mt-auto">
-                        <a href="${p.vcUrl}" target="_blank" class="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1">
-                            Acessar Site <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -547,26 +699,28 @@
 
         function getStatusConfig(status) {
             switch(status) {
-                case 'READY': return { label: 'Online', color: '#22c55e', text: 'text-green-400', bg: 'bg-green-900/20', border: 'green-900/50' };
-                case 'ERROR': return { label: 'Falhou', color: '#ef4444', text: 'text-red-400', bg: 'bg-red-900/20', border: 'red-900/50' };
-                case 'BUILDING': return { label: 'Buildando', color: '#eab308', text: 'text-yellow-400', bg: 'bg-yellow-900/20', border: 'yellow-900/50' };
-                case 'QUEUED': return { label: 'Fila', color: '#a855f7', text: 'text-purple-400', bg: 'bg-purple-900/20', border: 'purple-900/50' };
-                default: return { label: 'Desconhecido', color: '#6b7280', text: 'text-gray-400', bg: 'bg-gray-800', border: 'gray-700' };
+                case 'READY': return { label: 'Ready', color: '#fff' }; // Branco estilo Vercel
+                case 'ERROR': return { label: 'Error', color: '#ff4444' };
+                case 'BUILDING': return { label: 'Building', color: '#0070f3' }; // Azul Vercel
+                case 'QUEUED': return { label: 'Queued', color: '#888' };
+                default: return { label: 'Unknown', color: '#444' };
             }
         }
 
-        // --- Utilities ---
-
-        function setLoading(isLoading) {
+        // --- Helpers ---
+        function setLoading(isLoading, text = "Deploying...") {
             const btn = document.getElementById('deploy-btn');
             if(isLoading) {
                 btn.disabled = true;
-                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...`;
-                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                // Important: Keep the id="deploy-btn-text" even in loading state to avoid null errors
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span id="deploy-btn-text">${text}</span>`;
             } else {
                 btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> Iniciar Deploy`;
-                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                
+                // Determine if we are still in update mode by checking the cancel button visibility
+                const isUpdate = !document.getElementById('cancel-edit-btn').classList.contains('hidden');
+                
+                btn.innerHTML = `<span id="deploy-btn-text">${isUpdate ? "Atualizar Projeto" : "Deploy to Production"}</span><i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>`;
             }
             lucide.createIcons();
         }
@@ -575,15 +729,12 @@
             const panel = document.getElementById('log-panel');
             const out = document.getElementById('terminal-output');
             panel.classList.remove('hidden');
-            const color = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : 'text-gray-300';
-            out.innerHTML += `<div class="mb-1"><span class="text-blue-500 font-bold text-xs">[${src}]</span> <span class="${color}">${msg}</span></div>`;
+            const color = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : 'text-[#888]';
+            out.innerHTML += `<div class="flex gap-2"><span class="text-[#444] min-w-[50px]">${src}</span><span class="${color}">${msg}</span></div>`;
             out.scrollTop = out.scrollHeight;
         }
 
-        function clearLogs() {
-            document.getElementById('terminal-output').innerHTML = '';
-        }
-
+        function clearLogs() { document.getElementById('terminal-output').innerHTML = ''; }
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
             const c = document.getElementById('settings-content');
@@ -595,7 +746,6 @@
                 setTimeout(() => m.classList.add('hidden'), 300);
             }
         }
-
         function saveKeys() {
             const gh = document.getElementById('github-token').value;
             const vc = document.getElementById('vercel-token').value;
@@ -604,7 +754,6 @@
             toggleSettings();
             syncProjects(); 
         }
-
         function loadKeys() {
             const gh = localStorage.getItem('dm_gh_token');
             const vc = localStorage.getItem('dm_vc_token');
