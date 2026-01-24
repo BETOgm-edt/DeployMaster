@@ -52,12 +52,13 @@
                     <span class="font-bold text-xl tracking-tight text-white">DeployMaster Pro</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="updateAllStatuses()" class="p-2 text-gray-400 hover:text-white transition" title="Atualizar Status dos Projetos">
-                        <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
+                    <button onclick="syncProjects()" class="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white transition rounded-md hover:bg-gray-800" title="Sincronizar Projetos">
+                        <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
+                        <span class="text-sm font-medium hidden sm:inline">Sincronizar</span>
                     </button>
                     <button onclick="toggleSettings()" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800 transition text-sm text-gray-300 border border-transparent hover:border-gray-700">
                         <i data-lucide="settings" class="w-4 h-4"></i>
-                        <span>Configurações</span>
+                        <span class="hidden sm:inline">Configurações</span>
                     </button>
                 </div>
             </div>
@@ -118,7 +119,12 @@
                 <div class="flex justify-between items-end mb-6">
                     <div>
                         <h2 class="text-2xl font-bold text-white mb-1">Meus Projetos</h2>
-                        <p class="text-sm text-gray-400">Gerencie seus deploys e verifique status em tempo real.</p>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <span>Gerencie seus deploys.</span>
+                            <span id="sync-status" class="hidden text-blue-400 flex items-center gap-1">
+                                <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i> Sincronizando com a Vercel...
+                            </span>
+                        </div>
                     </div>
                     <span id="project-count" class="bg-gray-800/80 text-gray-300 text-xs font-medium px-3 py-1 rounded-full border border-gray-700">0 Projetos</span>
                 </div>
@@ -184,14 +190,14 @@
                             </a>
                         </div>
                         <div class="relative">
-                            <i data-lucide="triangle" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500 rotate-180"></i> <!-- Vercel icon inverted triangle -->
+                            <i data-lucide="triangle" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500 rotate-180"></i>
                             <input type="password" id="vercel-token" placeholder="Token da Vercel" class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                     </div>
                 </div>
 
                 <button onclick="saveKeys()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition mt-2 shadow-lg">
-                    Salvar Configurações
+                    Salvar e Sincronizar
                 </button>
             </div>
         </div>
@@ -205,9 +211,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadKeys();
-            renderProjects();
             
-            // Texto padrão
+            // Texto padrão no editor
             const defaultHTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -229,11 +234,119 @@
             const area = document.getElementById('html-code');
             if(!area.value) area.value = defaultHTML;
 
-            // Atualiza status se houver tokens
+            // Renderiza cache inicial e busca atualização
+            renderProjects();
+            
             if(localStorage.getItem('dm_vc_token')) {
-                updateAllStatuses();
+                syncProjects();
             }
         });
+
+        // --- Core: Sincronização (NOVO) ---
+        
+        async function syncProjects() {
+            const vcToken = localStorage.getItem('dm_vc_token');
+            const ghToken = localStorage.getItem('dm_gh_token');
+            
+            if (!vcToken) return;
+
+            const icon = document.getElementById('refresh-icon');
+            const statusLabel = document.getElementById('sync-status');
+            
+            icon.classList.add('animate-spin');
+            statusLabel.classList.remove('hidden');
+
+            try {
+                // 1. Buscar Informações do Usuário Vercel (para links do dashboard)
+                const vcUserRes = await fetch('https://api.vercel.com/v2/user', {
+                    headers: { Authorization: `Bearer ${vcToken}` }
+                });
+                const vcUser = await vcUserRes.json();
+                const vercelUsername = vcUser.user.username;
+
+                // 2. Buscar Todos os Projetos da Vercel
+                const vcRes = await fetch('https://api.vercel.com/v9/projects?limit=50', {
+                    headers: { Authorization: `Bearer ${vcToken}` }
+                });
+                if (!vcRes.ok) throw new Error('Falha ao listar projetos da Vercel');
+                const vcData = await vcRes.json();
+                const vcProjects = vcData.projects || [];
+
+                // 3. Buscar Repositórios do GitHub (Opcional, para enriquecer dados)
+                let ghRepos = [];
+                let ghUsername = '';
+                
+                if (ghToken) {
+                    try {
+                        const ghUserRes = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${ghToken}` } });
+                        if(ghUserRes.ok) {
+                            const ghUserData = await ghUserRes.json();
+                            ghUsername = ghUserData.login;
+                            
+                            const reposRes = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
+                                headers: { Authorization: `token ${ghToken}` }
+                            });
+                            if (reposRes.ok) ghRepos = await reposRes.json();
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao buscar GitHub:', e);
+                    }
+                }
+
+                // 4. Cruzar Dados e Mapear para Formato Interno
+                const syncedProjects = vcProjects.map(p => {
+                    // Tenta encontrar repo GitHub pelo nome
+                    const repo = ghRepos.find(r => r.name === p.name);
+                    const ghUrl = repo ? repo.html_url : (ghUsername ? `https://github.com/${ghUsername}/${p.name}` : '#');
+                    
+                    // Definir URL Final
+                    let finalUrl = `https://${p.name}.vercel.app`;
+                    if (p.targets?.production?.url) {
+                        finalUrl = `https://${p.targets.production.url}`;
+                    } else if (p.targets?.production?.alias?.length > 0) {
+                        finalUrl = `https://${p.targets.production.alias[0]}`;
+                    }
+
+                    // Definir Status
+                    // Vercel retorna latestDeployments no objeto do projeto
+                    let status = 'UNKNOWN';
+                    let deployId = null;
+                    if (p.latestDeployments && p.latestDeployments.length > 0) {
+                        const last = p.latestDeployments[0];
+                        status = last.readyState || last.state; // Vercel API inconsistente entre endpoints
+                        deployId = last.id;
+                    }
+
+                    // Normalizar status
+                    const statusMap = { 'READY': 'READY', 'ERROR': 'ERROR', 'BUILDING': 'BUILDING', 'QUEUED': 'QUEUED', 'CANCELED': 'ERROR', 'INITIALIZING': 'BUILDING' };
+                    const appStatus = statusMap[status] || (status ? status : 'UNKNOWN');
+
+                    return {
+                        id: parseInt(p.createdAt) || Date.now(),
+                        name: p.name,
+                        ghUrl: ghUrl,
+                        vcUrl: finalUrl,
+                        vcDashboardUrl: `https://vercel.com/${vercelUsername}/${p.name}`,
+                        vcProjectId: p.id,
+                        vcDeploymentId: deployId,
+                        status: appStatus,
+                        lastUpdate: new Date(p.updatedAt).toLocaleString()
+                    };
+                });
+
+                // 5. Atualizar Estado Local
+                projects = syncedProjects;
+                localStorage.setItem('dm_projects', JSON.stringify(projects));
+                renderProjects();
+                
+            } catch (error) {
+                console.error(error);
+                log('Sincronização', 'Erro: ' + error.message, 'error');
+            } finally {
+                icon.classList.remove('animate-spin');
+                statusLabel.classList.add('hidden');
+            }
+        }
 
         // --- Core: Deploy ---
         
@@ -260,71 +373,38 @@
                 log('GitHub', `Usuário: ${ghUser.login}`, 'success');
 
                 log('GitHub', `Verificando repositório '${projectName}'...`);
-                const repo = await ensureGitHubRepo(ghToken, projectName);
+                await ensureGitHubRepo(ghToken, projectName);
                 
                 log('GitHub', 'Enviando index.html...');
                 await uploadToGitHub(ghToken, ghUser.login, projectName, htmlContent);
                 
-                // 2. Vercel - Criar Projeto
-                log('Vercel', 'Obtendo informações da conta...');
-                const vcUser = await fetchVercelUser(vcToken);
-                
+                // 2. Vercel - Criar Projeto e Deploy
                 log('Vercel', `Configurando projeto '${projectName}'...`);
                 const projectData = await ensureVercelProject(vcToken, projectName);
                 
-                // 3. Vercel - Deploy
                 log('Vercel', 'Iniciando build...');
-                const deployment = await createVercelDeployment(vcToken, projectData.id, htmlContent, projectName);
+                await createVercelDeployment(vcToken, projectData.id, htmlContent, projectName);
                 
-                log('Vercel', 'Aguardando propagação da URL...');
+                log('Vercel', 'Deploy enviado! Sincronizando dashboard...');
                 
-                // 4. Buscar URL Canônica
-                // A URL do deployment é longa, buscamos a production target do projeto
-                const updatedProjectData = await fetchVercelProject(vcToken, projectData.id);
-                
-                // Tenta pegar: URL do Target Production ou Alias[0] do target ou gera padrão
-                let finalUrl = '';
-                if (updatedProjectData.targets?.production?.url) {
-                    finalUrl = updatedProjectData.targets.production.url;
-                } else if (updatedProjectData.targets?.production?.alias?.length > 0) {
-                    finalUrl = updatedProjectData.targets.production.alias[0];
-                } else {
-                    // Fallback para a padrão se não tiver target production ainda (primeiro deploy as vezes demora ms)
-                    finalUrl = `${projectName}.vercel.app`;
-                }
-
-                log('Sucesso', `Deploy concluído: ${finalUrl}`, 'success');
-
-                // Salvar dados completos
-                const newProject = {
-                    id: Date.now(),
-                    name: projectName,
-                    ghUrl: repo.html_url,
-                    vcUrl: `https://${finalUrl}`,
-                    vcDashboardUrl: `https://vercel.com/${vcUser.username}/${projectName}`,
-                    vcProjectId: projectData.id,
-                    vcDeploymentId: deployment.id, // ID do deploy específico para logs
-                    status: 'READY',
-                    lastUpdate: new Date().toLocaleString()
-                };
-
-                // Remove duplicatas se existir e adiciona novo
-                projects = projects.filter(p => p.name !== projectName);
-                projects.unshift(newProject);
-                localStorage.setItem('dm_projects', JSON.stringify(projects));
-                
-                renderProjects();
+                // Limpa form
                 document.getElementById('project-name').value = '';
+                
+                // Aguarda 2s e força sincronização total para pegar o status novo
+                setTimeout(() => {
+                    syncProjects();
+                    log('Sucesso', 'Projeto implantado e listado.', 'success');
+                    setLoading(false);
+                }, 2000);
 
             } catch (err) {
                 console.error(err);
                 log('ERRO FATAL', err.message, 'error');
-            } finally {
                 setLoading(false);
             }
         }
 
-        // --- API Functions ---
+        // --- API Helpers ---
 
         async function fetchGitHubUser(token) {
             const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
@@ -333,88 +413,48 @@
         }
 
         async function ensureGitHubRepo(token, name) {
-            // Tenta criar
             const res = await fetch('https://api.github.com/user/repos', {
                 method: 'POST',
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, auto_init: true, private: false })
             });
-            
-            if (res.status === 422) { // Já existe
-                const user = await fetchGitHubUser(token);
-                const existing = await fetch(`https://api.github.com/repos/${user.login}/${name}`, {
-                    headers: { Authorization: `token ${token}` }
-                });
-                return existing.json();
-            }
-            if (!res.ok) throw new Error('Erro ao criar Repo GitHub');
-            return res.json();
+            if (res.status === 422 || res.ok) return; // Sucesso ou já existe
+            throw new Error('Erro ao criar Repo GitHub');
         }
 
         async function uploadToGitHub(token, owner, repo, content) {
-            // Get SHA if exists
             let sha = null;
             try {
-                const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, {
-                    headers: { Authorization: `token ${token}` }
-                });
+                const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, { headers: { Authorization: `token ${token}` } });
                 if (check.ok) sha = (await check.json()).sha;
             } catch {}
 
-            const body = {
-                message: 'Update via DeployMaster',
-                content: btoa(unescape(encodeURIComponent(content))),
-                sha: sha || undefined
-            };
-
+            const body = { message: 'DeployMaster Update', content: btoa(unescape(encodeURIComponent(content))), sha };
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/index.html`, {
                 method: 'PUT',
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
-            if (!res.ok) throw new Error('Erro ao enviar arquivo pro GitHub');
-        }
-
-        async function fetchVercelUser(token) {
-            const res = await fetch('https://api.vercel.com/v2/user', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error('Erro Auth Vercel');
-            const data = await res.json();
-            return data.user;
+            if (!res.ok) throw new Error('Erro no upload GitHub');
         }
 
         async function ensureVercelProject(token, name) {
-            // Tenta criar projeto Vercel
             const res = await fetch('https://api.vercel.com/v9/projects', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, framework: null })
             });
             
-            if (!res.ok) {
-                // Se erro for diferente de 409 (conflict), tenta buscar o projeto existente
-                // A API de create retorna o projeto se já existe em alguns casos, mas vamos garantir
-                if (res.status === 409 || !res.ok) {
-                    return fetchVercelProjectByName(token, name);
-                }
-                throw new Error('Erro ao criar Projeto Vercel');
+            if (!res.ok && res.status !== 409) {
+                // Se falhar e não for conflito, tenta buscar pra ver se já existe e temos acesso
+                 const getRes = await fetch(`https://api.vercel.com/v9/projects/${name}`, { headers: { Authorization: `Bearer ${token}` } });
+                 if(getRes.ok) return getRes.json();
+                 throw new Error('Erro criar Projeto Vercel');
             }
-            return res.json();
-        }
-
-        async function fetchVercelProject(token, id) {
-             const res = await fetch(`https://api.vercel.com/v9/projects/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            return res.json();
-        }
-        
-        async function fetchVercelProjectByName(token, name) {
-             const res = await fetch(`https://api.vercel.com/v9/projects/${name}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if(!res.ok) throw new Error('Projeto não encontrado ou acesso negado');
+            if(res.status === 409) {
+                 const getRes = await fetch(`https://api.vercel.com/v9/projects/${name}`, { headers: { Authorization: `Bearer ${token}` } });
+                 return getRes.json();
+            }
             return res.json();
         }
 
@@ -423,73 +463,15 @@
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: name,
-                    project: projectId, // Associa ao projeto existente para pegar as configs de URL
-                    files: [{ file: 'index.html', data: content }],
-                    projectSettings: { framework: null },
-                    target: 'production'
+                    name: name, project: projectId, files: [{ file: 'index.html', data: content }],
+                    projectSettings: { framework: null }, target: 'production'
                 })
             });
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error?.message || 'Erro Deploy Vercel');
+                const e = await res.json();
+                throw new Error(e.error?.message || 'Erro Deploy Vercel');
             }
             return res.json();
-        }
-
-        async function getProjectStatus(token, projectId) {
-            // Busca o último deploy do projeto
-            const res = await fetch(`https://api.vercel.com/v6/deployments?projectId=${projectId}&limit=1`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if(!res.ok) return 'UNKNOWN';
-            const data = await res.json();
-            if(data.deployments && data.deployments.length > 0) {
-                return {
-                    state: data.deployments[0].state, // READY, ERROR, BUILDING, QUEUED
-                    id: data.deployments[0].uid
-                };
-            }
-            return { state: 'UNKNOWN', id: null };
-        }
-
-        // --- Status Update Logic ---
-
-        async function updateAllStatuses() {
-            const icon = document.getElementById('refresh-icon');
-            icon.classList.add('animate-spin');
-            
-            const token = localStorage.getItem('dm_vc_token');
-            if(!token) return;
-
-            const updatedProjects = await Promise.all(projects.map(async (p) => {
-                try {
-                    if (!p.vcProjectId) return p;
-                    const statusData = await getProjectStatus(token, p.vcProjectId);
-                    
-                    // Se houver um novo deploy ID detectado na Vercel (ex: via git push), atualizamos
-                    if (statusData.id) p.vcDeploymentId = statusData.id;
-                    p.status = statusData.state;
-                    
-                    // Tenta atualizar a URL se estiver incorreta
-                    if (p.vcUrl.length > 60) {
-                         const proj = await fetchVercelProject(token, p.vcProjectId);
-                         if (proj.targets?.production?.url) {
-                             p.vcUrl = `https://${proj.targets.production.url}`;
-                         }
-                    }
-                    
-                    return p;
-                } catch (e) {
-                    return p;
-                }
-            }));
-
-            projects = updatedProjects;
-            localStorage.setItem('dm_projects', JSON.stringify(projects));
-            renderProjects();
-            
-            setTimeout(() => icon.classList.remove('animate-spin'), 1000);
         }
 
         // --- UI Rendering ---
@@ -520,13 +502,13 @@
                 
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-lg text-white group-hover:text-blue-400 transition">${p.name}</h3>
-                            <a href="${p.vcUrl}" target="_blank" class="text-xs text-gray-400 hover:text-white hover:underline truncate block max-w-[200px] mt-1">
+                        <div class="overflow-hidden">
+                            <h3 class="font-bold text-lg text-white group-hover:text-blue-400 transition truncate" title="${p.name}">${p.name}</h3>
+                            <a href="${p.vcUrl}" target="_blank" class="text-xs text-gray-400 hover:text-white hover:underline truncate block mt-1">
                                 ${p.vcUrl.replace('https://', '')}
                             </a>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex-shrink-0 ml-2">
                              <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusConfig.bg} ${statusConfig.text} border-${statusConfig.border}">
                                 ${statusConfig.label}
                             </span>
@@ -534,34 +516,27 @@
                     </div>
 
                     <div class="flex-grow space-y-2 mb-4">
-                        <!-- Links Principais -->
                         <div class="grid grid-cols-2 gap-2">
                             <a href="${p.vcDashboardUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
                                 <i data-lucide="layout-dashboard" class="w-3 h-3"></i>
                                 Vercel Dash
                             </a>
-                            <a href="${p.ghUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
+                            <a href="${p.ghUrl}" target="_blank" class="${p.ghUrl === '#' ? 'opacity-50 pointer-events-none' : ''} flex items-center justify-center gap-2 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded border border-gray-700 transition">
                                 <i data-lucide="github" class="w-3 h-3"></i>
                                 Repo Git
                             </a>
                         </div>
-
-                        <!-- Botão de Erro Condicional -->
                         ${p.status === 'ERROR' ? `
                         <a href="${logUrl}" target="_blank" class="flex items-center justify-center gap-2 text-xs font-bold bg-red-900/30 hover:bg-red-900/50 text-red-400 py-2 rounded border border-red-900/50 transition w-full">
                             <i data-lucide="alert-circle" class="w-3 h-3"></i>
                             Ver Logs de Erro
-                        </a>
-                        ` : ''}
+                        </a>` : ''}
                     </div>
 
                     <div class="pt-3 border-t border-gray-800 flex justify-between items-center mt-auto">
                         <a href="${p.vcUrl}" target="_blank" class="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1">
                             Acessar Site <i data-lucide="external-link" class="w-3 h-3"></i>
                         </a>
-                        <button onclick="deleteProject(${p.id})" class="text-gray-600 hover:text-red-500 transition">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -599,7 +574,6 @@
             const panel = document.getElementById('log-panel');
             const out = document.getElementById('terminal-output');
             panel.classList.remove('hidden');
-            
             const color = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : 'text-gray-300';
             out.innerHTML += `<div class="mb-1"><span class="text-blue-500 font-bold text-xs">[${src}]</span> <span class="${color}">${msg}</span></div>`;
             out.scrollTop = out.scrollHeight;
@@ -609,15 +583,6 @@
             document.getElementById('terminal-output').innerHTML = '';
         }
 
-        function deleteProject(id) {
-            if(confirm('Remover este projeto do painel? (Não apaga da Vercel/GitHub)')) {
-                projects = projects.filter(p => p.id !== id);
-                localStorage.setItem('dm_projects', JSON.stringify(projects));
-                renderProjects();
-            }
-        }
-
-        // Settings Logic
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
             const c = document.getElementById('settings-content');
@@ -636,7 +601,7 @@
             if(gh) localStorage.setItem('dm_gh_token', gh);
             if(vc) localStorage.setItem('dm_vc_token', vc);
             toggleSettings();
-            updateAllStatuses(); // Tenta atualizar assim que salva
+            syncProjects(); 
         }
 
         function loadKeys() {
