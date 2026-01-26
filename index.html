@@ -490,14 +490,16 @@
             
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
             
-            // Show File Selector, Hide Visibility Option (Repo already exists)
-            document.getElementById('visibility-container').classList.add('hidden');
+            // Show File Selector
             document.getElementById('file-selector-container').classList.remove('hidden');
+            
+            // VISIBILITY LOGIC CHANGE: Keep visibility container visible
+            document.getElementById('visibility-container').classList.remove('hidden');
             
             const panel = document.getElementById('editor-panel');
             panel.classList.add('ring-2', 'ring-blue-500/50');
 
-            setLoading(true, "Listando arquivos...");
+            setLoading(true, "Carregando dados...");
             clearLogs();
 
             try {
@@ -507,7 +509,20 @@
                 }
                 const userLogin = cachedGhUser.login;
                 
-                // Fetch Files List
+                // 1. Fetch Repo Info to set visibility radio
+                log('GitHub', 'Verificando visibilidade...');
+                const repoRes = await fetch(`https://api.github.com/repos/${userLogin}/${name}`, {
+                    headers: { 'Authorization': `token ${ghToken}` }
+                });
+                
+                if(repoRes.ok) {
+                    const repoData = await repoRes.json();
+                    const visibilityValue = repoData.private ? 'private' : 'public';
+                    document.querySelector(`input[name="visibility"][value="${visibilityValue}"]`).checked = true;
+                }
+
+                // 2. Fetch Files List
+                log('GitHub', 'Listando arquivos...');
                 const filesRes = await fetch(`https://api.github.com/repos/${userLogin}/${name}/contents`, {
                     headers: { 'Authorization': `token ${ghToken}` }
                 });
@@ -630,6 +645,9 @@
                     await ensureGitHubRepo(ghToken, projectName, isPrivate);
                 } else {
                     log('GitHub', `Repo: ${projectName} found.`);
+                    // Update Visibility if changed
+                    log('GitHub', `Updating visibility to ${isPrivate ? 'Private' : 'Public'}...`);
+                    await updateGitHubRepoVisibility(ghToken, ghUser.login, projectName, isPrivate);
                 }
                 
                 log('GitHub', `Pushing code to ${fileName}...`);
@@ -640,22 +658,6 @@
                 const projectData = await ensureVercelProject(vcToken, projectName);
                 
                 log('Vercel', 'Triggering production build...');
-                // Note: For simplicity, we send content as index.html data to trigger build
-                // But Vercel pulls from Git usually. If we used Direct Upload (files: ...), we send the content.
-                // In our implementation below, createVercelDeployment uses File Upload.
-                // We should make sure we send the updated file content correctly.
-                // If editing CSS/JS, Vercel might need index.html to render anything.
-                // However, this simple app deploys single files via Vercel API direct upload. 
-                // To support multi-file correctly via Direct Upload, we would need to send ALL files.
-                // Since this is a "Single File App" constraint mostly, sending just the updated file 
-                // might break the site if index.html is missing in the payload.
-                // FIX: Vercel API replaces deployment files. We need to just trigger a redeploy or send index.html if possible.
-                // COMPROMISE for this scope: We will send the file being edited. 
-                // If it's not index.html, Vercel might show directory listing.
-                // Ideally, for non-index.html edits, we rely on Vercel Git Integration (which triggers auto).
-                // BUT, since we manually trigger deploy via API with `files` array, we overwrite the previous deploy files in that specific deployment instance.
-                // To fix this without complexity: We will continue to use the file content as payload.
-                
                 await createVercelDeployment(vcToken, projectData.id, content, projectName, fileName);
                 
                 log('Vercel', 'Deployment queued. Refreshing...', 'success');
@@ -695,6 +697,19 @@
             throw new Error('Repo Creation Failed');
         }
 
+        async function updateGitHubRepoVisibility(token, owner, repo, isPrivate) {
+            const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+                method: 'PATCH',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ private: isPrivate })
+            });
+            if (!res.ok) {
+                // Ignore if it fails due to plan restrictions (e.g. creating private repo on free plan used to be restricted, now it's fine but good to be safe)
+                // or if user doesn't have permissions
+                console.warn("Could not update repo visibility", await res.text());
+            }
+        }
+
         async function uploadToGitHub(token, owner, repo, content, filename = 'index.html') {
             let sha = null;
             try {
@@ -732,10 +747,6 @@
         }
 
         async function createVercelDeployment(token, projectId, content, name, filename = 'index.html') {
-            // NOTE: Vercel Direct Upload API replaces files. 
-            // If you edit style.css and deploy ONLY style.css, index.html is lost in that deployment instance.
-            // For a robust app, we would fetch ALL files from GitHub then send to Vercel.
-            // For this specific artifact scope, we are deploying the single file being edited.
             const res = await fetch('https://api.vercel.com/v13/deployments', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
