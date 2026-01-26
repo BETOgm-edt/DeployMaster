@@ -207,26 +207,56 @@
                                 </div>
                             </div>
 
-                            <!-- Seletor de Arquivo (Apenas visível na edição) -->
-                            <div id="file-selector-container" class="hidden">
-                                <label class="block text-xs font-mono text-[#666] mb-2 uppercase tracking-wider">Arquivo para Editar</label>
-                                <select id="file-select" onchange="loadFileContent(this.value)" class="input-field w-full rounded-lg px-3 py-2 text-sm font-mono text-[#CCC] cursor-pointer">
-                                    <option value="index.html">index.html</option>
+                            <!-- Seletor de Arquivo com Pesquisa (Apenas visível na edição) -->
+                            <div id="file-selector-container" class="hidden space-y-3 p-3 bg-[#111] rounded-lg border border-[#222]">
+                                <label class="block text-xs font-mono text-[#666] uppercase tracking-wider">Gerenciador de Arquivos</label>
+                                
+                                <!-- Busca de Arquivo -->
+                                <div class="relative">
+                                    <i data-lucide="search" class="absolute left-3 top-2.5 w-3 h-3 text-[#555]"></i>
+                                    <input type="text" id="file-search" onkeyup="filterFiles()" placeholder="Pesquisar arquivo (ex: css/style.css)..." 
+                                        class="input-field w-full rounded pl-8 pr-2 py-1.5 text-xs font-mono placeholder-[#444]">
+                                </div>
+
+                                <!-- Dropdown de Arquivos -->
+                                <select id="file-select" onchange="loadFileContent(this.value)" class="input-field w-full rounded px-2 py-1.5 text-xs font-mono text-[#CCC] cursor-pointer">
+                                    <!-- Opções populadas via JS -->
                                 </select>
+
+                                <!-- Botão Novo Arquivo -->
+                                <div class="flex justify-between items-center pt-1 border-t border-[#222]">
+                                    <span class="text-[10px] text-[#555]">Ou crie novo:</span>
+                                    <button type="button" onclick="toggleNewFileMode()" id="btn-new-file" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 transition">
+                                        <i data-lucide="file-plus" class="w-3 h-3"></i> Novo Arquivo
+                                    </button>
+                                </div>
+
+                                <!-- Input Novo Arquivo (Escondido por padrão) -->
+                                <div id="new-file-input-container" class="hidden animate-fade-in">
+                                    <input type="text" id="new-file-path" placeholder="ex: assets/css/style.css" 
+                                        class="input-field w-full rounded px-2 py-1.5 text-xs font-mono text-blue-100 border-blue-900/50 focus:border-blue-500 placeholder-[#333]">
+                                    <p class="text-[9px] text-[#555] mt-1">*Pastas são criadas automaticamente (ex: pasta/arquivo.js)</p>
+                                </div>
                             </div>
 
                             <!-- Editor de Código -->
                             <div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <label class="block text-xs font-mono text-[#666] uppercase tracking-wider" id="code-label">Conteúdo do Arquivo</label>
+                                    <label class="block text-xs font-mono text-[#666] uppercase tracking-wider" id="code-label">Conteúdo</label>
                                     <div class="flex gap-2">
                                         <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono">RESET TEMPLATE</button>
                                     </div>
                                 </div>
-                                <div class="relative">
+                                <div class="relative group">
                                     <textarea id="html-code" required rows="14"
-                                        class="code-editor input-field w-full rounded-lg p-3 text-xs text-[#CCC] resize-none"
+                                        class="code-editor input-field w-full rounded-lg p-3 text-xs text-[#CCC] resize-none focus:ring-1 focus:ring-[#333]"
+                                        placeholder="// Cole seu código aqui..."
                                         spellcheck="false"></textarea>
+                                    
+                                    <!-- Simple Search Overlay trigger (Visual hint) -->
+                                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                        <span class="text-[9px] bg-[#222] text-[#666] px-1.5 py-0.5 rounded border border-[#333]">Use Ctrl+F para buscar</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -322,8 +352,8 @@
     <!-- Script Lógica -->
     <script>
         let projects = JSON.parse(localStorage.getItem('dm_projects')) || [];
-        // Variável global para cachear o usuário atual do GitHub
         let cachedGhUser = null;
+        let allRepoFiles = []; // Armazena lista completa para filtro
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -406,7 +436,7 @@
                         if(ghUserRes.ok) {
                             const ghUserData = await ghUserRes.json();
                             ghUsername = ghUserData.login;
-                            cachedGhUser = ghUserData; // Cache for edit mode
+                            cachedGhUser = ghUserData;
                             const reposRes = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
                                 headers: { Authorization: `token ${ghToken}` }
                             });
@@ -479,7 +509,6 @@
             
             // Visual Updates
             document.getElementById('project-name').value = name;
-            // Desabilitar nome do projeto na edição para evitar conflitos de deploy
             document.getElementById('project-name').disabled = true;
             document.getElementById('project-name').classList.add('opacity-50', 'cursor-not-allowed');
 
@@ -489,69 +518,57 @@
             if(btnText) btnText.innerText = "Atualizar Projeto";
             
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            
-            // Show File Selector
             document.getElementById('file-selector-container').classList.remove('hidden');
-            
-            // VISIBILITY LOGIC CHANGE: Keep visibility container visible
-            document.getElementById('visibility-container').classList.remove('hidden');
+            document.getElementById('visibility-container').classList.remove('hidden'); // Keep visibility logic
             
             const panel = document.getElementById('editor-panel');
             panel.classList.add('ring-2', 'ring-blue-500/50');
 
-            setLoading(true, "Carregando dados...");
+            setLoading(true, "Mapeando arquivos...");
             clearLogs();
+            document.getElementById('file-search').value = '';
+            toggleNewFileMode(false); // Reset to select mode
 
             try {
-                // Fetch User
-                if (!cachedGhUser) {
-                     cachedGhUser = await fetchGitHubUser(ghToken);
-                }
+                if (!cachedGhUser) { cachedGhUser = await fetchGitHubUser(ghToken); }
                 const userLogin = cachedGhUser.login;
                 
-                // 1. Fetch Repo Info to set visibility radio
-                log('GitHub', 'Verificando visibilidade...');
+                // 1. Visibilidade
                 const repoRes = await fetch(`https://api.github.com/repos/${userLogin}/${name}`, {
                     headers: { 'Authorization': `token ${ghToken}` }
                 });
-                
                 if(repoRes.ok) {
                     const repoData = await repoRes.json();
                     const visibilityValue = repoData.private ? 'private' : 'public';
                     document.querySelector(`input[name="visibility"][value="${visibilityValue}"]`).checked = true;
+                    // Pegar branch padrão para o recursive tree
+                    const defaultBranch = repoData.default_branch || 'main';
+                    
+                    // 2. Fetch Recursive Tree (Listar tudo, inclusive pastas)
+                    log('GitHub', 'Buscando árvore de arquivos recursiva...');
+                    const treeRes = await fetch(`https://api.github.com/repos/${userLogin}/${name}/git/trees/${defaultBranch}?recursive=1`, {
+                        headers: { 'Authorization': `token ${ghToken}` }
+                    });
+
+                    if (!treeRes.ok) throw new Error("Erro ao listar estrutura de arquivos.");
+                    const treeData = await treeRes.json();
+                    
+                    // Filtrar apenas 'blob' (arquivos) e ordenar
+                    allRepoFiles = treeData.tree.filter(i => i.type === 'blob').sort((a,b) => a.path.localeCompare(b.path));
+                    
+                    renderFileOptions(allRepoFiles);
+                    
+                    // Seleção padrão
+                    if (allRepoFiles.some(f => f.path === 'index.html')) {
+                        document.getElementById('file-select').value = 'index.html';
+                    } else if(allRepoFiles.length > 0) {
+                        document.getElementById('file-select').value = allRepoFiles[0].path;
+                    }
+                    
+                    if(allRepoFiles.length > 0) {
+                        await loadFileContent(document.getElementById('file-select').value, name);
+                    }
                 }
-
-                // 2. Fetch Files List
-                log('GitHub', 'Listando arquivos...');
-                const filesRes = await fetch(`https://api.github.com/repos/${userLogin}/${name}/contents`, {
-                    headers: { 'Authorization': `token ${ghToken}` }
-                });
-                
-                if (!filesRes.ok) throw new Error("Não foi possível listar arquivos do repositório.");
-                const filesData = await filesRes.json();
-                
-                // Populate Select
-                const select = document.getElementById('file-select');
-                select.innerHTML = '';
-                
-                // Filter only files (not dirs)
-                const files = filesData.filter(f => f.type === 'file');
-                files.forEach(f => {
-                    const opt = document.createElement('option');
-                    opt.value = f.path;
-                    opt.text = f.path;
-                    select.appendChild(opt);
-                });
-
-                // Tenta selecionar index.html por padrão, senão o primeiro
-                if (files.some(f => f.path === 'index.html')) {
-                    select.value = 'index.html';
-                } else if(files.length > 0) {
-                    select.value = files[0].path;
-                }
-
-                // Load content of selected file
-                await loadFileContent(select.value, name);
 
             } catch (error) {
                 console.error(error);
@@ -562,13 +579,67 @@
             }
         }
 
+        // --- New Logic: Filter & New File ---
+
+        function renderFileOptions(files) {
+            const select = document.getElementById('file-select');
+            select.innerHTML = '';
+            if(files.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "(Nenhum arquivo encontrado)";
+                select.appendChild(opt);
+                return;
+            }
+            files.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.path;
+                opt.text = f.path; // Caminho completo ex: src/css/style.css
+                select.appendChild(opt);
+            });
+        }
+
+        function filterFiles() {
+            const term = document.getElementById('file-search').value.toLowerCase();
+            const filtered = allRepoFiles.filter(f => f.path.toLowerCase().includes(term));
+            renderFileOptions(filtered);
+        }
+
+        function toggleNewFileMode(forceState) {
+            const container = document.getElementById('new-file-input-container');
+            const select = document.getElementById('file-select');
+            const search = document.getElementById('file-search').parentNode;
+            const btn = document.getElementById('btn-new-file');
+
+            const isHidden = container.classList.contains('hidden');
+            const shouldShow = forceState !== undefined ? forceState : isHidden;
+
+            if (shouldShow) {
+                container.classList.remove('hidden');
+                select.classList.add('hidden');
+                search.classList.add('hidden');
+                btn.innerHTML = `<i data-lucide="list" class="w-3 h-3"></i> Voltar à Lista`;
+                document.getElementById('html-code').value = ''; // Limpa para novo arquivo
+                document.getElementById('new-file-path').focus();
+            } else {
+                container.classList.add('hidden');
+                select.classList.remove('hidden');
+                search.classList.remove('hidden');
+                btn.innerHTML = `<i data-lucide="file-plus" class="w-3 h-3"></i> Novo Arquivo`;
+                // Recarrega o selecionado
+                if(select.value) loadFileContent(select.value);
+            }
+            lucide.createIcons();
+        }
+
         async function loadFileContent(filePath, projectNameOverride) {
+            if(!filePath) return;
             const ghToken = localStorage.getItem('dm_gh_token');
             const name = projectNameOverride || document.getElementById('project-name').value;
             const userLogin = cachedGhUser ? cachedGhUser.login : (await fetchGitHubUser(ghToken)).login;
 
             setLoading(true, `Lendo ${filePath}...`);
             try {
+                // Conteúdo direto via API Contents
                  const res = await fetch(`https://api.github.com/repos/${userLogin}/${name}/contents/${filePath}`, {
                     headers: { 'Authorization': `token ${ghToken}` }
                 });
@@ -604,9 +675,9 @@
             document.getElementById('cancel-edit-btn').classList.add('hidden');
             document.getElementById('editor-panel').classList.remove('ring-2', 'ring-blue-500/50');
             
-            // Show Visibility, Hide File Selector
             document.getElementById('visibility-container').classList.remove('hidden');
             document.getElementById('file-selector-container').classList.add('hidden');
+            toggleNewFileMode(false);
 
             lucide.createIcons();
             clearLogs();
@@ -623,12 +694,18 @@
             const content = document.getElementById('html-code').value;
             
             const isUpdate = !document.getElementById('cancel-edit-btn').classList.contains('hidden');
-            
-            // New Features Logic
             const isPrivate = document.querySelector('input[name="visibility"]:checked').value === 'private';
+            
             let fileName = 'index.html';
+            
             if (isUpdate) {
-                fileName = document.getElementById('file-select').value;
+                const isNewFile = !document.getElementById('new-file-input-container').classList.contains('hidden');
+                if (isNewFile) {
+                    fileName = document.getElementById('new-file-path').value.trim();
+                    if(!fileName) return alert("Digite o caminho do arquivo (ex: pasta/arquivo.js)");
+                } else {
+                    fileName = document.getElementById('file-select').value;
+                }
             }
 
             setLoading(true, isUpdate ? `Atualizando ${fileName}...` : "Deploying...");
@@ -641,12 +718,11 @@
                 log('GitHub', `Verified user: ${ghUser.login}`, 'success');
 
                 if (!isUpdate) {
-                    log('GitHub', `Checking repo: ${projectName} (${isPrivate ? 'Private' : 'Public'})...`);
+                    log('GitHub', `Checking repo: ${projectName}...`);
                     await ensureGitHubRepo(ghToken, projectName, isPrivate);
                 } else {
                     log('GitHub', `Repo: ${projectName} found.`);
-                    // Update Visibility if changed
-                    log('GitHub', `Updating visibility to ${isPrivate ? 'Private' : 'Public'}...`);
+                    // Update Visibility
                     await updateGitHubRepoVisibility(ghToken, ghUser.login, projectName, isPrivate);
                 }
                 
@@ -665,7 +741,12 @@
                 if(!isUpdate) {
                     document.getElementById('project-name').value = '';
                 } else {
-                    resetForm();
+                    // Se foi novo arquivo, reseta para modo lista e recarrega
+                    if(isUpdate) {
+                        editProject(projectName); // Refresh file list
+                    } else {
+                        resetForm();
+                    }
                 }
                 
                 setTimeout(() => {
@@ -680,7 +761,7 @@
             }
         }
 
-        // --- API Functions ---
+        // --- API Functions (Same as before) ---
         async function fetchGitHubUser(token) {
             const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
             if (!res.ok) throw new Error('GitHub Auth Failed');
@@ -703,23 +784,20 @@
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ private: isPrivate })
             });
-            if (!res.ok) {
-                // Ignore if it fails due to plan restrictions (e.g. creating private repo on free plan used to be restricted, now it's fine but good to be safe)
-                // or if user doesn't have permissions
-                console.warn("Could not update repo visibility", await res.text());
-            }
+            if (!res.ok) console.warn("Could not update repo visibility");
         }
 
         async function uploadToGitHub(token, owner, repo, content, filename = 'index.html') {
             let sha = null;
             try {
+                // Tenta pegar SHA para update (necessário se arquivo existe)
                 const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, { headers: { Authorization: `token ${token}` } });
                 if (check.ok) sha = (await check.json()).sha;
             } catch {}
-            // Encode UTF-8 to Base64
-            const encodedContent = btoa(new TextEncoder().encode(content).reduce((data, byte) => data + String.fromCharCode(byte), ''));
             
-            const body = { message: `Update ${filename} via DeployMaster`, content: encodedContent, sha };
+            const encodedContent = btoa(new TextEncoder().encode(content).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+            const body = { message: `Update ${filename}`, content: encodedContent, sha };
+            
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, {
                 method: 'PUT',
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
@@ -762,7 +840,7 @@
             return res.json();
         }
 
-        // --- Render UI (Unchanged) ---
+        // --- Render UI (Same logic, new status colors) ---
         function renderProjects() {
             const grid = document.getElementById('projects-grid');
             const empty = document.getElementById('empty-state');
@@ -831,7 +909,7 @@
         function getStatusConfig(status) {
             switch(status) {
                 case 'READY': return { label: 'Ready', color: '#22c55e' }; // Verde
-                case 'ERROR': return { label: 'Error', color: '#ff4444' }; // Vermelho
+                case 'ERROR': return { label: 'Error', color: '#ff4444' };
                 case 'BUILDING': return { label: 'Building', color: '#eab308' }; // Amarelo
                 case 'QUEUED': return { label: 'Queued', color: '#888' };
                 default: return { label: 'Unknown', color: '#444' };
