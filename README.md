@@ -2,7 +2,7 @@
 
 DeployMaster is an open-source, serverless web application that provides a VS Code-like IDE directly in your browser. It integrates seamlessly with GitHub and Vercel, allowing you to create, edit, and deploy web projects with a single click.
 
-**🔗 VER PROJETO hospedado no vercel:** [https://deploymaster.vercel.app/](https://deploymaster.vercel.app/)
+**🌐 View Live Project (Hosted on Vercel):** [https://deploymaster.vercel.app/](https://deploymaster.vercel.app/)
 
 ## ✨ Features
 
