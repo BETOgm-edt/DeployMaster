@@ -4,6 +4,10 @@ DeployMaster is an open-source, serverless web application that provides a VS Co
 
 **🌐 View Live Project (Hosted on Vercel):** [https://deploymaster.vercel.app/](https://deploymaster.vercel.app/)
 
+<!-- Para exibir a imagem da ferramenta, salve o seu print/screenshot como 'screenshot.png' dentro de uma pasta chamada 'assets' no seu projeto. -->
+![DeployMaster Dashboard](assets/screenshot.png)
+
+
 ## ✨ Features
 
 - **Built-in IDE**: Powered by Monaco Editor (the same engine as VS Code), featuring syntax highlighting, auto-completion, and a premium dark theme.
