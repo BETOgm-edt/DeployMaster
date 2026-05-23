@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeployMaster Pro</title>
+    <title>DeployMaster v2</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFF' stroke='%23FFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 22 2 2 22 2'></polygon></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -42,6 +43,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
 
     <style>
         body { 
@@ -120,7 +122,7 @@
                         <i data-lucide="triangle" class="w-4 h-4 fill-current rotate-180"></i>
                     </div>
                     <span class="font-medium text-sm tracking-wide text-gray-300">DeployMaster</span>
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#222] text-[#888]">PRO</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#222] text-[#888]">v2</span>
                 </div>
                 
                 <div class="flex items-center gap-3">
@@ -146,147 +148,175 @@
     </nav>
 
     <main class="flex-grow w-full max-w-7xl mx-auto px-6 py-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            
-            <!-- Coluna Esquerda: Editor -->
-            <div class="lg:col-span-4 flex flex-col gap-6">
-                <div class="panel rounded-xl p-0 overflow-hidden animate-fade-in transition-all duration-300" id="editor-panel">
-                    <div class="p-5 border-b border-[#222] bg-[#080808] flex justify-between items-center">
-                        <h2 class="text-sm font-medium text-white flex items-center gap-2" id="form-title">
-                            <i data-lucide="plus" class="w-4 h-4 text-[#666]" id="form-icon"></i>
-                            Novo Deployment
-                        </h2>
-                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-[#666] hover:text-white transition">
-                            Cancelar
-                        </button>
-                    </div>
-                    
-                    <div class="p-5">
-                        <form id="deploy-form" onsubmit="handleDeploy(event)" class="space-y-5">
-                            <!-- Nome e Visibilidade -->
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label class="block text-xs font-mono text-[#666] mb-2 uppercase tracking-wider">Project Slug</label>
-                                    <div class="relative group">
-                                        <span class="absolute left-3 top-2.5 text-[#444] text-sm font-mono">/</span>
-                                        <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
-                                            placeholder="my-awesome-project"
-                                            class="input-field w-full rounded-lg pl-6 pr-4 py-2 text-sm font-mono placeholder-[#333] group-hover:border-[#333] transition">
-                                    </div>
-                                </div>
-                                
-                                <div id="visibility-container">
-                                    <label class="block text-xs font-mono text-[#666] mb-2 uppercase tracking-wider">Visibilidade (GitHub)</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="visibility" value="public" class="peer sr-only" checked>
-                                            <div class="text-center py-2 border border-[#222] rounded bg-[#050505] text-[#666] peer-checked:bg-[#222] peer-checked:text-white peer-checked:border-[#444] transition-all text-xs font-medium">
-                                                <i data-lucide="globe" class="w-3 h-3 inline-block mb-0.5 mr-1"></i> Public
-                                            </div>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="visibility" value="private" class="peer sr-only">
-                                            <div class="text-center py-2 border border-[#222] rounded bg-[#050505] text-[#666] peer-checked:bg-[#222] peer-checked:text-white peer-checked:border-[#444] transition-all text-xs font-medium">
-                                                <i data-lucide="lock" class="w-3 h-3 inline-block mb-0.5 mr-1"></i> Private
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Seletor de Arquivos -->
-                            <div id="file-selector-container" class="hidden space-y-3 p-3 bg-[#111] rounded-lg border border-[#222]">
-                                <label class="block text-xs font-mono text-[#666] uppercase tracking-wider">Gerenciador de Arquivos</label>
-                                
-                                <div class="relative">
-                                    <i data-lucide="search" class="absolute left-3 top-2.5 w-3 h-3 text-[#555]"></i>
-                                    <input type="text" id="file-search" onkeyup="filterFiles()" placeholder="Pesquisar..." 
-                                        class="input-field w-full rounded pl-8 pr-2 py-1.5 text-xs font-mono placeholder-[#444]">
-                                </div>
-
-                                <select id="file-select" onchange="loadFileContent(this.value)" class="input-field w-full rounded px-2 py-1.5 text-xs font-mono text-[#CCC] cursor-pointer"></select>
-
-                                <div class="flex justify-between items-center pt-1 border-t border-[#222]">
-                                    <span class="text-[10px] text-[#555]">Ou crie novo:</span>
-                                    <button type="button" onclick="toggleNewFileMode()" id="btn-new-file" class="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 transition">
-                                        <i data-lucide="file-plus" class="w-3 h-3"></i> Novo Arquivo
-                                    </button>
-                                </div>
-
-                                <div id="new-file-input-container" class="hidden animate-fade-in">
-                                    <input type="text" id="new-file-path" placeholder="ex: assets/css/style.css" 
-                                        class="input-field w-full rounded px-2 py-1.5 text-xs font-mono text-blue-100 border-blue-900/50 focus:border-blue-500 placeholder-[#333]">
-                                </div>
-                            </div>
-
-                            <!-- Editor -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="block text-xs font-mono text-[#666] uppercase tracking-wider" id="code-label">Conteúdo</label>
-                                    <div class="flex gap-2">
-                                        <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono">RESET TEMPLATE</button>
-                                    </div>
-                                </div>
-                                <div class="relative group">
-                                    <textarea id="html-code" required rows="14"
-                                        class="code-editor input-field w-full rounded-lg p-3 text-xs text-[#CCC] resize-none focus:ring-1 focus:ring-[#333]"
-                                        placeholder="// Cole seu código aqui..."
-                                        spellcheck="false"></textarea>
-                                </div>
-                            </div>
-
-                            <button type="submit" id="deploy-btn"
-                                class="btn-primary w-full py-2.5 rounded-lg text-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 group">
-                                <span id="deploy-btn-text">Deploy to Production</span>
-                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Logs -->
-                <div id="log-panel" class="hidden panel rounded-xl p-0 overflow-hidden border border-[#222]">
-                    <div class="bg-[#050505] px-4 py-2 border-b border-[#222] flex justify-between items-center">
-                        <span class="text-[10px] font-mono text-[#666]">BUILD LOGS</span>
-                        <div class="flex gap-1.5">
-                            <div class="w-2 h-2 rounded-full bg-[#333]"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#333]"></div>
-                        </div>
-                    </div>
-                    <div id="terminal-output" class="font-mono text-[11px] p-4 h-32 overflow-y-auto text-[#888] space-y-1 bg-black"></div>
-                </div>
-            </div>
-
-            <!-- Coluna Direita: Dashboard -->
-            <div class="lg:col-span-8">
-                <div class="flex justify-between items-end mb-6">
+        <!-- Dashboard Content -->
+        <div class="w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
                     <div>
                         <h1 class="text-xl font-medium text-white tracking-tight">Visão Geral</h1>
                         <p class="text-sm text-[#666] mt-1">Gerencie seus deploys ativos e monitore o status.</p>
                     </div>
-                    <span id="project-count" class="text-xs font-mono text-[#444] border border-[#222] px-2 py-1 rounded">0 PROJECTS</span>
+                    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full sm:w-auto">
+                        <button onclick="openEditorModal()" class="btn-primary px-4 py-1.5 rounded-lg text-sm flex items-center justify-center gap-2 w-full sm:w-auto font-medium shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Novo Projeto</span>
+                        </button>
+                        
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span id="project-count" class="text-xs font-mono text-[#444] border border-[#222] px-2 py-1.5 rounded whitespace-nowrap">0 PROJECTS</span>
+                            <div class="relative w-full sm:w-56">
+                                <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-[#555]"></i>
+                                <input type="text" id="project-search-input" onkeyup="filterProjects()" placeholder="Buscar projetos..." 
+                                    class="input-field w-full rounded-lg pl-9 pr-3 py-1.5 text-sm font-mono placeholder-[#444]">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="projects-grid" class="grid grid-cols-1 gap-3"></div>
+                <div class="mt-6 text-center">
+                    <button id="load-more-btn" onclick="loadMoreProjects()" class="hidden px-4 py-2 bg-[#111] hover:bg-[#222] border border-[#333] rounded-lg text-sm text-[#888] hover:text-white transition">
+                        Carregar Mais
+                    </button>
+                </div>
 
                 <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 border border-dashed border-[#222] rounded-xl bg-[#050505]">
                     <div class="w-12 h-12 bg-[#111] rounded-full flex items-center justify-center mb-4 border border-[#222]">
                         <i data-lucide="box" class="w-5 h-5 text-[#444]"></i>
                     </div>
                     <p class="text-sm text-[#888]">No deployments found</p>
-                    <button onclick="document.getElementById('project-name').focus()" class="mt-4 text-xs text-white hover:underline">Create your first project</button>
+                    <button onclick="openEditorModal()" class="mt-4 text-xs text-white hover:underline">Create your first project</button>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Editor IDE Modal (VS Code Style) -->
+    <div id="editor-modal" class="fixed inset-0 z-[100] hidden flex-col bg-[#050505]/95 backdrop-blur-md animate-fade-in p-0 sm:p-2 md:p-6 lg:p-10 transition-all duration-300">
+        <div class="flex-grow flex flex-col bg-[#0A0A0A] sm:border border-[#222] sm:rounded-xl shadow-2xl overflow-hidden w-full h-full max-h-[100dvh]">
+            
+            <!-- IDE Header -->
+            <div class="h-14 min-h-[56px] border-b border-[#222] bg-[#050505] flex items-center justify-between px-3 sm:px-4 shrink-0 overflow-x-auto no-scrollbar">
+                 <div class="flex items-center gap-3 min-w-max">
+                     <h2 class="text-sm font-medium text-white flex items-center gap-2" id="form-title">
+                         <i data-lucide="layout" class="w-4 h-4 text-[#666]"></i>
+                         <span>Novo Deployment</span>
+                     </h2>
+                     <div class="h-4 w-[1px] bg-[#333]"></div>
+                     
+                     <!-- Project Form inside Header -->
+                     <form id="deploy-form" onsubmit="handleDeploy(event)" class="flex items-center gap-3">
+                         <div class="relative group">
+                             <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
+                                 placeholder="nome-do-projeto"
+                                 class="input-field rounded-md px-3 py-1 text-xs font-mono w-40 sm:w-48 border-none bg-[#111] hover:bg-[#151515] focus:bg-[#1a1a1a]">
+                         </div>
+                         
+                         <div id="visibility-container" class="flex items-center gap-1 bg-[#111] rounded p-0.5 border border-[#222]">
+                             <label class="cursor-pointer">
+                                 <input type="radio" name="visibility" value="public" class="peer sr-only" checked>
+                                 <div class="px-2 py-1 rounded text-[#666] peer-checked:bg-[#222] peer-checked:text-white transition-all text-[10px] font-medium" title="Público"><i data-lucide="globe" class="w-3 h-3 inline"></i></div>
+                             </label>
+                             <label class="cursor-pointer">
+                                 <input type="radio" name="visibility" value="private" class="peer sr-only">
+                                 <div class="px-2 py-1 rounded text-[#666] peer-checked:bg-[#222] peer-checked:text-white transition-all text-[10px] font-medium" title="Privado"><i data-lucide="lock" class="w-3 h-3 inline"></i></div>
+                             </label>
+                         </div>
+                         <button type="submit" id="deploy-btn" class="hidden"></button>
+                     </form>
+                 </div>
+                 
+                 <div class="flex items-center gap-2 sm:gap-3 pl-3 shrink-0">
+                     <button type="button" onclick="document.getElementById('deploy-form').requestSubmit()" id="deploy-action-btn" class="btn-primary px-3 sm:px-4 py-1.5 rounded-md text-xs flex items-center gap-2 group whitespace-nowrap">
+                         <span id="deploy-btn-text">Deploy</span>
+                         <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
+                     </button>
+                     <button type="button" onclick="closeEditorModal()" class="text-[#666] hover:text-white transition p-1.5 bg-[#111] rounded-md"><i data-lucide="x" class="w-4 h-4"></i></button>
+                 </div>
+            </div>
+
+            <!-- IDE Body -->
+            <div class="flex-grow flex overflow-hidden relative">
+                
+                <!-- Mobile Sidebar Toggle -->
+                <button onclick="toggleSidebar()" class="md:hidden absolute bottom-4 right-4 z-50 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl">
+                    <i data-lucide="folder" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Sidebar Explorer -->
+                <div id="editor-sidebar" class="w-64 flex-shrink-0 bg-[#080808] border-r border-[#222] flex flex-col transition-transform duration-300 absolute md:relative z-40 h-full -translate-x-full md:translate-x-0">
+                    <div class="p-3 border-b border-[#222] flex justify-between items-center bg-[#050505]">
+                        <span class="text-[10px] font-mono text-[#666] uppercase tracking-wider">Explorer</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="toggleNewFileMode()" id="btn-new-file" class="text-[#666] hover:text-white transition" title="Novo Arquivo">
+                                <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="toggleSidebar()" class="md:hidden text-[#666] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-2 border-b border-[#222]">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-2 top-1.5 w-3 h-3 text-[#555]"></i>
+                            <input type="text" id="file-search" onkeyup="filterFiles()" placeholder="Buscar arquivos..." 
+                                class="w-full bg-[#111] rounded pl-7 pr-2 py-1 text-xs font-mono text-white border-none focus:bg-[#1a1a1a] placeholder-[#444]">
+                        </div>
+                    </div>
+
+                    <div id="new-file-input-container" class="hidden p-2 animate-fade-in border-b border-[#222] bg-[#0a0a0a]">
+                        <div class="flex items-center gap-1 bg-[#111] p-1.5 rounded border border-[#333]">
+                            <i data-lucide="file" class="w-3.5 h-3.5 text-[#888]"></i>
+                            <input type="text" id="new-file-path" placeholder="ex: src/app.js" 
+                                class="bg-transparent border-none w-full text-xs font-mono text-white focus:outline-none placeholder-[#555]">
+                        </div>
+                    </div>
+
+                    <div id="file-list" class="flex-grow overflow-y-auto p-1 space-y-0.5">
+                        <!-- Arquivos renderizados aqui -->
+                    </div>
+                    <input type="hidden" id="file-select">
+                </div>
+                
+                <!-- Main Editor Area -->
+                <div class="flex-grow flex flex-col bg-[#050505] min-w-0">
+                    <!-- Editor Tabs -->
+                    <div class="h-9 min-h-[36px] bg-[#0A0A0A] flex border-b border-[#222] overflow-x-auto no-scrollbar">
+                         <div class="px-4 py-1.5 bg-[#050505] border-r border-[#222] border-t-2 border-t-blue-500 text-xs font-mono text-white flex items-center gap-2 shrink-0">
+                              <i data-lucide="file-code" class="w-3.5 h-3.5 text-blue-400"></i>
+                              <span id="active-file-name">index.html</span>
+                         </div>
+                         <div class="flex-grow flex justify-end items-center px-2">
+                             <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono" title="Resetar código inicial">RESET TEMPLATE</button>
+                         </div>
+                    </div>
+                    
+                    <!-- Monaco Container -->
+                    <div class="flex-grow relative w-full h-full">
+                         <div id="monaco-editor" class="absolute inset-0"></div>
+                    </div>
+
+                    <!-- Logs Panel (inside IDE) -->
+                    <div id="log-panel" class="hidden h-32 shrink-0 border-t border-[#222] bg-black flex flex-col">
+                        <div class="bg-[#050505] px-4 py-1.5 border-b border-[#222] flex justify-between items-center">
+                            <span class="text-[10px] font-mono text-[#666]">TERMINAL</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="document.getElementById('log-panel').classList.add('hidden')" class="text-[#666] hover:text-white"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>
+                        <div id="terminal-output" class="font-mono text-[11px] p-2 flex-grow overflow-y-auto text-[#888] space-y-1"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Settings -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all duration-300 opacity-0">
-        <div class="panel rounded-xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300 overflow-hidden" id="settings-content">
+    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] hidden flex items-center justify-center transition-all duration-300 opacity-0">
+        <div class="panel rounded-xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300 overflow-hidden bg-[#0A0A0A] border border-[#222]" id="settings-content">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-sm font-medium text-white">API Configuration</h3>
-                    <button onclick="toggleSettings()" class="text-[#666] hover:text-white transition"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    <h3 class="text-sm font-medium text-white flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4 text-[#666]"></i> Configurações</h3>
+                    <button onclick="toggleSettings()" class="text-[#666] hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="space-y-5">
                     <div class="space-y-1.5">
@@ -297,7 +327,7 @@
                         <label class="text-xs text-[#888]">Vercel Token</label>
                         <input type="password" id="vercel-token" class="input-field w-full rounded px-3 py-2 text-sm font-mono placeholder-[#333]">
                     </div>
-                    <button onclick="saveKeys()" class="btn-primary w-full py-2 rounded text-xs uppercase tracking-wide">Save Changes</button>
+                    <button onclick="saveKeys()" class="btn-primary w-full py-2 rounded text-xs uppercase tracking-wide font-medium">Salvar Configurações</button>
                 </div>
             </div>
         </div>
@@ -306,21 +336,43 @@
     <!-- Script Lógica -->
     <script>
         let projects = JSON.parse(localStorage.getItem('dm_projects')) || [];
+        let filteredProjects = [];
+        let displayedProjects = 10;
         let cachedGhUser = null;
         let allRepoFiles = [];
+        let monacoEditor = null;
+        let expandedFolders = new Set(); // Stores paths of expanded folders
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadKeys();
-            loadTemplate();
+            
+            // Initialize Monaco
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+                monacoEditor = monaco.editor.create(document.getElementById('monaco-editor'), {
+                    value: "",
+                    language: 'html',
+                    theme: 'vs-dark',
+                    automaticLayout: true,
+                    minimap: { enabled: false },
+                    fontSize: 12,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    scrollBeyondLastLine: false,
+                    padding: { top: 16, bottom: 16 }
+                });
+                loadTemplate();
+            });
+
             renderProjects();
             if(localStorage.getItem('dm_vc_token')) syncProjects();
         });
 
         function loadTemplate() {
-            const defaultHTML = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>Hello World</title>\n</head>\n<body>\n<h1>Deployed via Git</h1>\n</body>\n</html>`;
-            const area = document.getElementById('html-code');
-            if(!area.value || area.value.trim() === '') area.value = defaultHTML;
+            const defaultHTML = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>DeployMaster v2</title>\n</head>\n<body>\n<h1>Deployed via Git</h1>\n</body>\n</html>`;
+            if (monacoEditor) {
+                if (!monacoEditor.getValue() || monacoEditor.getValue().trim() === '') monacoEditor.setValue(defaultHTML);
+            }
         }
 
         async function syncProjects() {
@@ -330,9 +382,11 @@
 
             const icon = document.getElementById('refresh-icon');
             const statusLabel = document.getElementById('sync-status');
-            icon.classList.add('animate-spin');
-            statusLabel.classList.remove('hidden');
-            statusLabel.classList.add('flex');
+            if (icon) icon.classList.add('animate-spin');
+            if (statusLabel) {
+                statusLabel.classList.remove('hidden');
+                statusLabel.classList.add('flex');
+            }
 
             try {
                 const [userRes, teamsRes] = await Promise.all([
@@ -344,7 +398,7 @@
                 const user = userData.user;
                 const teams = teamsData.teams || [];
 
-                const vcRes = await fetch('https://api.vercel.com/v9/projects?limit=50', { headers: { Authorization: `Bearer ${vcToken}` } });
+                const vcRes = await fetch('https://api.vercel.com/v9/projects?limit=100', { headers: { Authorization: `Bearer ${vcToken}` } });
                 if (!vcRes.ok) throw new Error('API Sync Failed');
                 const vcData = await vcRes.json();
                 
@@ -401,13 +455,13 @@
                 console.error(error);
                 log('Sync', 'Error: ' + error.message, 'error');
             } finally {
-                icon.classList.remove('animate-spin');
-                statusLabel.classList.add('hidden');
-                statusLabel.classList.remove('flex');
+                if (icon) icon.classList.remove('animate-spin');
+                if (statusLabel) {
+                    statusLabel.classList.add('hidden');
+                    statusLabel.classList.remove('flex');
+                }
             }
         }
-
-        // --- Core: Deploy Logic (FIXED FOR GIT CONNECTION) ---
 
         async function handleDeploy(e) {
             e.preventDefault();
@@ -416,9 +470,9 @@
             if (!ghToken || !vcToken) { toggleSettings(); return; }
 
             const projectName = document.getElementById('project-name').value.trim().toLowerCase();
-            const content = document.getElementById('html-code').value;
+            const content = monacoEditor ? monacoEditor.getValue() : '';
             
-            const isUpdate = !document.getElementById('cancel-edit-btn').classList.contains('hidden');
+            const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
             const isPrivate = document.querySelector('input[name="visibility"]:checked').value === 'private';
             
             let fileName = 'index.html';
@@ -430,15 +484,14 @@
 
             setLoading(true, "Processando...");
             clearLogs();
+            document.getElementById('log-panel').classList.remove('hidden');
             
             try {
-                // 1. GitHub Auth
                 log('GitHub', 'Autenticando...');
                 const ghUser = await fetchGitHubUser(ghToken);
                 cachedGhUser = ghUser;
                 const userLogin = ghUser.login;
 
-                // 2. Ensure GitHub Repo exists
                 log('GitHub', `Verificando repositório ${projectName}...`);
                 if (!isUpdate) {
                     await ensureGitHubRepo(ghToken, projectName, isPrivate);
@@ -446,24 +499,20 @@
                     await updateGitHubRepoVisibility(ghToken, userLogin, projectName, isPrivate);
                 }
 
-                // 3. Ensure Vercel Project & LINK TO GIT
-                // Esta é a parte crítica para conectar ao Git
                 log('Vercel', `Configurando projeto e vínculo Git...`);
                 await ensureVercelProjectLinked(vcToken, projectName, `${userLogin}/${projectName}`);
 
-                // 4. Push Code to GitHub (Isso vai disparar o deploy na Vercel via webhook)
                 log('GitHub', `Enviando código para ${fileName}...`);
                 await uploadToGitHub(ghToken, userLogin, projectName, content, fileName);
                 log('GitHub', 'Código enviado (Push).', 'success');
                 
                 log('Vercel', 'Deploy automático iniciado via Git Integration.', 'success');
-                log('System', 'Aguardando atualização do status...', 'info');
+                log('System', 'Aguardando deploy e propagação...', 'info');
 
                 if(!isUpdate) document.getElementById('project-name').value = '';
                 else if (isUpdate) editProject(projectName); // Refresh
 
-                // Inicia polling para ver o status "Building"
-                setTimeout(() => { syncProjects(); setLoading(false); }, 3000);
+                pollDeploymentStatus(vcToken, projectName);
 
             } catch (err) {
                 console.error(err);
@@ -472,9 +521,41 @@
             }
         }
 
-        // --- Critical Function: Link Vercel to GitHub ---
+        async function pollDeploymentStatus(vcToken, projectName, maxAttempts = 60) {
+            let attempts = 0;
+            const pollInterval = setInterval(async () => {
+                attempts++;
+                try {
+                    const res = await fetch(`https://api.vercel.com/v9/projects/${projectName}`, { headers: { Authorization: `Bearer ${vcToken}` } });
+                    if (res.ok) {
+                        const projData = await res.json();
+                        let status = 'UNKNOWN';
+                        if (projData.latestDeployments && projData.latestDeployments.length > 0) {
+                            const last = projData.latestDeployments[0];
+                            status = last.readyState || last.state;
+                        }
+                        if (status === 'READY' || status === 'ERROR' || status === 'CANCELED') {
+                            clearInterval(pollInterval);
+                            log('Vercel', `Deployment Finished with status: ${status}`, status === 'READY' ? 'success' : 'error');
+                            syncProjects();
+                            setLoading(false);
+                            if (status === 'READY') {
+                                log('System', 'Tudo pronto e no ar!', 'success');
+                            }
+                            return;
+                        }
+                    }
+                } catch(e) {}
+                if (attempts >= maxAttempts) {
+                    clearInterval(pollInterval);
+                    log('System', 'Polling timeout. Please check dashboard.', 'error');
+                    syncProjects();
+                    setLoading(false);
+                }
+            }, 3000);
+        }
+
         async function ensureVercelProjectLinked(token, name, gitRepo) {
-            // Tenta criar já com o link
             const res = await fetch('https://api.vercel.com/v9/projects', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -486,12 +567,10 @@
             });
 
             if (res.status === 409) {
-                // Se já existe, pega o ID e tenta conectar (caso não esteja)
                 log('Vercel', 'Projeto existe. Verificando conexão...', 'info');
                 const existing = await fetch(`https://api.vercel.com/v9/projects/${name}`, { headers: { Authorization: `Bearer ${token}` } });
                 const projData = await existing.json();
                 
-                // Se não tem link, tenta conectar
                 if (!projData.link) {
                     log('Vercel', 'Conectando ao repositório GitHub...', 'info');
                     const linkRes = await fetch(`https://api.vercel.com/v9/projects/${projData.id}/link`, {
@@ -519,7 +598,6 @@
             return await res.json();
         }
 
-        // --- Standard API Helpers ---
         async function fetchGitHubUser(token) {
             const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
             if (!res.ok) throw new Error('GitHub Token Inválido');
@@ -560,22 +638,49 @@
             if (!res.ok) throw new Error('Falha no upload para o GitHub');
         }
 
-        // --- UI & Edit Logic ---
+        function openEditorModal(isEdit = false, name = '') {
+            const modal = document.getElementById('editor-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; // prevent background scrolling
+            
+            if (monacoEditor) {
+                setTimeout(() => monacoEditor.layout(), 150);
+            }
+            
+            if (!isEdit) {
+                resetForm();
+            }
+        }
+
+        function closeEditorModal() {
+            const modal = document.getElementById('editor-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('editor-sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
         async function editProject(name) {
             const ghToken = localStorage.getItem('dm_gh_token');
             if(!ghToken) { toggleSettings(); return alert("Token GitHub necessário"); }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            openEditorModal(true, name);
+
             document.getElementById('project-name').value = name;
             document.getElementById('project-name').disabled = true;
             document.getElementById('project-name').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> Editando: ${name}`;
-            document.getElementById('deploy-btn-text').innerText = "Atualizar Projeto";
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            document.getElementById('file-selector-container').classList.remove('hidden');
-            document.getElementById('editor-panel').classList.add('ring-2', 'ring-blue-500/50');
+            document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> <span>Editando: ${name}</span>`;
+            document.getElementById('deploy-btn-text').innerText = "Atualizar";
+            // Set flag on cancel button even though it's hidden now, handleDeploy checks it
+            const form = document.getElementById('deploy-form');
+            form.dataset.isUpdate = "true";
 
-            setLoading(true, "Carregando arquivos...");
+            setLoading(true, "Carregando...");
             clearLogs();
             toggleNewFileMode(false);
 
@@ -583,31 +688,186 @@
                 if (!cachedGhUser) cachedGhUser = await fetchGitHubUser(ghToken);
                 const user = cachedGhUser.login;
                 
-                // Visibilidade
                 const repoRes = await fetch(`https://api.github.com/repos/${user}/${name}`, { headers: { Authorization: `token ${ghToken}` } });
                 if(repoRes.ok) {
                     const data = await repoRes.json();
                     document.querySelector(`input[name="visibility"][value="${data.private ? 'private' : 'public'}"]`).checked = true;
                     
-                    // Tree recursive
                     const branch = data.default_branch || 'main';
                     const treeRes = await fetch(`https://api.github.com/repos/${user}/${name}/git/trees/${branch}?recursive=1`, { headers: { Authorization: `token ${ghToken}` } });
                     if(treeRes.ok) {
                         const treeData = await treeRes.json();
                         allRepoFiles = treeData.tree.filter(i => i.type === 'blob').sort((a,b) => a.path.localeCompare(b.path));
                         renderFileOptions(allRepoFiles);
-                        if(allRepoFiles.some(f => f.path === 'index.html')) document.getElementById('file-select').value = 'index.html';
-                        else if(allRepoFiles.length > 0) document.getElementById('file-select').value = allRepoFiles[0].path;
-                        if(allRepoFiles.length > 0) await loadFileContent(document.getElementById('file-select').value, name);
+                        
+                        let targetFile = '';
+                        if(allRepoFiles.some(f => f.path === 'index.html')) targetFile = 'index.html';
+                        else if(allRepoFiles.length > 0) targetFile = allRepoFiles[0].path;
+                        
+                        if (targetFile) {
+                            await selectFile(targetFile, name);
+                        }
                     }
                 }
             } catch (e) {
                 console.error(e);
+                document.getElementById('log-panel').classList.remove('hidden');
                 log('ERROR', e.message, 'error');
-                resetForm();
+                
+                if (e.message.includes('GitHub Token Inválido') || e.message.includes('Bad credentials')) {
+                    alert("Seu Token do GitHub é inválido ou expirou. Por favor, reconfigure.");
+                    localStorage.removeItem('dm_gh_token');
+                    closeEditorModal();
+                    toggleSettings();
+                }
             } finally {
                 setLoading(false);
             }
+        }
+
+        function renderFileOptions(files) {
+            const list = document.getElementById('file-list');
+            list.innerHTML = '';
+            if(files.length === 0) {
+                list.innerHTML = `<div class="text-[10px] text-[#666] p-2 text-center">(Vazio)</div>`;
+                return;
+            }
+            
+            // Construir árvore de arquivos
+            const root = { name: 'root', path: 'root', isFolder: true, children: {} };
+            files.forEach(f => {
+                const parts = f.path.split('/');
+                let current = root;
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    if (!current.children[part]) {
+                        const isFolder = i < parts.length - 1;
+                        current.children[part] = {
+                            name: part,
+                            path: isFolder ? parts.slice(0, i + 1).join('/') : f.path,
+                            isFolder: isFolder,
+                            children: {}
+                        };
+                    }
+                    current = current.children[part];
+                }
+            });
+
+            const getIcon = (path, isFolder, isExpanded) => {
+                if (isFolder) return isExpanded ? 'folder-open' : 'folder';
+                const ext = path.split('.').pop().toLowerCase();
+                if (['html', 'htm'].includes(ext)) return 'file-code-2';
+                if (['css'].includes(ext)) return 'file-type-2';
+                if (['js', 'ts', 'jsx', 'tsx', 'json'].includes(ext)) return 'file-json';
+                if (['png', 'jpg', 'jpeg', 'svg', 'gif'].includes(ext)) return 'image';
+                return 'file';
+            };
+
+            const renderNode = (node, container, level = 0) => {
+                const children = Object.values(node.children).sort((a, b) => {
+                    if (a.isFolder === b.isFolder) return a.name.localeCompare(b.name);
+                    return a.isFolder ? -1 : 1;
+                });
+
+                children.forEach(child => {
+                    const item = document.createElement('div');
+                    
+                    const inner = document.createElement('div');
+                    inner.className = 'flex items-center gap-1 py-1 hover:bg-[#222] transition cursor-pointer text-xs font-mono group';
+                    inner.style.paddingLeft = `${level * 12 + 8}px`;
+                    inner.style.paddingRight = '8px';
+                    
+                    const isExpanded = child.isFolder && expandedFolders.has(child.path);
+                    
+                    if (child.isFolder) {
+                        inner.classList.add('text-[#CCC]');
+                    } else {
+                        inner.classList.add('text-[#888]', 'file-item');
+                        inner.dataset.path = child.path;
+                    }
+
+                    const chevron = child.isFolder 
+                        ? `<i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-3 h-3 text-[#666] group-hover:text-white transition-transform"></i>`
+                        : `<div class="w-3 h-3"></div>`;
+                        
+                    const iconColor = child.isFolder ? 'text-blue-400 opacity-80' : 'opacity-70 group-hover:opacity-100 group-hover:text-blue-400';
+
+                    inner.innerHTML = `
+                        ${chevron}
+                        <i data-lucide="${getIcon(child.path, child.isFolder, isExpanded)}" class="w-3.5 h-3.5 ${iconColor}"></i>
+                        <span class="truncate w-full select-none">${child.name}</span>
+                    `;
+
+                    item.appendChild(inner);
+                    container.appendChild(item);
+
+                    if (child.isFolder) {
+                        const childrenContainer = document.createElement('div');
+                        childrenContainer.className = isExpanded ? 'block' : 'hidden';
+                        item.appendChild(childrenContainer);
+                        
+                        inner.onclick = (e) => {
+                            e.stopPropagation();
+                            if (expandedFolders.has(child.path)) expandedFolders.delete(child.path);
+                            else expandedFolders.add(child.path);
+                            renderFileOptions(files); // Re-renderiza para atualizar ícones
+                        };
+                        
+                        renderNode(child, childrenContainer, level + 1);
+                    } else {
+                        inner.onclick = (e) => {
+                            e.stopPropagation();
+                            selectFile(child.path);
+                        };
+                    }
+                });
+            };
+
+            renderNode(root, list, 0);
+            
+            // Restaura a seleção visual
+            const activePath = document.getElementById('active-file-name')?.innerText;
+            if (activePath && activePath !== 'index.html') {
+                document.querySelectorAll('.file-item').forEach(el => {
+                    if (el.dataset.path === activePath) {
+                        el.classList.add('bg-[#222]', 'text-white', 'border-l-2', 'border-blue-500');
+                        el.classList.remove('text-[#888]');
+                    }
+                });
+            }
+            lucide.createIcons();
+        }
+
+        async function selectFile(path, projOverride) {
+            document.getElementById('file-select').value = path;
+            document.querySelectorAll('.file-item').forEach(el => {
+                if (el.dataset.path === path) {
+                    el.classList.add('bg-[#222]', 'text-white', 'border-l-2', 'border-blue-500');
+                    el.classList.remove('text-[#888]');
+                } else {
+                    el.classList.remove('bg-[#222]', 'text-white', 'border-l-2', 'border-blue-500');
+                    el.classList.add('text-[#888]');
+                }
+            });
+            
+            document.getElementById('active-file-name').innerText = path;
+            
+            if (monacoEditor) {
+                const ext = path.split('.').pop().toLowerCase();
+                const langMap = { 'html':'html', 'css':'css', 'js':'javascript', 'json':'json', 'ts':'typescript' };
+                monaco.editor.setModelLanguage(monacoEditor.getModel(), langMap[ext] || 'plaintext');
+                // hide sidebar on mobile after selecting
+                if (window.innerWidth < 768) {
+                    document.getElementById('editor-sidebar').classList.add('-translate-x-full');
+                }
+            }
+            
+            await loadFileContent(path, projOverride);
+        }
+
+        function filterFiles() {
+            const term = document.getElementById('file-search').value.toLowerCase();
+            renderFileOptions(allRepoFiles.filter(f => f.path.toLowerCase().includes(term)));
         }
 
         async function loadFileContent(path, projOverride) {
@@ -622,7 +882,7 @@
                 if(!res.ok) throw new Error('Erro ao ler arquivo');
                 const data = await res.json();
                 const content = new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)));
-                document.getElementById('html-code').value = content;
+                if (monacoEditor) monacoEditor.setValue(content);
                 log('System', `${path} carregado.`, 'success');
             } catch (e) {
                 log('ERROR', e.message, 'error');
@@ -631,41 +891,26 @@
             }
         }
 
-        function renderFileOptions(files) {
-            const select = document.getElementById('file-select');
-            select.innerHTML = '';
-            if(files.length === 0) {
-                select.appendChild(new Option("(Vazio)", ""));
-                return;
-            }
-            files.forEach(f => select.appendChild(new Option(f.path, f.path)));
-        }
-
-        function filterFiles() {
-            const term = document.getElementById('file-search').value.toLowerCase();
-            renderFileOptions(allRepoFiles.filter(f => f.path.toLowerCase().includes(term)));
-        }
-
         function toggleNewFileMode(force) {
             const container = document.getElementById('new-file-input-container');
-            const select = document.getElementById('file-select');
             const search = document.getElementById('file-search').parentNode;
+            const list = document.getElementById('file-list');
             const btn = document.getElementById('btn-new-file');
             
             const show = force !== undefined ? force : container.classList.contains('hidden');
             
             if(show) {
                 container.classList.remove('hidden');
-                select.classList.add('hidden');
                 search.classList.add('hidden');
-                btn.innerHTML = `<i data-lucide="list" class="w-3 h-3"></i> Voltar à Lista`;
-                document.getElementById('html-code').value = '';
+                list.style.opacity = '0.3';
+                btn.innerHTML = `<i data-lucide="x" class="w-3.5 h-3.5"></i>`;
+                if (monacoEditor) monacoEditor.setValue('');
                 document.getElementById('new-file-path').focus();
             } else {
                 container.classList.add('hidden');
-                select.classList.remove('hidden');
                 search.classList.remove('hidden');
-                btn.innerHTML = `<i data-lucide="file-plus" class="w-3 h-3"></i> Novo Arquivo`;
+                list.style.opacity = '1';
+                btn.innerHTML = `<i data-lucide="file-plus" class="w-3.5 h-3.5"></i>`;
             }
             lucide.createIcons();
         }
@@ -674,31 +919,52 @@
             document.getElementById('project-name').value = '';
             document.getElementById('project-name').disabled = false;
             document.getElementById('project-name').classList.remove('opacity-50', 'cursor-not-allowed');
-            document.getElementById('html-code').value = '';
+            document.getElementById('deploy-form').dataset.isUpdate = "false";
+            
+            if (monacoEditor) monacoEditor.setValue('');
             loadTemplate();
-            document.getElementById('form-title').innerHTML = `<i data-lucide="plus" class="w-4 h-4 text-[#666]"></i> Novo Deployment`;
-            document.getElementById('deploy-btn-text').innerText = "Deploy to Production";
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            document.getElementById('editor-panel').classList.remove('ring-2', 'ring-blue-500/50');
-            document.getElementById('file-selector-container').classList.add('hidden');
+            document.getElementById('form-title').innerHTML = `<i data-lucide="layout" class="w-4 h-4 text-[#666]"></i> <span>Novo Deployment</span>`;
+            document.getElementById('deploy-btn-text').innerText = "Deploy";
+            
             toggleNewFileMode(false);
             lucide.createIcons();
             clearLogs();
+            document.getElementById('log-panel').classList.add('hidden');
+            
+            allRepoFiles = [];
+            renderFileOptions([]);
+            document.getElementById('active-file-name').innerText = "index.html";
         }
 
-        // UI Helpers
-        function renderProjects() {
+        function filterProjects() {
+            renderProjects();
+        }
+
+        function loadMoreProjects() {
+            displayedProjects += 10;
+            renderProjects(true);
+        }
+
+        function renderProjects(keepLimit = false) {
             const grid = document.getElementById('projects-grid');
             const empty = document.getElementById('empty-state');
+            const btnMore = document.getElementById('load-more-btn');
+            
+            if (!keepLimit) displayedProjects = 10;
+            
+            const term = document.getElementById('project-search-input') ? document.getElementById('project-search-input').value.toLowerCase() : '';
+            filteredProjects = projects.filter(p => p.name.toLowerCase().includes(term));
+            
             document.getElementById('project-count').textContent = `${projects.length} PROJECTS`;
             grid.innerHTML = '';
             
-            if (projects.length === 0) { empty.classList.remove('hidden'); return; }
+            if (filteredProjects.length === 0) { empty.classList.remove('hidden'); if(btnMore) btnMore.classList.add('hidden'); return; }
             empty.classList.add('hidden');
 
-            projects.forEach(p => {
+            const toShow = filteredProjects.slice(0, displayedProjects);
+
+            toShow.forEach(p => {
                 const st = getStatusConfig(p.status);
-                const userSlug = p.vcDashboardUrl ? p.vcDashboardUrl.split('/')[3] : 'user';
                 const card = document.createElement('div');
                 card.className = 'panel rounded-lg p-4 flex items-center justify-between group hover:border-[#444] transition-colors animate-fade-in';
                 card.innerHTML = `
@@ -722,13 +988,18 @@
                             <span class="text-[10px] text-[#444]">${p.lastUpdate}</span>
                         </div>
                         <div class="flex items-center border-l border-[#222] pl-4 gap-1">
-                            <button onclick="editProject('${p.name}')" class="p-2 text-[#666] hover:text-blue-400 hover:bg-[#111] rounded transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <a href="${p.vcDashboardUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></a>
-                            <a href="${p.ghUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition"><i data-lucide="github" class="w-4 h-4"></i></a>
+                            <button onclick="editProject('${p.name}')" class="p-2 text-[#666] hover:text-blue-400 hover:bg-[#111] rounded transition" title="Editar"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                            <a href="${p.vcDashboardUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition" title="Dashboard"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></a>
+                            <a href="${p.ghUrl}" target="_blank" class="p-2 text-[#666] hover:text-white hover:bg-[#111] rounded transition" title="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
                         </div>
                     </div>`;
                 grid.appendChild(card);
             });
+            
+            if (btnMore) {
+                if (displayedProjects < filteredProjects.length) btnMore.classList.remove('hidden');
+                else btnMore.classList.add('hidden');
+            }
             lucide.createIcons();
         }
 
@@ -743,14 +1014,14 @@
         }
 
         function setLoading(isLoading, text="Deploying...") {
-            const btn = document.getElementById('deploy-btn');
+            const btn = document.getElementById('deploy-action-btn');
             if(isLoading) {
                 btn.disabled = true;
                 btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span id="deploy-btn-text">${text}</span>`;
             } else {
                 btn.disabled = false;
-                const isUpdate = !document.getElementById('cancel-edit-btn').classList.contains('hidden');
-                btn.innerHTML = `<span id="deploy-btn-text">${isUpdate ? "Atualizar Projeto" : "Deploy to Production"}</span><i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>`;
+                const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
+                btn.innerHTML = `<span id="deploy-btn-text">${isUpdate ? "Atualizar" : "Deploy"}</span><i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>`;
             }
             lucide.createIcons();
         }
