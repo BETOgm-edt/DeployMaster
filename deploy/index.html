@@ -117,7 +117,7 @@
     <nav class="border-b border-[#222] bg-[#030303]/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex items-center justify-between h-14">
-                <a href="../" class="flex items-center gap-3 hover:opacity-80 transition-opacity" title="Voltar para a Home">
+                <a href="#" class="flex items-center gap-3 hover:opacity-80 transition-opacity" title="DeployMaster Dashboard">
                     <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                         <i data-lucide="triangle" class="w-4 h-4 fill-current rotate-180"></i>
                     </div>
@@ -132,11 +132,6 @@
                     </div>
                     
                     <div class="h-4 w-[1px] bg-[#333] mx-1"></div>
-
-                    <a href="../" class="px-2.5 py-1 text-xs text-[#888] hover:text-white transition rounded hover:bg-[#111] font-mono flex items-center gap-1.5" title="Ir para Landing Page">
-                        <i data-lucide="home" class="w-3.5 h-3.5"></i>
-                        <span class="hidden sm:inline">Landing Page</span>
-                    </a>
 
                     <button onclick="syncProjects()" class="p-2 text-[#666] hover:text-white transition rounded hover:bg-[#111]" title="Sincronizar">
                         <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
@@ -161,7 +156,7 @@
                         <p class="text-sm text-[#666] mt-1">Gerencie seus deploys ativos e monitore o status.</p>
                     </div>
                     <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full sm:w-auto">
-                        <button onclick="openEditorModal()" class="btn-primary px-4 py-1.5 rounded-lg text-sm flex items-center justify-center gap-2 w-full sm:w-auto font-medium shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                        <button onclick="openNewProjectChoiceModal()" class="btn-primary px-4 py-1.5 rounded-lg text-sm flex items-center justify-center gap-2 w-full sm:w-auto font-medium shadow-[0_0_15px_rgba(255,255,255,0.1)]">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             <span>Novo Projeto</span>
                         </button>
@@ -189,11 +184,63 @@
                         <i data-lucide="box" class="w-5 h-5 text-[#444]"></i>
                     </div>
                     <p class="text-sm text-[#888]">No deployments found</p>
-                    <button onclick="openEditorModal()" class="mt-4 text-xs text-white hover:underline">Create your first project</button>
+                    <button onclick="openNewProjectChoiceModal()" class="mt-4 text-xs text-white hover:underline">Create your first project</button>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Modal Escolha Novo Projeto (Começar do zero vs Importar repositório) -->
+    <div id="new-project-choice-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
+        <div class="bg-[#0A0A0A] border border-[#222] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative">
+            <button onclick="closeNewProjectChoiceModal()" class="absolute top-4 right-4 text-[#666] hover:text-white transition p-1 rounded-md">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mx-auto mb-3 text-white">
+                    <i data-lucide="plus-circle" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <h2 class="text-lg sm:text-xl font-medium text-white tracking-tight">Como deseja iniciar seu projeto?</h2>
+                <p class="text-xs sm:text-sm text-[#777] mt-1">Escolha uma das opções para configurar seu novo deploy no DeployMaster.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Opção 1: Começar do Zero -->
+                <button type="button" onclick="selectProjectCreationOption('new')" class="group text-left p-5 bg-[#111] hover:bg-[#181818] border border-[#222] hover:border-blue-500/50 rounded-xl transition-all duration-200 flex flex-col justify-between h-48 shadow-lg hover:shadow-blue-500/5 cursor-pointer">
+                    <div>
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">Começar do Zero</h3>
+                        <p class="text-[11px] text-[#777] leading-relaxed mt-1">Crie um repositório limpo no GitHub e edite o código diretamente no editor.</p>
+                    </div>
+                    <div class="flex items-center text-[11px] font-mono text-blue-400 group-hover:translate-x-1 transition-transform mt-2">
+                        <span>Iniciar código</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </div>
+                </button>
+
+                <!-- Opção 2: Importar Repositório -->
+                <button type="button" onclick="selectProjectCreationOption('existing')" class="group text-left p-5 bg-[#111] hover:bg-[#181818] border border-[#222] hover:border-amber-500/50 rounded-xl transition-all duration-200 flex flex-col justify-between h-48 shadow-lg hover:shadow-amber-500/5 cursor-pointer">
+                    <div>
+                        <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <!-- SVG GitHub da Landing Page -->
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors">Importar Repositório</h3>
+                        <p class="text-[11px] text-[#777] leading-relaxed mt-1">Vincule um projeto existente da sua conta no GitHub para deploy.</p>
+                    </div>
+                    <div class="flex items-center text-[11px] font-mono text-amber-400 group-hover:translate-x-1 transition-transform mt-2">
+                        <span>Selecionar repo</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Editor IDE Modal (VS Code Style) -->
     <div id="editor-modal" class="fixed inset-0 z-[100] hidden flex-col bg-[#050505]/95 backdrop-blur-md animate-fade-in p-0 sm:p-2 md:p-6 lg:p-10 transition-all duration-300">
@@ -843,6 +890,31 @@
             const repoToggle = document.getElementById('repo-source-toggle');
             if (repoToggle) repoToggle.classList.remove('hidden');
             loadTemplate();
+        }
+
+        function openNewProjectChoiceModal() {
+            const modal = document.getElementById('new-project-choice-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function closeNewProjectChoiceModal() {
+            const modal = document.getElementById('new-project-choice-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function selectProjectCreationOption(option) {
+            closeNewProjectChoiceModal();
+            openEditorModal(false);
+            setRepoSourceMode(option);
         }
 
         function openEditorModal(isEdit = false, name = '') {
