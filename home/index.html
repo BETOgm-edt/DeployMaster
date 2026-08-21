@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DeployMaster | Seu projeto online. Sem complicação.</title>
     <meta name="description" content="A ponte serverless perfeita entre o seu código e o mundo. Conecte seu repositório do GitHub e aproveite a infraestrutura Edge da Vercel com zero configuração.">
 
@@ -57,18 +57,20 @@
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
         }
 
         /* Ambient Glow Spotlights */
         .glow-top {
             position: absolute;
-            width: 750px;
-            height: 750px;
-            background: radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.01) 55%, transparent 75%);
-            filter: blur(90px);
+            width: 90vw;
+            max-width: 800px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, rgba(52, 211, 153, 0.01) 60%, transparent 80%);
+            filter: blur(100px);
             border-radius: 50%;
             pointer-events: none;
-            top: -200px;
+            top: -150px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 0;
@@ -76,7 +78,7 @@
 
         /* Glassmorphism Panels */
         .glass-panel {
-            background: rgba(10, 10, 10, 0.75);
+            background: rgba(10, 10, 10, 0.8);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -84,11 +86,11 @@
 
         /* Grid Background Pattern */
         .bg-grid {
-            background-size: 40px 40px;
+            background-size: 32px 32px;
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
         }
 
         /* Impeccable Design System Classes */
@@ -97,7 +99,7 @@
             color: #050505;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            padding: 12px 26px;
+            padding: 12px 28px;
             border-radius: 9999px;
             border: none;
             cursor: pointer;
@@ -107,6 +109,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            touch-action: manipulation;
         }
         .ds-btn-primary:hover {
             transform: scale(1.04);
@@ -114,7 +117,7 @@
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
         }
         .ds-btn-primary:active {
-            transform: scale(0.97);
+            transform: scale(0.96);
         }
 
         .ds-status-badge {
@@ -124,7 +127,7 @@
             background: rgba(52, 211, 153, 0.1);
             color: #34D399;
             border: 1px solid rgba(52, 211, 153, 0.2);
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
@@ -154,30 +157,6 @@
         .reveal.active {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        /* Float Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-            animation: float 6s ease-in-out 3s infinite;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #050505;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #222;
-            border-radius: 3px;
         }
 
         /* Terminal Cursor Blink */
@@ -213,14 +192,15 @@
     <div class="glow-top"></div>
 
     <!-- Navigation Header -->
-    <header class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <header class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/5 bg-[#050505]/90 backdrop-blur-md" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+            
             <!-- Brand Logo -->
             <a href="#" class="flex items-center gap-2.5 group">
                 <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
                 </div>
-                <span class="font-semibold tracking-tight text-lg">Deploymaster</span>
+                <span class="font-semibold tracking-tight text-base sm:text-lg">Deploymaster</span>
             </a>
 
             <!-- Nav Links (Desktop) -->
@@ -231,10 +211,29 @@
                 <a href="#casos-de-uso" class="hover:text-white transition-colors">Casos de uso</a>
             </nav>
 
-            <!-- Action Button -->
-            <div class="flex items-center gap-4">
-                <a href="../deploy/" class="ds-btn-primary text-xs sm:text-sm">
+            <!-- Action Button & Mobile Toggle -->
+            <div class="flex items-center gap-3">
+                <a href="../deploy/" class="ds-btn-primary text-xs sm:text-sm !py-2.5 !px-4 sm:!px-6">
                     <span>Acessar IDE</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" aria-label="Abrir Menu" class="md:hidden w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-300 active:scale-95">
+                    <i data-lucide="menu" class="w-5 h-5" id="mobile-menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-[#0A0A0A] px-6 py-6 space-y-4">
+            <a href="#como-funciona" class="mobile-nav-link block text-base font-medium text-neutral-300 hover:text-white py-1">Como funciona</a>
+            <a href="#interface" class="mobile-nav-link block text-base font-medium text-neutral-300 hover:text-white py-1">Interface</a>
+            <a href="#velocidade" class="mobile-nav-link block text-base font-medium text-neutral-300 hover:text-white py-1">Velocidade</a>
+            <a href="#casos-de-uso" class="mobile-nav-link block text-base font-medium text-neutral-300 hover:text-white py-1">Casos de uso</a>
+            <div class="pt-4 border-t border-white/10">
+                <a href="../deploy/" class="ds-btn-primary w-full text-center text-sm py-3">
+                    <span>Entrar no Deploymaster IDE</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
@@ -243,193 +242,187 @@
 
     <main class="relative z-10">
         
-        <!-- HERO SECTION -->
-        <section class="relative pt-36 sm:pt-44 pb-20 sm:pb-28 px-6 overflow-hidden">
+        <!-- HERO SECTION (Impeccably Centered) -->
+        <section class="relative pt-28 sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
             <div class="absolute inset-0 bg-grid z-[-1] pointer-events-none"></div>
 
-            <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center reveal">
                 
-                <!-- Left Text Column -->
-                <div class="lg:col-span-6 flex flex-col gap-6 reveal text-left">
-                    
-                    <!-- Impeccable Status Badge -->
-                    <div class="ds-status-badge w-fit">
-                        <span class="ds-pulse-dot"></span>
-                        <span>Deploy Engine v2.0 Live</span>
-                    </div>
-
-                    <!-- Main Headline -->
-                    <h1 class="text-4xl sm:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white">
-                        Seu projeto.<br>
-                        <span class="font-serif italic font-normal text-emerald-400">Online.</span><br>
-                        Sem complicação.
-                    </h1>
-
-                    <!-- Description -->
-                    <p class="text-base sm:text-lg text-neutral-400 max-w-xl font-light leading-relaxed">
-                        A ponte serverless perfeita entre o seu código e o mundo. Conecte seu repositório do GitHub e aproveite a infraestrutura Edge da Vercel com zero configuração.
-                    </p>
-
-                    <!-- CTAs -->
-                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
-                        <a href="../deploy/" class="ds-btn-primary">
-                            <span>Acessar ferramenta</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                        <a href="#como-funciona" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium text-sm border border-white/10 text-neutral-300 hover:text-white hover:bg-white/5 transition-all active:scale-95">
-                            <span>Ver como funciona</span>
-                        </a>
-                    </div>
-
-                    <!-- Native Infrastructure Indicators -->
-                    <div class="flex flex-col gap-3 pt-6 border-t border-white/5 mt-2">
-                        <span class="text-[10px] font-mono font-medium text-neutral-500 uppercase tracking-widest">Infraestrutura Nativa</span>
-                        <div class="flex items-center gap-6 text-neutral-400 font-mono text-xs">
-                            <div class="flex items-center gap-2 hover:text-white transition-colors cursor-default">
-                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
-                                <span>GitHub API</span>
-                            </div>
-                            <div class="flex items-center gap-2 hover:text-white transition-colors cursor-default">
-                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2L24 22H0L12 2Z"/></svg>
-                                <span>Vercel Edge</span>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Status Badge Pill -->
+                <div class="ds-status-badge mb-6">
+                    <span class="ds-pulse-dot"></span>
+                    <span>Deploy Engine v2.0 Live</span>
                 </div>
 
-                <!-- Right Hero Showcase Window (Obsidian Command Center) -->
-                <div class="lg:col-span-6 reveal">
-                    <div class="relative w-full rounded-2xl border border-white/10 bg-[#080808] p-4 sm:p-5 shadow-2xl">
-                        
-                        <!-- Top Window Header -->
-                        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
-                            </div>
-                            <div class="text-[11px] font-mono text-neutral-400">deploymaster-workflow.ts</div>
-                            <div class="ds-status-badge !py-0.5 !px-2.5 !text-[10px]">
-                                <span class="ds-pulse-dot"></span>
-                                <span>READY</span>
-                            </div>
+                <!-- Main Headline -->
+                <h1 class="text-3xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.15] sm:leading-[1.1] text-white max-w-3xl mb-6">
+                    Seu projeto. <span class="font-serif italic font-normal text-emerald-400">Online.</span><br class="hidden sm:inline">
+                    Sem complicação.
+                </h1>
+
+                <!-- Centered Subtitle -->
+                <p class="text-sm sm:text-lg text-neutral-400 max-w-2xl font-light leading-relaxed mb-8 px-2 sm:px-0">
+                    A ponte serverless perfeita entre o seu código e o mundo. Conecte seu repositório do GitHub e aproveite a infraestrutura Edge da Vercel com zero configuração.
+                </p>
+
+                <!-- Centered Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto mb-10">
+                    <a href="../deploy/" class="ds-btn-primary w-full sm:w-auto text-sm">
+                        <span>Acessar ferramenta</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                    <a href="#como-funciona" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium text-sm border border-white/10 text-neutral-300 hover:text-white hover:bg-white/5 transition-all w-full sm:w-auto active:scale-95">
+                        <span>Ver como funciona</span>
+                    </a>
+                </div>
+
+                <!-- Centered Infrastructure Badges -->
+                <div class="flex flex-col items-center gap-3 pt-6 border-t border-white/5 w-full max-w-md">
+                    <span class="text-[10px] font-mono font-medium text-neutral-500 uppercase tracking-widest">Infraestrutura Nativa</span>
+                    <div class="flex items-center justify-center gap-8 text-neutral-400 font-mono text-xs">
+                        <div class="flex items-center gap-2 hover:text-white transition-colors cursor-default">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                            <span>GitHub API</span>
                         </div>
-
-                        <!-- Stacked Interactive Code & Terminal Flow -->
-                        <div class="space-y-3 font-mono text-xs">
-                            
-                            <!-- 1. Code Editor Snippet -->
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/5 text-neutral-300">
-                                <div class="flex items-center justify-between text-[11px] text-neutral-400 border-b border-white/5 pb-2 mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <i data-lucide="file-code-2" class="w-3.5 h-3.5 text-blue-400"></i>
-                                        <span>app.tsx</span>
-                                    </div>
-                                    <span class="text-neutral-500">main</span>
-                                </div>
-                                <div class="text-neutral-300 space-y-1">
-                                    <p><span class="text-blue-400">export default</span> <span class="text-purple-400">function</span> App() {</p>
-                                    <p class="pl-4 text-emerald-400">&lt;DeployMaster vercel={<span class="text-white">true</span>} /&gt;</p>
-                                    <p>}</p>
-                                </div>
-                            </div>
-
-                            <!-- 2. Animated Deploy Terminal -->
-                            <div class="bg-[#050505] p-3.5 rounded-xl border border-white/10 space-y-2">
-                                <div class="flex items-center justify-between text-[11px] text-neutral-400 border-b border-white/5 pb-2">
-                                    <div class="flex items-center gap-2">
-                                        <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i>
-                                        <span>Deploy Process</span>
-                                    </div>
-                                    <span class="text-emerald-400 text-[10px]">ACTIVE</span>
-                                </div>
-
-                                <div id="terminal-content" class="h-[60px] overflow-hidden text-xs space-y-1">
-                                    <!-- Populated via Javascript typing loop -->
-                                </div>
-
-                                <!-- Animated Progress Line -->
-                                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden mt-1">
-                                    <div class="h-full bg-emerald-400 animate-progress rounded-full"></div>
-                                </div>
-                            </div>
-
-                            <!-- 3. Live Project Card -->
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/5 flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
-                                        <i data-lucide="globe" class="w-4 h-4"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs font-semibold text-white font-mono">seu-projeto.vercel.app</div>
-                                        <div class="text-[10px] text-neutral-400">Vercel Production Edge</div>
-                                    </div>
-                                </div>
-                                <div class="ds-status-badge">
-                                    <span class="ds-pulse-dot"></span>
-                                    <span>ONLINE</span>
-                                </div>
-                            </div>
-
+                        <div class="flex items-center gap-2 hover:text-white transition-colors cursor-default">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2L24 22H0L12 2Z"/></svg>
+                            <span>Vercel Edge</span>
                         </div>
-
                     </div>
                 </div>
 
             </div>
+
+            <!-- Centered Showcase Window -->
+            <div class="max-w-4xl mx-auto mt-12 sm:mt-16 reveal">
+                <div class="relative w-full rounded-2xl border border-white/10 bg-[#080808] p-3.5 sm:p-5 shadow-2xl">
+                    
+                    <!-- Window Header -->
+                    <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-3.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
+                        </div>
+                        <div class="text-[10px] sm:text-[11px] font-mono text-neutral-400">deploymaster-workflow.ts</div>
+                        <div class="ds-status-badge !py-0.5 !px-2.5 !text-[10px]">
+                            <span class="ds-pulse-dot"></span>
+                            <span>READY</span>
+                        </div>
+                    </div>
+
+                    <!-- Window Content Stack -->
+                    <div class="space-y-3 font-mono text-xs">
+                        
+                        <!-- Code Snippet -->
+                        <div class="glass-panel p-3 sm:p-4 rounded-xl border border-white/5 text-neutral-300">
+                            <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-neutral-400 border-b border-white/5 pb-2 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="file-code-2" class="w-3.5 h-3.5 text-blue-400"></i>
+                                    <span>app.tsx</span>
+                                </div>
+                                <span class="text-neutral-500">main</span>
+                            </div>
+                            <div class="text-neutral-300 space-y-1 text-[11px] sm:text-xs">
+                                <p><span class="text-blue-400">export default</span> <span class="text-purple-400">function</span> App() {</p>
+                                <p class="pl-4 text-emerald-400">&lt;DeployMaster vercel={<span class="text-white">true</span>} /&gt;</p>
+                                <p>}</p>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Output -->
+                        <div class="bg-[#050505] p-3 sm:p-4 rounded-xl border border-white/10 space-y-2">
+                            <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-neutral-400 border-b border-white/5 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                    <span>Deploy Terminal</span>
+                                </div>
+                                <span class="text-emerald-400 text-[10px]">LIVE LOGS</span>
+                            </div>
+
+                            <div id="terminal-content" class="h-[55px] sm:h-[60px] overflow-hidden text-[11px] sm:text-xs space-y-1">
+                                <!-- Dynamic Typing Animation -->
+                            </div>
+
+                            <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden mt-1">
+                                <div class="h-full bg-emerald-400 animate-progress rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <!-- Live Status Pill -->
+                        <div class="glass-panel p-3 sm:p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
+                                    <i data-lucide="globe" class="w-4 h-4"></i>
+                                </div>
+                                <div class="truncate">
+                                    <div class="text-xs font-semibold text-white font-mono truncate">seu-projeto.vercel.app</div>
+                                    <div class="text-[10px] text-neutral-400">Vercel Production Edge</div>
+                                </div>
+                            </div>
+                            <div class="ds-status-badge shrink-0">
+                                <span class="ds-pulse-dot"></span>
+                                <span>ONLINE</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
         </section>
 
-        <!-- HOW IT WORKS -->
-        <section id="como-funciona" class="py-24 md:py-32 px-6 relative border-t border-white/5">
+        <!-- HOW IT WORKS (Centered) -->
+        <section id="como-funciona" class="py-20 sm:py-32 px-4 sm:px-6 relative border-t border-white/5">
             <div class="max-w-7xl mx-auto">
                 
-                <div class="mb-16 max-w-2xl reveal">
-                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-4 text-white">
-                        Três etapas.<br>Zero infraestrutura.
+                <div class="text-center mb-12 sm:mb-20 max-w-2xl mx-auto reveal">
+                    <h2 class="text-2xl sm:text-5xl font-medium tracking-tight mb-4 text-white">
+                        Três etapas. Zero complicação.
                     </h2>
-                    <p class="text-neutral-400 text-base md:text-lg font-light leading-relaxed">
-                        Desenhamos um fluxo focado no que importa: seu código rodando no mundo real o mais rápido possível.
+                    <p class="text-neutral-400 text-sm sm:text-lg font-light leading-relaxed">
+                        Desenhamos um fluxo minimalista focado no que importa: seu código rodando na internet instantaneamente.
                     </p>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-8">
+                <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
                     
                     <!-- Step 1 -->
-                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col gap-6 reveal">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col items-center text-center gap-5 reveal">
                         <div class="w-12 h-12 rounded-full bg-[#0A0A0A] border border-white/10 flex items-center justify-center text-xl font-mono text-neutral-300">
                             01
                         </div>
-                        <h3 class="text-xl font-medium text-white flex items-center gap-2">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                        <h3 class="text-lg sm:text-xl font-medium text-white flex items-center justify-center gap-2">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
                             Conecte seu GitHub
                         </h3>
-                        <p class="text-neutral-400 font-light text-sm leading-relaxed">
-                            Vincule sua conta localmente, selecione o repositório ou crie do zero. O Deploymaster configura o pipeline automaticamente.
+                        <p class="text-neutral-400 font-light text-xs sm:text-sm leading-relaxed">
+                            Importe repositórios existentes ou crie do zero. O Deploymaster sincroniza os arquivos automaticamente.
                         </p>
-                        <div class="mt-4 p-4 rounded-xl border border-white/5 bg-[#050505] font-mono text-xs text-neutral-400">
+                        <div class="w-full mt-2 p-3.5 rounded-xl border border-white/5 bg-[#050505] font-mono text-[11px] sm:text-xs text-neutral-400 text-left">
                             <div class="flex items-center gap-2 text-white font-medium">
-                                <i data-lucide="git-commit" class="w-4 h-4 text-emerald-400"></i>
+                                <i data-lucide="git-commit" class="w-3.5 h-3.5 text-emerald-400"></i>
                                 <span>git push origin main</span>
                             </div>
-                            <div class="text-neutral-500 mt-2">Webhook disparado automaticamente.</div>
+                            <div class="text-neutral-500 mt-1.5 text-[10px]">Webhook sincronizado.</div>
                         </div>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col gap-6 reveal">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col items-center text-center gap-5 reveal">
                         <div class="w-12 h-12 rounded-full bg-[#0A0A0A] border border-white/10 flex items-center justify-center text-xl font-mono text-neutral-300">
                             02
                         </div>
-                        <h3 class="text-xl font-medium text-white flex items-center gap-2">
+                        <h3 class="text-lg sm:text-xl font-medium text-white flex items-center justify-center gap-2">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2L24 22H0L12 2Z"/></svg>
                             Deploy via Vercel
                         </h3>
-                        <p class="text-neutral-400 font-light text-sm leading-relaxed">
-                            Utilizamos a API Edge da Vercel. Seu app é construído com máxima performance e distribuído na rede global.
+                        <p class="text-neutral-400 font-light text-xs sm:text-sm leading-relaxed">
+                            Integração direta com a API Edge da Vercel. Seu código é compilado com máxima velocidade.
                         </p>
-                        <div class="mt-4 p-4 rounded-xl border border-white/5 bg-[#050505] font-mono text-xs">
-                            <div class="flex justify-between items-center mb-2">
+                        <div class="w-full mt-2 p-3.5 rounded-xl border border-white/5 bg-[#050505] font-mono text-[11px] sm:text-xs text-left">
+                            <div class="flex justify-between items-center mb-1.5">
                                 <span class="text-neutral-400">Building...</span>
                                 <span class="text-emerald-400 font-semibold">0.8s</span>
                             </div>
@@ -440,23 +433,23 @@
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col gap-6 reveal">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 flex flex-col items-center text-center gap-5 reveal">
                         <div class="w-12 h-12 rounded-full bg-[#0A0A0A] border border-emerald-500/30 flex items-center justify-center text-xl font-mono text-emerald-400">
                             03
                         </div>
-                        <h3 class="text-xl font-medium text-white flex items-center gap-2">
-                            <i data-lucide="globe" class="w-5 h-5 text-emerald-400"></i>
-                            Projeto Online
+                        <h3 class="text-lg sm:text-xl font-medium text-white flex items-center justify-center gap-2">
+                            <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+                            Projeto Publicado
                         </h3>
-                        <p class="text-neutral-400 font-light text-sm leading-relaxed">
-                            URL pública gerada com certificado SSL ativo e cache Edge distribuído instantaneamente.
+                        <p class="text-neutral-400 font-light text-xs sm:text-sm leading-relaxed">
+                            URL pública pronta para acesso global com SSL automático e rede CDN global ativada.
                         </p>
-                        <div class="mt-4 p-4 rounded-xl border border-white/5 bg-[#050505] font-mono text-xs flex items-center justify-between">
+                        <div class="w-full mt-2 p-3.5 rounded-xl border border-white/5 bg-[#050505] font-mono text-[11px] sm:text-xs flex items-center justify-between text-left">
                             <div class="flex items-center gap-2 text-emerald-400 truncate">
                                 <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                                <span>seu-projeto.vercel.app</span>
+                                <span class="truncate">seu-projeto.vercel.app</span>
                             </div>
-                            <i data-lucide="external-link" class="w-3.5 h-3.5 text-neutral-500"></i>
+                            <i data-lucide="external-link" class="w-3.5 h-3.5 text-neutral-500 shrink-0"></i>
                         </div>
                     </div>
 
@@ -464,19 +457,19 @@
             </div>
         </section>
 
-        <!-- INTERFACE / DASHBOARD PREVIEW -->
-        <section id="interface" class="py-24 px-6">
+        <!-- INTERFACE PREVIEW (Centered) -->
+        <section id="interface" class="py-20 sm:py-32 px-4 sm:px-6">
             <div class="max-w-7xl mx-auto">
                 
-                <div class="text-center mb-16 reveal">
-                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight text-white mb-4">Controle absoluto.</h2>
-                    <p class="text-neutral-400 text-base md:text-lg font-light max-w-2xl mx-auto">
-                        Uma interface desenhada para clareza. Tenha visão completa de todos os seus deployments, métricas e repositórios em um só lugar.
+                <div class="text-center mb-12 sm:mb-16 reveal max-w-2xl mx-auto">
+                    <h2 class="text-2xl sm:text-5xl font-medium tracking-tight text-white mb-4">Controle absoluto.</h2>
+                    <p class="text-neutral-400 text-sm sm:text-lg font-light">
+                        Uma visão limpa e centralizada de todos os seus projetos e status de deployment.
                     </p>
                 </div>
 
-                <!-- Dashboard Window Mockup -->
-                <div class="reveal rounded-2xl border border-white/10 bg-[#080808] shadow-2xl overflow-hidden max-w-5xl mx-auto">
+                <!-- Window Mockup -->
+                <div class="reveal rounded-2xl border border-white/10 bg-[#080808] shadow-2xl overflow-hidden max-w-4xl mx-auto">
                     
                     <div class="h-10 border-b border-white/10 bg-[#0C0C0C] flex items-center px-4 justify-between">
                         <div class="flex items-center gap-2">
@@ -484,82 +477,62 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
                             <span class="w-2.5 h-2.5 rounded-full bg-neutral-700"></span>
                         </div>
-                        <div class="text-[11px] text-neutral-400 font-mono tracking-widest uppercase">Deploymaster Console</div>
-                        <div class="w-12"></div>
+                        <div class="text-[10px] sm:text-[11px] text-neutral-400 font-mono tracking-widest uppercase">Console Deploymaster</div>
+                        <div class="w-10"></div>
                     </div>
 
-                    <div class="p-6 md:p-8 space-y-6">
+                    <div class="p-4 sm:p-8 space-y-5">
                         
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/5 text-center sm:text-left">
                             <div>
-                                <h3 class="text-xl font-semibold text-white">Projetos Ativos</h3>
-                                <p class="text-xs text-neutral-400 font-mono mt-0.5">Gerenciamento direto via GitHub & Vercel REST APIs</p>
+                                <h3 class="text-lg sm:text-xl font-semibold text-white">Projetos Ativos</h3>
+                                <p class="text-xs text-neutral-400 font-mono mt-0.5">Gerenciamento via GitHub & Vercel API</p>
                             </div>
-                            <a href="../deploy/" class="ds-btn-primary text-xs !py-2.5 !px-5">
+                            <a href="../deploy/" class="ds-btn-primary text-xs !py-2.5 !px-5 self-center sm:self-auto">
                                 <span>+ Novo Projeto</span>
                             </a>
                         </div>
 
-                        <!-- Responsive Projects List -->
+                        <!-- Projects Stack -->
                         <div class="space-y-3">
                             
-                            <!-- Project Item 1 -->
-                            <div class="p-4 rounded-xl border border-white/5 bg-[#0D0D0D] flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-colors">
+                            <!-- Project 1 -->
+                            <div class="p-3.5 sm:p-4 rounded-xl border border-white/5 bg-[#0D0D0D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-white/20 transition-colors">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                                         <i data-lucide="box" class="w-4 h-4 text-emerald-400"></i>
                                     </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-white">landing-page-v3</div>
-                                        <div class="text-xs font-mono text-neutral-400">main • landing-page.vercel.app</div>
+                                    <div class="truncate text-left">
+                                        <div class="text-xs sm:text-sm font-semibold text-white truncate">landing-page-v3</div>
+                                        <div class="text-[11px] font-mono text-neutral-400 truncate">main • landing-page.vercel.app</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-6 justify-between sm:justify-end">
-                                    <div class="ds-status-badge">
+                                <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                                    <div class="ds-status-badge !py-0.5 !px-2.5 !text-[11px]">
                                         <span class="ds-pulse-dot"></span>
                                         <span>ONLINE</span>
                                     </div>
-                                    <span class="text-xs font-mono text-neutral-500">2 min atrás</span>
+                                    <span class="text-[11px] font-mono text-neutral-500">2 min atrás</span>
                                 </div>
                             </div>
 
-                            <!-- Project Item 2 -->
-                            <div class="p-4 rounded-xl border border-white/5 bg-[#0D0D0D] flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-colors">
+                            <!-- Project 2 -->
+                            <div class="p-3.5 sm:p-4 rounded-xl border border-white/5 bg-[#0D0D0D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-white/20 transition-colors">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                                         <i data-lucide="triangle" class="w-4 h-4 text-blue-400"></i>
                                     </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-white">api-core-service</div>
-                                        <div class="text-xs font-mono text-neutral-400">production • api.empresa.com</div>
+                                    <div class="truncate text-left">
+                                        <div class="text-xs sm:text-sm font-semibold text-white truncate">api-core-service</div>
+                                        <div class="text-[11px] font-mono text-neutral-400 truncate">production • api.empresa.com</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-6 justify-between sm:justify-end">
-                                    <div class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-xs font-medium inline-flex items-center gap-2">
+                                <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                                    <div class="px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px] font-medium inline-flex items-center gap-1.5">
                                         <i data-lucide="loader" class="w-3 h-3 animate-spin"></i>
                                         <span>BUILDING</span>
                                     </div>
-                                    <span class="text-xs font-mono text-neutral-500">Agora</span>
-                                </div>
-                            </div>
-
-                            <!-- Project Item 3 -->
-                            <div class="p-4 rounded-xl border border-white/5 bg-[#0D0D0D] flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                                        <i data-lucide="circle" class="w-4 h-4 text-purple-400"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-white">blog-estatico</div>
-                                        <div class="text-xs font-mono text-neutral-400">main • blog.vercel.app</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-6 justify-between sm:justify-end">
-                                    <div class="ds-status-badge">
-                                        <span class="ds-pulse-dot"></span>
-                                        <span>ONLINE</span>
-                                    </div>
-                                    <span class="text-xs font-mono text-neutral-500">Ontem</span>
+                                    <span class="text-[11px] font-mono text-neutral-500">Agora</span>
                                 </div>
                             </div>
 
@@ -572,156 +545,135 @@
             </div>
         </section>
 
-        <!-- VELOCIDADE -->
-        <section id="velocidade" class="py-24 md:py-32 px-6 border-y border-white/5 bg-[#080808] relative overflow-hidden">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-16">
+        <!-- VELOCIDADE (Centered) -->
+        <section id="velocidade" class="py-20 sm:py-32 px-4 sm:px-6 border-y border-white/5 bg-[#080808] relative overflow-hidden">
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center reveal">
                 
-                <div class="md:w-1/2 reveal">
-                    <h2 class="text-4xl md:text-6xl font-medium tracking-tight text-white mb-6">
-                        Velocidade <br><span class="text-neutral-400">na essência.</span>
-                    </h2>
-                    <p class="text-neutral-400 text-base md:text-lg font-light leading-relaxed mb-8 max-w-md">
-                        Integração nativa perfeita. O ecossistema do GitHub combinado com a Edge Network da Vercel reduz o tempo de build e latência ao mínimo físico possível.
-                    </p>
-
-                    <ul class="flex flex-col gap-4 text-sm font-medium text-white font-mono">
-                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
-                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white">
-                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
-                            </div>
-                            <span>Sincronização em tempo real com GitHub</span>
-                        </li>
-                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
-                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white">
-                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2L24 22H0L12 2Z"/></svg>
-                            </div>
-                            <span>Infraestrutura global Vercel Edge</span>
-                        </li>
-                        <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
-                                <i data-lucide="zap" class="w-4 h-4"></i>
-                            </div>
-                            <span>Builds automáticas instantâneas</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="md:w-1/2 flex justify-center md:justify-end reveal">
-                    <div class="flex flex-col items-end">
-                        <div class="text-7xl sm:text-8xl lg:text-9xl font-light font-mono tracking-tighter text-white flex items-baseline">
-                            <span id="speed-counter">0.0</span>
-                            <span class="text-3xl sm:text-5xl text-emerald-400 ml-2">s</span>
-                        </div>
-                        <div class="text-neutral-400 text-xs font-mono uppercase tracking-widest mt-2">
-                            Tempo médio de deploy estático
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- PARA QUEM É -->
-        <section id="casos-de-uso" class="py-24 md:py-32 px-6">
-            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl sm:text-6xl font-medium tracking-tight text-white mb-4">
+                    Velocidade <span class="text-neutral-400">na essência.</span>
+                </h2>
                 
-                <div class="mb-16 reveal">
-                    <h2 class="text-xs font-mono font-medium text-emerald-400 uppercase tracking-widest mb-4">Feito para</h2>
-                    <p class="text-3xl md:text-5xl font-light text-white">Qualquer projeto web.<br>Qualquer framework.</p>
+                <p class="text-neutral-400 text-sm sm:text-lg font-light leading-relaxed mb-10 max-w-xl">
+                    Integração nativa perfeita. O ecossistema do GitHub combinado com a Edge Network da Vercel reduz a latência ao mínimo físico possível.
+                </p>
+
+                <!-- Big Speed Metric -->
+                <div class="my-4 flex flex-col items-center">
+                    <div class="text-6xl sm:text-8xl lg:text-9xl font-light font-mono tracking-tighter text-white flex items-baseline justify-center">
+                        <span id="speed-counter">0.0</span>
+                        <span class="text-3xl sm:text-5xl text-emerald-400 ml-2">s</span>
+                    </div>
+                    <div class="text-neutral-400 text-[10px] sm:text-xs font-mono uppercase tracking-widest mt-3">
+                        Tempo médio de deploy estático
+                    </div>
                 </div>
 
-                <div class="flex flex-col reveal">
-                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span class="text-2xl md:text-4xl font-light text-neutral-500 group-hover:text-white transition-colors duration-300">Sites e Portfólios</span>
-                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-neutral-500 group-hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                <!-- Feature Pills -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full mt-12 text-xs font-mono">
+                    <div class="p-4 rounded-xl border border-white/10 bg-[#0A0A0A] flex items-center justify-center gap-3 text-neutral-300">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                        <span>GitHub Sync</span>
                     </div>
-                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span class="text-2xl md:text-4xl font-light text-neutral-500 group-hover:text-white transition-colors duration-300">Landing Pages Alta Conversão</span>
-                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-neutral-500 group-hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    <div class="p-4 rounded-xl border border-white/10 bg-[#0A0A0A] flex items-center justify-center gap-3 text-neutral-300">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path d="M12 2L24 22H0L12 2Z"/></svg>
+                        <span>Vercel Edge</span>
                     </div>
-                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span class="text-2xl md:text-4xl font-light text-neutral-500 group-hover:text-white transition-colors duration-300">Aplicações Web Complexas</span>
-                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-neutral-500 group-hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
-                    </div>
-                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span class="text-2xl md:text-4xl font-light text-neutral-500 group-hover:text-white transition-colors duration-300">Projetos Gerados por IA</span>
-                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-neutral-500 group-hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    <div class="p-4 rounded-xl border border-white/10 bg-[#0A0A0A] flex items-center justify-center gap-3 text-neutral-300">
+                        <i data-lucide="zap" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                        <span>Auto Builds</span>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- CTA FINAL -->
-        <section id="cta" class="py-32 px-6 relative overflow-hidden">
-            <div class="max-w-4xl mx-auto text-center relative z-10 flex flex-col items-center reveal">
-                <div class="w-16 h-16 mb-8 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
-                    <i data-lucide="rocket" class="w-8 h-8"></i>
+        <!-- CASOS DE USO (Centered Layout) -->
+        <section id="casos-de-uso" class="py-20 sm:py-32 px-4 sm:px-6">
+            <div class="max-w-4xl mx-auto">
+                
+                <div class="text-center mb-12 sm:mb-16 reveal">
+                    <h2 class="text-xs font-mono font-medium text-emerald-400 uppercase tracking-widest mb-3">Compatibilidade</h2>
+                    <p class="text-2xl sm:text-5xl font-light text-white">Feito para qualquer projeto web.</p>
                 </div>
-                <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-6 text-white">
+
+                <div class="flex flex-col reveal divide-y divide-white/5">
+                    <div class="py-6 sm:py-8 flex items-center justify-between group cursor-default">
+                        <span class="text-lg sm:text-3xl font-light text-neutral-400 group-hover:text-white transition-colors">Sites e Portfólios</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                    <div class="py-6 sm:py-8 flex items-center justify-between group cursor-default">
+                        <span class="text-lg sm:text-3xl font-light text-neutral-400 group-hover:text-white transition-colors">Landing Pages de Alta Conversão</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                    <div class="py-6 sm:py-8 flex items-center justify-between group cursor-default">
+                        <span class="text-lg sm:text-3xl font-light text-neutral-400 group-hover:text-white transition-colors">Aplicações Web & SPA</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                    <div class="py-6 sm:py-8 flex items-center justify-between group cursor-default">
+                        <span class="text-lg sm:text-3xl font-light text-neutral-400 group-hover:text-white transition-colors">Projetos Gerados por IA</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CTA FINAL (Centered Spotlight) -->
+        <section id="cta" class="py-24 sm:py-36 px-4 sm:px-6 relative overflow-hidden">
+            <div class="max-w-3xl mx-auto text-center relative z-10 flex flex-col items-center reveal">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 mb-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="rocket" class="w-7 h-7 sm:w-8 sm:h-8"></i>
+                </div>
+                <h2 class="text-3xl sm:text-6xl font-medium tracking-tight mb-4 sm:mb-6 text-white leading-tight">
                     Seu próximo projeto pode estar online <span class="font-serif italic font-normal text-emerald-400">agora</span>.
                 </h2>
-                <p class="text-neutral-400 text-lg mb-10 max-w-xl mx-auto font-light">
-                    Abandone a complexidade da infraestrutura tradicional. Use o Deploymaster diretamente do seu navegador.
+                <p class="text-neutral-400 text-sm sm:text-lg mb-8 max-w-lg mx-auto font-light">
+                    Abandone a complexidade de servidores tradicionais. Use o Deploymaster diretamente do seu navegador.
                 </p>
-                <a href="../deploy/" class="ds-btn-primary text-base !py-4 !px-8">
+                <a href="../deploy/" class="ds-btn-primary text-sm sm:text-base !py-3.5 !px-8">
                     <span>Acessar Deploymaster</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
-                <p class="mt-6 text-xs font-mono text-neutral-500">100% Gratuito • Sem necessidade de cadastro</p>
+                <p class="mt-4 text-[11px] font-mono text-neutral-500">100% Gratuito • Sem necessidade de cadastro</p>
             </div>
         </section>
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="border-t border-white/5 pt-16 pb-12 px-6 bg-[#030303]">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
-                
-                <div class="col-span-2 lg:col-span-2 flex flex-col gap-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
-                        </div>
-                        <span class="font-semibold tracking-tight text-white">Deploymaster</span>
-                    </div>
-                    <p class="text-sm text-neutral-400 font-light max-w-xs leading-relaxed">
-                        A plataforma definitiva para publicar seus projetos web com velocidade e controle. 100% gratuita.
-                    </p>
+    <!-- FOOTER (Centered Layout) -->
+    <footer class="border-t border-white/5 pt-12 sm:pt-16 pb-12 px-4 sm:px-6 bg-[#030303]">
+        <div class="max-w-7xl mx-auto flex flex-col items-center text-center gap-8">
+            
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
                 </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-white font-medium text-sm">Produto</h4>
-                    <a href="#como-funciona" class="text-neutral-400 text-sm hover:text-white transition-colors">Como funciona</a>
-                    <a href="#interface" class="text-neutral-400 text-sm hover:text-white transition-colors">Interface</a>
-                    <a href="../deploy/" class="text-neutral-400 text-sm hover:text-white transition-colors">Web IDE</a>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-white font-medium text-sm">Recursos</h4>
-                    <a href="https://github.com/BETOgm-edt/DeployMaster" target="_blank" class="text-neutral-400 text-sm hover:text-white transition-colors">Repositório GitHub</a>
-                    <a href="#velocidade" class="text-neutral-400 text-sm hover:text-white transition-colors">Infraestrutura Edge</a>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-white font-medium text-sm">Legal</h4>
-                    <a href="#" class="text-neutral-400 text-sm hover:text-white transition-colors">Termos</a>
-                    <a href="#" class="text-neutral-400 text-sm hover:text-white transition-colors">Privacidade</a>
-                </div>
-
+                <span class="font-semibold tracking-tight text-white text-base">Deploymaster</span>
             </div>
 
-            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="text-xs text-neutral-500 font-mono">
-                    &copy; 2026 Deploymaster. Um projeto open-source sem fins lucrativos.
+            <p class="text-xs sm:text-sm text-neutral-400 font-light max-w-md leading-relaxed">
+                A plataforma definitiva para publicar seus projetos web com velocidade e controle. 100% gratuita e open-source.
+            </p>
+
+            <nav class="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-neutral-400">
+                <a href="#como-funciona" class="hover:text-white transition-colors">Como funciona</a>
+                <a href="#interface" class="hover:text-white transition-colors">Interface</a>
+                <a href="#velocidade" class="hover:text-white transition-colors">Velocidade</a>
+                <a href="../deploy/" class="hover:text-white transition-colors">Web IDE</a>
+                <a href="https://github.com/BETOgm-edt/DeployMaster" target="_blank" class="hover:text-white transition-colors">GitHub</a>
+            </nav>
+
+            <div class="border-t border-white/5 w-full pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-[11px] text-neutral-500 font-mono">
+                    &copy; 2026 Deploymaster. Todos os direitos reservados.
                 </p>
                 <div class="flex items-center gap-4 text-neutral-400">
-                    <a href="https://github.com/BETOgm-edt/DeployMaster" target="_blank" class="hover:text-white transition-colors">
+                    <a href="https://github.com/BETOgm-edt/DeployMaster" target="_blank" class="hover:text-white transition-colors" aria-label="GitHub Repository">
                         <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
                     </a>
                 </div>
             </div>
+
         </div>
     </footer>
 
@@ -740,6 +692,23 @@
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
 
         // Animated Terminal Loop
         const terminalEl = document.getElementById('terminal-content');
