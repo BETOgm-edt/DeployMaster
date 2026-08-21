@@ -697,18 +697,20 @@
 
         async function onExistingRepoSelected() {
             const select = document.getElementById('existing-repo-select');
+            if (!select) return;
             const selectedOption = select.options[select.selectedIndex];
             if (!selectedOption || !selectedOption.value) return;
 
             const fullName = selectedOption.value; // "owner/repo"
-            const repoName = selectedOption.dataset.name;
+            const [owner, name] = fullName.split('/');
+            const repoName = selectedOption.dataset.name || name;
             const isPrivate = selectedOption.dataset.private === "true";
 
             document.getElementById('project-name').value = repoName;
-            document.querySelector(`input[name="visibility"][value="${isPrivate ? 'private' : 'public'}"]`).checked = true;
+            const visRadio = document.querySelector(`input[name="visibility"][value="${isPrivate ? 'private' : 'public'}"]`);
+            if (visRadio) visRadio.checked = true;
 
-            const [owner, name] = fullName.split('/');
-            setLoading(true, "Carregando arquivos...");
+            setLoading(true, "Carregando arquivos do repositório...");
             try {
                 const ghToken = localStorage.getItem('dm_gh_token');
                 const repoRes = await fetch(`https://api.github.com/repos/${owner}/${name}`, { headers: { Authorization: `token ${ghToken}` } });
@@ -721,11 +723,18 @@
                         allRepoFiles = treeData.tree.filter(i => i.type === 'blob').sort((a,b) => a.path.localeCompare(b.path));
                         renderFileOptions(allRepoFiles);
                         let targetFile = allRepoFiles.some(f => f.path === 'index.html') ? 'index.html' : (allRepoFiles[0]?.path || '');
-                        if (targetFile) await selectFile(targetFile, name);
-                        log('System', `Repositório ${fullName} carregado no editor.`, 'success');
+                        if (targetFile) {
+                            await selectFile(targetFile);
+                        } else {
+                            document.getElementById('active-file-name').innerText = '(Sem arquivo)';
+                            updateBreadcrumbs('');
+                            if (monacoEditor) monacoEditor.setValue('// Repositório sem arquivos');
+                        }
+                        log('System', `Repositório ${fullName} carregado no editor com sucesso.`, 'success');
                     }
                 }
             } catch (e) {
+                console.error(e);
                 log('ERROR', 'Falha ao ler arquivos: ' + e.message, 'error');
             } finally {
                 setLoading(false);
@@ -746,7 +755,7 @@
                 const select = document.getElementById('existing-repo-select');
                 if (!select || !select.value) return alert("Selecione um repositório existente na lista");
                 fullGitRepo = select.value;
-                projectName = select.options[select.selectedIndex].dataset.name;
+                projectName = (select.options[select.selectedIndex]?.dataset?.name || select.value.split('/')[1]).toLowerCase();
             }
 
             if (!projectName) return alert("Informe o nome do projeto");
@@ -1089,8 +1098,32 @@
 
         async function selectRepoFromPicker(fullName, repoName, isPrivate) {
             closeRepoPickerModal();
-            openEditorModal(false);
+
+            // Abre o modal do editor diretamente sem chamar resetForm()
+            const modal = document.getElementById('editor-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            if (monacoEditor) {
+                setTimeout(() => monacoEditor.layout(), 150);
+            }
+
+            // Configura formulário para o repositório selecionado
+            document.getElementById('deploy-form').reset();
+            document.getElementById('deploy-form').dataset.isUpdate = "false";
+            document.getElementById('project-name').value = repoName;
+            document.getElementById('project-name').disabled = false;
+            document.getElementById('form-title').innerHTML = `<i data-lucide="git-branch" class="w-4 h-4 text-amber-400"></i> <span>Importado: ${escapeHTML(repoName)}</span>`;
+            document.getElementById('deploy-btn-text').innerText = "Deploy & Conectar";
+
+            const repoToggle = document.getElementById('repo-source-toggle');
+            if (repoToggle) repoToggle.classList.remove('hidden');
+
+            // Define o modo explicitamente para Repo Existente
             setRepoSourceMode('existing');
+
+            // Garante que o select possui as opções
+            renderUserGitHubRepoOptions();
 
             const select = document.getElementById('existing-repo-select');
             if (select) {
@@ -1106,6 +1139,7 @@
                 select.value = fullName;
             }
 
+            // Carrega os arquivos diretamente do GitHub
             await onExistingRepoSelected();
         }
 
@@ -1573,12 +1607,24 @@
         async function loadFileContent(path, projOverride) {
             if(!path) return;
             const ghToken = localStorage.getItem('dm_gh_token');
-            const name = projOverride || document.getElementById('project-name').value;
-            const user = cachedGhUser ? cachedGhUser.login : (await fetchGitHubUser(ghToken)).login;
+            let owner = '', name = '';
+            
+            if (repoSourceMode === 'existing') {
+                const select = document.getElementById('existing-repo-select');
+                const val = select ? select.value : '';
+                if (val && val.includes('/')) {
+                    [owner, name] = val.split('/');
+                }
+            }
+            if (!name) name = projOverride || document.getElementById('project-name').value;
+            if (!owner) {
+                const user = cachedGhUser ? cachedGhUser.login : (await fetchGitHubUser(ghToken)).login;
+                owner = user;
+            }
 
             setLoading(true, `Lendo ${path}...`);
             try {
-                const res = await fetch(`https://api.github.com/repos/${user}/${name}/contents/${path}`, { headers: { Authorization: `token ${ghToken}` } });
+                const res = await fetch(`https://api.github.com/repos/${owner}/${name}/contents/${path}`, { headers: { Authorization: `token ${ghToken}` } });
                 if(!res.ok) throw new Error('Erro ao ler arquivo');
                 const data = await res.json();
                 const content = new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)));
