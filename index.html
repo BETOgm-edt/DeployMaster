@@ -4,14 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deploymaster | Seu projeto online. Sem complicação.</title>
+    <title>DeployMaster | Seu projeto online. Sem complicação.</title>
+    <meta name="description" content="A ponte serverless definitiva entre o seu GitHub e a infraestrutura Edge da Vercel. Crie, edite e publique projetos web direto do navegador.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,55 +30,81 @@
                         serif: ['Instrument Serif', 'Georgia', 'serif'],
                     },
                     colors: {
-                        background: 'var(--color-background)',
-                        surface: 'var(--color-surface)',
-                        surfaceHover: 'var(--color-surfaceHover)',
-                        border: 'var(--color-border)',
-                        borderHover: 'var(--color-borderHover)',
-                        primary: 'var(--color-primary)',
-                        secondary: 'var(--color-secondary)',
-                        tertiary: 'var(--color-tertiary)',
-                        accent: 'var(--color-accent)',
-                        accentMuted: 'var(--color-accentMuted)',
-                    },
-                    backgroundImage: {
-                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        background: '#050505',
+                        surface: '#0A0A0A',
+                        surfaceHover: '#141414',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        borderHover: 'rgba(255, 255, 255, 0.2)',
+                        accent: '#34D399',
+                        accentMuted: 'rgba(52, 211, 153, 0.15)',
                     }
                 }
             }
         }
     </script>
 
-    <!-- Custom CSS for Animations and Specific Stylings -->
+    <!-- Custom Stylings and Effects -->
     <style>
         :root {
-            --color-background: #050505;
-            --color-surface: #0A0A0A;
-            --color-surfaceHover: #141414;
-            --color-border: rgba(255, 255, 255, 0.06);
-            --color-borderHover: rgba(255, 255, 255, 0.15);
-            --color-primary: #FFFFFF;
-            --color-secondary: #A3A3A3;
-            --color-tertiary: #525252;
             --color-accent: #34D399;
-            /* Emerald for success/tech vibe */
-            --color-accentMuted: rgba(52, 211, 153, 0.2);
         }
 
         body {
-            background-color: var(--color-background);
-            color: var(--color-primary);
+            background-color: #050505;
+            color: #FFFFFF;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Scroll Reveal Utility Classes */
+        /* Ambient Glow Spotlights */
+        .glow-top {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, rgba(52, 211, 153, 0.02) 50%, transparent 75%);
+            filter: blur(80px);
+            border-radius: 50%;
+            pointer-events: none;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .glow-secondary {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            filter: blur(90px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Grid Background Pattern */
+        .bg-grid-pattern {
+            background-size: 36px 36px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+        }
+
+        /* Scroll Reveal Animation */
         .reveal {
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(24px);
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .reveal.active {
@@ -87,986 +112,556 @@
             transform: translateY(0);
         }
 
-        .reveal-delay-1 {
-            transition-delay: 0.1s;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
 
-        .reveal-delay-2 {
-            transition-delay: 0.2s;
-        }
-
-        .reveal-delay-3 {
-            transition-delay: 0.3s;
-        }
-
-        /* Glowing background spotlights (Ambient Depth) */
-        .glow-top-left {
-            position: absolute;
-            width: 550px;
-            height: 550px;
-            background: radial-gradient(circle, rgba(52, 211, 153, 0.16) 0%, rgba(52, 211, 153, 0.04) 45%, transparent 70%);
-            filter: blur(70px);
-            border-radius: 50%;
-            pointer-events: none;
-            top: 5%;
-            left: 5%;
-            z-index: 0;
-        }
-
-        .glow-bottom-right {
-            position: absolute;
-            width: 650px;
-            height: 650px;
-            background: radial-gradient(circle, rgba(52, 211, 153, 0.09) 0%, rgba(255, 255, 255, 0.03) 40%, transparent 75%);
-            filter: blur(90px);
-            border-radius: 50%;
-            pointer-events: none;
-            bottom: 0%;
-            right: 10%;
-            z-index: 0;
-        }
-
-        /* Dashboard & Code Blocks */
-        .glass-panel {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid theme('colors.border');
-        }
-
-        /* Subtle floating animation */
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
-        }
-
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .animate-float-delayed {
-            animation: float 6s ease-in-out 3s infinite;
-        }
-
-        /* Terminal Typing Cursor */
+        /* Terminal Cursor Blink */
         .cursor-blink {
             display: inline-block;
-            width: 8px;
-            height: 16px;
-            background-color: theme('colors.secondary');
+            width: 7px;
+            height: 15px;
+            background-color: #34D399;
             animation: blink 1s step-end infinite;
             vertical-align: middle;
             margin-left: 2px;
         }
 
         @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-        }
-
-        /* Progress Bar Animation */
-        @keyframes fillProgress {
-            0% {
-                width: 0%;
-                opacity: 1;
-            }
-
-            80% {
-                width: 100%;
-                opacity: 1;
-            }
-
-            100% {
-                width: 100%;
-                opacity: 0;
-            }
-        }
-
-        .animate-progress {
-            animation: fillProgress 4s ease-in-out infinite;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--color-background);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--color-tertiary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--color-secondary);
-        }
-
-        /* Subtle line grid pattern */
-        .bg-grid {
-            background-size: 40px 40px;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
     </style>
 </head>
 
-<body class="relative bg-background text-primary">
-    <!--
-    THESIS: O Deploymaster landing page une a autoridade visual de um terminal/IDE moderno (dark obsidian, monospaced details, emerald status accents) com uma narrativa persuasiva de zero fricção, eliminando o cabeçalho genérico em favor de um fluxo visual "Código -> Deploy -> Online" interativo.
-    OWN-WORLD: Paleta de alta precisão em tons de obsidiana (#050505), superfícies de vidro fosco (rgba(255,255,255,0.03)), bordas sutis (rgba(255,255,255,0.06)), acentos em verde esmeralda (#34D399) para estados ativos/online, tipografia limpa combinando Inter e JetBrains Mono.
-    STORY: O visitante compreende instantaneamente a proposta (deploy Vercel + GitHub em 1 clique sem backend/cadastro), vê o terminal animado em tempo real simulando a sincronização, experimenta a prévia da interface do console e é impulsionado à ação com CTAs diretos.
-    FIRST VIEWPORT: Hero impactante com tag de versão ao vivo, título em tipografia gigante e bem hierarquizada, CTA com glow sutil e visualizador triplo conectado (Editor de Código -> Terminal de Deploy com animação de digitação -> Card de Status Online).
-    FORM: Persuade / Monochrome Tech Product Marketing (Impeccable Seed 4950178e).
-    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
-    -->
+<body class="relative bg-[#050505] text-white selection:bg-emerald-500/30 selection:text-emerald-300">
 
-    <div class="glow-bg"></div>
+    <!-- Ambient Glow Effect -->
+    <div class="glow-top"></div>
 
-    <nav class="fixed top-0 w-full z-50 glass-panel border-b-0 border-white/5 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="flex items-center gap-2 cursor-pointer group">
-                <div
-                    class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        data-lucide="triangle" aria-hidden="true"
-                        class="lucide lucide-triangle w-4 h-4 fill-current rotate-180">
-                        <path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                    </svg>
+    <!-- Navigation Header -->
+    <header class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
                 </div>
-                <span class="font-semibold tracking-tight text-lg">Deploymaster</span>
-            </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="font-bold tracking-tight text-base sm:text-lg">DeployMaster</span>
+                    <span class="text-[10px] font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">v2.0</span>
+                </div>
+            </a>
 
-            <!-- Desktop Links -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-secondary">
-                <a href="#como-funciona" class="hover:text-primary transition-colors">Como funciona</a>
-                <a href="#interface" class="hover:text-primary transition-colors">Interface</a>
-                <a href="#casos-de-uso" class="hover:text-primary transition-colors">Casos de uso</a>
-            </div>
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                <a href="#recursos" class="hover:text-white transition-colors">Recursos</a>
+                <a href="#como-funciona" class="hover:text-white transition-colors">Como Funciona</a>
+                <a href="#interface" class="hover:text-white transition-colors">Interface</a>
+                <a href="#infraestrutura" class="hover:text-white transition-colors">Infraestrutura</a>
+            </nav>
 
-            <!-- CTA -->
-            <div class="flex items-center gap-4">
-                <a href="./deploy/"
-                    class="text-sm font-medium bg-white text-black px-5 py-2 rounded-md hover:bg-neutral-200 transition-colors active:scale-95">
-                    Acessar ferramenta
+            <!-- Action Button -->
+            <div class="flex items-center gap-3">
+                <a href="./deploy/" class="inline-flex items-center gap-2 text-xs sm:text-sm font-medium bg-white text-black px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg hover:bg-neutral-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                    <span>Acessar IDE</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <main>
+    <main class="relative z-10">
+        
         <!-- HERO SECTION -->
-        <section class="relative pt-40 pb-20 md:pt-52 md:pb-32 overflow-hidden px-6">
-            <div class="absolute inset-0 bg-grid z-[-1] pointer-events-none"></div>
+        <section class="relative pt-32 sm:pt-40 pb-20 sm:pb-28 px-4 sm:px-6 overflow-hidden">
+            <div class="absolute inset-0 bg-grid-pattern z-[-1] pointer-events-none"></div>
 
-            <!-- Background Ambient Glows -->
-            <div class="glow-top-left"></div>
-            <div class="glow-bottom-right"></div>
+            <div class="max-w-6xl mx-auto flex flex-col items-center text-center">
+                
+                <!-- Status Live Badge -->
+                <div class="reveal inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-mono font-medium mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="tracking-wide uppercase">Deploy Engine v2.0 • 100% Serverless</span>
+                </div>
 
-            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+                <!-- Headline -->
+                <h1 class="reveal text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-4xl text-white">
+                    Seu código online.<br>
+                    <span class="font-serif italic font-normal text-emerald-400">Zero</span> complicação.
+                </h1>
 
-                <!-- Text Content -->
-                <div class="flex flex-col gap-6 reveal z-10">
-                    <div class="text-xs font-semibold tracking-[0.2em] uppercase text-accent/90">
-                        Deploy Engine v2.0 Live
+                <!-- Subtitle -->
+                <p class="reveal text-base sm:text-xl text-neutral-400 max-w-2xl mt-6 font-light leading-relaxed">
+                    Crie, edite e publique aplicações web direto do navegador. Conecte seu repositório do GitHub e distribua na infraestrutura Edge da Vercel em segundos.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="reveal flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 w-full sm:w-auto">
+                    <a href="./deploy/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white text-black px-7 py-3.5 rounded-xl font-medium text-sm hover:bg-neutral-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        <i data-lucide="rocket" class="w-4 h-4"></i>
+                        <span>Começar Agora Gratuitamente</span>
+                    </a>
+                    <a href="#como-funciona" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 px-6 py-3.5 rounded-xl font-medium text-sm text-neutral-300 hover:text-white transition-all active:scale-95">
+                        <i data-lucide="play-circle" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Ver Como Funciona</span>
+                    </a>
+                </div>
+
+                <!-- Feature Badges -->
+                <div class="reveal flex items-center justify-center gap-6 sm:gap-10 text-xs font-mono text-neutral-400 mt-10 pt-6 border-t border-white/5 w-full max-w-lg">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Sem Cadastro</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span>GitHub Sync</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Vercel Edge</span>
+                    </div>
+                </div>
+
+                <!-- UNIFIED COMMAND CENTER HERO WINDOW -->
+                <div class="reveal w-full max-w-5xl mt-12 rounded-2xl border border-white/10 bg-[#080808] shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden text-left">
+                    
+                    <!-- IDE Window Bar -->
+                    <div class="h-10 bg-[#0C0C0C] border-b border-white/10 px-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-1 rounded bg-[#141414] border border-white/5 text-[11px] font-mono text-neutral-400">
+                            <i data-lucide="file-code" class="w-3.5 h-3.5 text-blue-400"></i>
+                            <span>DeployMaster IDE — index.html</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-mono text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="hidden sm:inline">main branch</span>
+                        </div>
                     </div>
 
-                    <h1 class="text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.05] text-primary">
-                        Seu projeto<br>
-                        <span class="font-serif italic font-normal text-accent pr-2">online</span> sem complicação
-                    </h1>
-
-                    <div class="flex items-center gap-3 pt-1">
-                        <span class="w-10 h-[1px] bg-tertiary"></span>
-                        <span class="text-sm md:text-base text-secondary font-light">A ponte perfeita entre o seu código e o mundo.</span>
-                    </div>
-
-                    <p class="text-base md:text-lg text-secondary/80 max-w-lg font-light leading-relaxed">
-                        Conecte seu repositório do GitHub e aproveite o poder da infraestrutura Vercel com zero configuração.
-                    </p>
-
-                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <a href="./deploy/"
-                            class="flex items-center justify-center gap-2 bg-white text-black px-6 py-3.5 rounded-md font-medium hover:bg-neutral-200 transition-colors active:scale-95">
-                            Acessar ferramenta
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                        <a href="#como-funciona"
-                            class="flex items-center justify-center gap-2 px-6 py-3.5 rounded-md font-medium border border-border text-primary hover:bg-surfaceHover transition-colors active:scale-95">
-                            Ver como funciona
-                        </a>
-                    </div>
-
-                    <div class="flex flex-col gap-3 pt-8 mt-4 border-t border-white/5 reveal reveal-delay-1">
-                        <span class="text-[10px] font-medium text-tertiary uppercase tracking-widest">Infraestrutura
-                            nativa</span>
-                        <div class="flex items-center gap-6 text-secondary">
-                            <div class="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
-                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
-                                    class="w-5 h-5">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium">GitHub</span>
+                    <!-- Split Layout: Code + Live Terminal Output -->
+                    <div class="grid lg:grid-cols-12 min-h-[320px] sm:min-h-[380px] bg-[#050505]">
+                        
+                        <!-- Left Code Editor View -->
+                        <div class="lg:col-span-7 p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-white/10 font-mono text-xs sm:text-sm leading-relaxed text-neutral-300 overflow-x-auto">
+                            <div class="flex gap-4">
+                                <div class="select-none text-neutral-600 text-right pr-2 border-r border-white/5 space-y-1">
+                                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <p><span class="text-purple-400">&lt;!DOCTYPE html&gt;</span></p>
+                                    <p><span class="text-blue-400">&lt;html</span> <span class="text-emerald-400">lang</span>=<span class="text-amber-300">"pt-BR"</span><span class="text-blue-400">&gt;</span></p>
+                                    <p class="pl-4"><span class="text-blue-400">&lt;head&gt;</span><span class="text-neutral-400">&lt;title&gt;Meu App Online&lt;/title&gt;</span><span class="text-blue-400">&lt;/head&gt;</span></p>
+                                    <p class="pl-4"><span class="text-blue-400">&lt;body&gt;</span></p>
+                                    <p class="pl-8"><span class="text-blue-400">&lt;h1&gt;</span>Publicado via DeployMaster<span class="text-blue-400">&lt;/h1&gt;</span></p>
+                                    <p class="pl-8"><span class="text-blue-400">&lt;script&gt;</span><span class="text-purple-400">console</span>.log(<span class="text-amber-300">"Deploy realizado com sucesso!"</span>);<span class="text-blue-400">&lt;/script&gt;</span></p>
+                                    <p class="pl-4"><span class="text-blue-400">&lt;/body&gt;</span></p>
+                                    <p><span class="text-blue-400">&lt;/html&gt;</span></p>
+                                    <p class="text-emerald-400 font-semibold pt-2">// Prontinho para o deploy na Vercel Edge 🚀</p>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="w-4 h-4">
-                                    <path d="M12 2L24 22H0L12 2Z" />
-                                </svg>
-                                <span class="text-sm font-medium">Vercel</span>
+                        </div>
+
+                        <!-- Right Live Terminal & Deployment Status Panel -->
+                        <div class="lg:col-span-5 p-4 sm:p-6 bg-[#080808] flex flex-col justify-between font-mono text-xs">
+                            
+                            <div>
+                                <!-- Console Header -->
+                                <div class="flex items-center justify-between pb-3 border-b border-white/5 mb-4 text-neutral-400">
+                                    <span class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-300">
+                                        <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i> Terminal Output
+                                    </span>
+                                    <span class="text-[10px] text-neutral-400 bg-white/5 px-2 py-0.5 rounded">REALTIME</span>
+                                </div>
+
+                                <!-- Typing Output Container -->
+                                <div id="terminal-content" class="space-y-2 h-[160px] overflow-hidden">
+                                    <!-- Dynamic Animated Logs Populated by JS -->
+                                </div>
                             </div>
+
+                            <!-- Live Project Card Preview -->
+                            <div class="mt-4 pt-4 border-t border-white/10 bg-[#0D0D0D] p-3.5 rounded-xl border border-white/5 flex items-center justify-between">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-medium text-white truncate">meu-projeto.vercel.app</div>
+                                        <div class="text-[10px] text-neutral-400 truncate">Vercel Production Edge</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>ONLINE</span>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
 
-                <!-- Visual Composition (Code -> Deploy -> Online) -->
-                <div
-                    class="relative w-full aspect-square md:aspect-[4/3] flex items-center justify-center reveal reveal-delay-2 lg:ml-auto max-w-[500px]">
+            </div>
+        </section>
 
-                    <!-- Decorative background blur -->
-                    <div class="absolute w-full h-full bg-accentMuted blur-[100px] rounded-full opacity-30"></div>
-
-                    <!-- Flow Container -->
-                    <div class="relative w-full h-full flex flex-col items-center justify-between py-8">
-
-                        <!-- Connection Line -->
-                        <div
-                            class="absolute top-[20%] bottom-[20%] w-[1px] bg-gradient-to-b from-transparent via-border to-transparent left-1/2 -translate-x-1/2">
-                            <!-- Animated data dot moving down -->
-                            <div
-                                class="w-1 h-8 bg-accent shadow-[0_0_10px_rgba(52,211,153,0.5)] rounded-full absolute -left-[1px] animate-[slideDown_3s_ease-in-out_infinite]">
-                            </div>
-                        </div>
-
-                        <!-- 1. Code / Project -->
-                        <div
-                            class="glass-panel w-full sm:w-[85%] p-4 rounded-xl flex flex-col gap-3 relative z-10 animate-float shadow-2xl">
-                            <div class="flex items-center gap-2 text-xs text-tertiary border-b border-white/5 pb-2">
-                                <i data-lucide="file-code-2" class="w-4 h-4"></i>
-                                <span>app.tsx</span>
-                                <span class="ml-auto">Main</span>
-                            </div>
-                            <div class="font-mono text-xs text-secondary opacity-70">
-                                <p><span class="text-blue-400">export default</span> <span
-                                        class="text-purple-400">function</span> App() {</p>
-                                <p class="pl-4">return (</p>
-                                <p class="pl-8 text-white">&lt;Deploymaster /&gt;</p>
-                                <p class="pl-4">);</p>
-                                <p>}</p>
-                            </div>
-                        </div>
-
-                        <!-- 2. Deploy Terminal -->
-                        <div
-                            class="bg-[#050505] border border-border w-full sm:w-[95%] p-4 rounded-xl flex flex-col gap-3 relative z-10 shadow-2xl">
-                            <div class="flex items-center gap-2 text-xs text-tertiary border-b border-white/5 pb-2">
-                                <i data-lucide="terminal" class="w-4 h-4"></i>
-                                <span>Deploy Process</span>
-                            </div>
-                            <div
-                                class="font-mono text-xs text-secondary h-[60px] overflow-hidden flex flex-col justify-end">
-                                <div id="terminal-content">
-                                    <!-- Populated by JS -->
-                                </div>
-                            </div>
-                            <!-- Progress Bar -->
-                            <div class="h-1 w-full bg-surface rounded-full overflow-hidden mt-1">
-                                <div class="h-full bg-primary animate-progress rounded-full"></div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Online Status -->
-                        <div
-                            class="glass-panel w-full sm:w-[85%] p-4 rounded-xl flex items-center justify-between relative z-10 animate-float-delayed shadow-2xl">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center">
-                                    <i data-lucide="globe" class="w-5 h-5 text-primary"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-medium">project.app</span>
-                                    <span class="text-xs text-secondary">Produção</span>
-                                </div>
-                            </div>
-                            <div
-                                class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accentMuted border border-accent/20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
-                                <span class="text-[10px] font-medium text-accent uppercase tracking-wider">Online</span>
-                            </div>
-                        </div>
-
+        <!-- METRICS TICKER -->
+        <section class="py-12 border-y border-white/5 bg-white/[0.01]">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    
+                    <div class="reveal p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/50">
+                        <div class="text-3xl sm:text-4xl font-bold font-mono text-emerald-400">0.8s</div>
+                        <div class="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-medium">Tempo Médio de Build</div>
                     </div>
+
+                    <div class="reveal p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/50">
+                        <div class="text-3xl sm:text-4xl font-bold font-mono text-white">100%</div>
+                        <div class="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-medium">Client-Side & Seguro</div>
+                    </div>
+
+                    <div class="reveal p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/50">
+                        <div class="text-3xl sm:text-4xl font-bold font-mono text-white">0 Config</div>
+                        <div class="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-medium">GitHub & Vercel Sync</div>
+                    </div>
+
+                    <div class="reveal p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/50">
+                        <div class="text-3xl sm:text-4xl font-bold font-mono text-emerald-400">R$ 0</div>
+                        <div class="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-medium">Gratuito & Ilimitado</div>
+                    </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- HOW IT WORKS -->
-        <section id="como-funciona" class="py-24 md:py-32 px-6 relative">
-            <div class="max-w-7xl mx-auto">
-                <div class="mb-20 max-w-2xl reveal">
-                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-6">Três etapas.<br>Zero
-                        infraestrutura.</h2>
-                    <p class="text-secondary text-lg font-light">Desenhamos um fluxo focado no que importa: seu código
-                        rodando no mundo real o mais rápido possível.</p>
+        <!-- RECURSOS (BENTO GRID) -->
+        <section id="recursos" class="py-24 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                
+                <div class="reveal text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-xs font-mono font-medium text-emerald-400 uppercase tracking-widest mb-3">Recursos Integrados</h2>
+                    <p class="text-3xl sm:text-5xl font-bold tracking-tight text-white">Engenharia de precisão para seus deploys.</p>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-12 lg:gap-8 relative">
-                    <!-- Background connecting line for desktop -->
-                    <div class="hidden md:block absolute top-[24px] left-[10%] right-[10%] h-[1px] bg-border z-0"></div>
-
-                    <!-- Step 1 -->
-                    <div class="flex flex-col gap-6 relative z-10 reveal">
-                        <div
-                            class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-secondary mb-4">
-                            01
+                <div class="grid md:grid-cols-12 gap-6">
+                    
+                    <!-- Bento 1: Monaco IDE -->
+                    <div class="reveal md:col-span-7 p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] flex flex-col justify-between relative overflow-hidden group hover:border-white/20 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-6">
+                                <i data-lucide="code-2" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">Monaco IDE no Navegador</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Mesma engine do VS Code com syntax highlighting, atalhos clássicos, árvore de arquivos estilo Windows e autocompletar diretamente na web.
+                            </p>
                         </div>
-                        <h3 class="text-xl font-medium flex items-center gap-2">
-                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
-                                class="w-5 h-5">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                </path>
-                            </svg>
-                            Conecte seu GitHub
-                        </h3>
-                        <p class="text-secondary font-light text-sm leading-relaxed">Vincule sua conta, selecione o
-                            repositório do seu projeto. O Deploymaster identifica o framework (React, Vue, Node, etc.) e
-                            configura o pipeline automaticamente.</p>
+                        <div class="mt-8 p-4 rounded-xl bg-[#050505] border border-white/5 font-mono text-xs text-neutral-400">
+                            <span class="text-purple-400">import</span> { Monaco } <span class="text-purple-400">from</span> <span class="text-amber-300">'vs/loader'</span>;
+                        </div>
+                    </div>
 
-                        <!-- Visual -->
-                        <div
-                            class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center relative overflow-hidden group">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <!-- Bento 2: Conexão GitHub -->
+                    <div class="reveal md:col-span-5 p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] flex flex-col justify-between relative overflow-hidden group hover:border-white/20 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-6">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
                             </div>
-                            <div class="font-mono text-xs text-secondary flex items-center gap-2">
-                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
-                                    class="w-4 h-4 text-white">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                    </path>
-                                </svg>
-                                <span class="text-white font-medium">git push origin main</span>
+                            <h3 class="text-xl font-bold text-white mb-2">Importação & Sync GitHub</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Importe repositórios existentes ou crie novos projetos do zero com sincronização automática de commits via REST API.
+                            </p>
+                        </div>
+                        <div class="mt-8 flex items-center gap-2 text-xs font-mono text-emerald-400">
+                            <i data-lucide="git-branch" class="w-4 h-4"></i>
+                            <span>git commit -m "Deploy instantâneo"</span>
+                        </div>
+                    </div>
+
+                    <!-- Bento 3: Vercel Edge -->
+                    <div class="reveal md:col-span-5 p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] flex flex-col justify-between relative overflow-hidden group hover:border-white/20 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 2L24 22H0L12 2Z"/></svg>
                             </div>
-                            <div class="font-mono text-xs text-tertiary mt-2">
-                                Webhook disparado...<br>
-                                Repositório sincronizado
+                            <h3 class="text-xl font-bold text-white mb-2">Infraestrutura Vercel Edge</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Distribuição global de alta performance com HTTPS automático, CDN Edge e links de produção gerados na hora.
+                            </p>
+                        </div>
+                        <div class="mt-8 flex items-center gap-2 text-xs font-mono text-amber-400">
+                            <i data-lucide="zap" class="w-4 h-4"></i>
+                            <span>Ready state: READY in 0.8s</span>
+                        </div>
+                    </div>
+
+                    <!-- Bento 4: Privado e Local -->
+                    <div class="reveal md:col-span-7 p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] flex flex-col justify-between relative overflow-hidden group hover:border-white/20 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+                                <i data-lucide="shield-check" class="w-5 h-5"></i>
                             </div>
+                            <h3 class="text-xl font-bold text-white mb-2">100% Client-Side & Tokens Seguros</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Seus Personal Access Tokens do GitHub e Vercel ficam armazenados exclusivamente no seu navegador via <code class="text-emerald-400 font-mono">localStorage</code>. Nenhum dado transita por servidores intermediários.
+                            </p>
+                        </div>
+                        <div class="mt-8 p-4 rounded-xl bg-[#050505] border border-white/5 font-mono text-xs text-neutral-400 flex items-center justify-between">
+                            <span>localStorage.getItem('dm_gh_token')</span>
+                            <span class="text-emerald-400 font-semibold">● PROTEGIDO</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- COMO FUNCIONA (1-2-3 FLOW) -->
+        <section id="como-funciona" class="py-24 border-t border-white/5 bg-[#080808] px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                
+                <div class="reveal text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-xs font-mono font-medium text-emerald-400 uppercase tracking-widest mb-3">Fluxo Simplificado</h2>
+                    <p class="text-3xl sm:text-5xl font-bold tracking-tight text-white">Do código à produção em 3 passos.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 relative">
+                    
+                    <!-- Step 1 -->
+                    <div class="reveal p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] relative flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-bold font-mono text-neutral-700 mb-4">01</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Conecte Suas Chaves</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Insira seu Token do GitHub e da Vercel no painel de configurações. Tudo é salvo no seu navegador de forma 100% privada.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-mono text-neutral-500">
+                            <i data-lucide="key" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span>Autenticação Local</span>
                         </div>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="flex flex-col gap-6 relative z-10 reveal reveal-delay-1">
-                        <div
-                            class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-secondary mb-4">
-                            02
+                    <div class="reveal p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] relative flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-bold font-mono text-neutral-700 mb-4">02</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Edite ou Importe</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                Escolha "Começar do Zero" ou "Importar Repositório". Crie arquivos HTML, CSS ou JS usando o Monaco IDE integrado.
+                            </p>
                         </div>
-                        <h3 class="text-xl font-medium flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="w-4 h-4">
-                                <path d="M12 2L24 22H0L12 2Z" />
-                            </svg>
-                            Deploy via Vercel
-                        </h3>
-                        <p class="text-secondary font-light text-sm leading-relaxed">Utilizamos a engine da Vercel por
-                            baixo dos panos. Seu app é construído com máxima performance e distribuído na Edge Network.
-                        </p>
-
-                        <!-- Visual -->
-                        <div
-                            class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center relative group">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-mono text-secondary">Building...</span>
-                                <span class="text-xs font-mono text-white">45s</span>
-                            </div>
-                            <div class="h-1 w-full bg-border rounded-full overflow-hidden">
-                                <div class="h-full bg-white w-2/3 rounded-full relative">
-                                    <div
-                                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2s_infinite]">
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-mono text-neutral-500">
+                            <i data-lucide="folder-tree" class="w-3.5 h-3.5 text-blue-400"></i>
+                            <span>Explorer Estilo Windows</span>
                         </div>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="flex flex-col gap-6 relative z-10 reveal reveal-delay-2">
-                        <div
-                            class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-primary mb-4 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                            03
+                    <div class="reveal p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0A0A0A] relative flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-bold font-mono text-emerald-400 mb-4">03</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Clique em Deploy</h3>
+                            <p class="text-sm text-neutral-400 font-light leading-relaxed">
+                                O DeployMaster cria o repositório no GitHub e dispara a build na Vercel com acompanhamento de logs em tempo real.
+                            </p>
                         </div>
-                        <h3 class="text-xl font-medium">Seu projeto está online</h3>
-                        <p class="text-secondary font-light text-sm leading-relaxed">URL segura gerada, certificado SSL
-                            aplicado e cache global distribuído instantaneamente.</p>
-
-                        <!-- Visual -->
-                        <div
-                            class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center items-center relative group">
-                            <div
-                                class="px-4 py-2 rounded-md bg-[#050505] border border-border flex items-center gap-2 group-hover:border-white/20 transition-colors">
-                                <i data-lucide="lock" class="w-3 h-3 text-secondary"></i>
-                                <span class="text-xs text-primary">seu-projeto.deploy.app</span>
-                                <i data-lucide="external-link" class="w-3 h-3 text-secondary ml-2"></i>
-                            </div>
+                        <div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-mono text-emerald-400">
+                            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                            <span>URL de Produção Ativa</span>
                         </div>
                     </div>
 
                 </div>
+
             </div>
         </section>
 
-        <!-- INTERFACE / PRODUTO -->
-        <section id="interface" class="py-24 px-6">
-            <div class="max-w-7xl mx-auto">
-                <div class="text-center mb-16 reveal">
-                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-4">Controle absoluto.</h2>
-                    <p class="text-secondary text-lg font-light max-w-2xl mx-auto">Uma interface desenhada para clareza.
-                        Tenha visão completa de todos os seus deployments, métricas e domínios em um só lugar.</p>
+        <!-- INTERFACE PREVIEW -->
+        <section id="interface" class="py-24 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto text-center">
+                
+                <div class="reveal max-w-2xl mx-auto mb-12">
+                    <h2 class="text-xs font-mono font-medium text-emerald-400 uppercase tracking-widest mb-3">Painel de Controle</h2>
+                    <p class="text-3xl sm:text-5xl font-bold tracking-tight text-white">Interface limpa. Visão total.</p>
                 </div>
 
-                <!-- Dashboard Mockup -->
-                <div
-                    class="reveal reveal-delay-1 relative rounded-2xl border border-border bg-[#030303] shadow-2xl overflow-hidden max-w-5xl mx-auto">
-
-                    <!-- Top Window Controls -->
-                    <div class="h-10 border-b border-border bg-surface flex items-center px-4 gap-2">
-                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
-                        <div class="mx-auto text-[11px] text-tertiary font-mono tracking-widest uppercase">Deploymaster
-                            Console</div>
+                <div class="reveal rounded-2xl border border-white/10 bg-[#080808] p-4 sm:p-8 shadow-[0_0_50px_rgba(0,0,0,0.9)] text-left">
+                    <div class="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Seus Projetos Ativos</h3>
+                            <p class="text-xs text-neutral-400 font-mono">2 projetos gerenciados</p>
+                        </div>
+                        <a href="./deploy/" class="text-xs font-medium font-mono bg-white text-black px-4 py-2 rounded-lg hover:bg-neutral-200 transition-all">
+                            + Novo Projeto
+                        </a>
                     </div>
 
-                    <div class="flex flex-col md:flex-row h-auto md:h-[500px]">
-
-                        <!-- Sidebar (Hidden on mobile) -->
-                        <div class="hidden md:flex flex-col w-64 border-r border-border p-4 gap-6 bg-surface/30">
-                            <div class="flex items-center gap-3 px-2 py-1.5 rounded-md bg-white/5 text-primary">
-                                <i data-lucide="box" class="w-4 h-4"></i>
-                                <span class="text-sm font-medium">Projetos</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer">
-                                <i data-lucide="activity" class="w-4 h-4"></i>
-                                <span class="text-sm">Monitoramento</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer">
-                                <i data-lucide="globe" class="w-4 h-4"></i>
-                                <span class="text-sm">Domínios</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer mt-auto">
-                                <i data-lucide="settings" class="w-4 h-4"></i>
-                                <span class="text-sm">Configurações</span>
-                            </div>
-                        </div>
-
-                        <!-- Main Content Area -->
-                        <div class="flex-1 p-6 md:p-8 flex flex-col gap-6 overflow-x-auto">
-
-                            <!-- Header -->
-                            <div class="flex justify-between items-center min-w-[600px]">
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-xl bg-[#0F0F0F] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono font-bold text-white text-sm">
+                                    DM
+                                </div>
                                 <div>
-                                    <h3 class="text-xl font-medium text-primary">Projetos Ativos</h3>
-                                    <p class="text-sm text-secondary">Gerencie suas aplicações e ambientes.</p>
+                                    <div class="text-sm font-bold text-white">deploymaster-app</div>
+                                    <div class="text-xs font-mono text-neutral-400">deploymaster-app.vercel.app</div>
                                 </div>
-                                <a href="./deploy/"
-                                    class="bg-white text-black text-sm px-4 py-2 rounded font-medium hover:bg-neutral-200 transition-colors inline-block">
-                                    Novo Projeto
-                                </a>
                             </div>
-
-                            <!-- Table -->
-                            <div class="border border-border rounded-lg bg-surface/50 overflow-hidden min-w-[600px]">
-                                <!-- Table Head -->
-                                <div
-                                    class="grid grid-cols-12 gap-4 p-4 border-b border-border text-xs text-tertiary font-medium uppercase tracking-wider">
-                                    <div class="col-span-4">Projeto / Repo</div>
-                                    <div class="col-span-2">Status</div>
-                                    <div class="col-span-3">URL</div>
-                                    <div class="col-span-2">Atualizado</div>
-                                    <div class="col-span-1 text-right">Tempo</div>
+                            <div class="flex items-center gap-4">
+                                <div class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-medium flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>ONLINE</span>
                                 </div>
+                                <a href="./deploy/" class="text-xs font-mono text-neutral-400 hover:text-white transition-colors">Editar &rarr;</a>
+                            </div>
+                        </div>
 
-                                <!-- Rows -->
-                                <div class="flex flex-col">
-                                    <!-- Row 1 -->
-                                    <div
-                                        class="grid grid-cols-12 gap-4 p-4 border-b border-border/50 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
-                                        <div class="col-span-4 flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
-                                                <i data-lucide="hexagon" class="w-4 h-4 text-primary"></i>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span class="text-sm font-medium text-primary">landing-page-v3</span>
-                                                <span class="text-xs text-secondary flex items-center gap-1">
-                                                    <svg viewBox="0 0 24 24" fill="currentColor"
-                                                        xmlns="http://www.w3.org/2000/svg" class="w-3 h-3">
-                                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                                            d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                                        </path>
-                                                    </svg> main
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-2">
-                                            <div
-                                                class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accentMuted/50 border border-accent/10">
-                                                <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
-                                                <span
-                                                    class="text-[10px] text-accent font-medium uppercase">Online</span>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
-                                            landing-page.deploy.app
-                                        </div>
-                                        <div class="col-span-2 text-sm text-tertiary">2 min atrás</div>
-                                        <div class="col-span-1 text-sm text-tertiary text-right">42s</div>
-                                    </div>
-
-                                    <!-- Row 2 -->
-                                    <div
-                                        class="grid grid-cols-12 gap-4 p-4 border-b border-border/50 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
-                                        <div class="col-span-4 flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
-                                                <i data-lucide="triangle" class="w-4 h-4 text-primary"></i>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span class="text-sm font-medium text-primary">api-core-service</span>
-                                                <span class="text-xs text-secondary flex items-center gap-1">
-                                                    <svg viewBox="0 0 24 24" fill="currentColor"
-                                                        xmlns="http://www.w3.org/2000/svg" class="w-3 h-3">
-                                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                                            d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                                        </path>
-                                                    </svg> production
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-2">
-                                            <div
-                                                class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
-                                                <i data-lucide="loader"
-                                                    class="w-2.5 h-2.5 text-blue-400 animate-spin"></i>
-                                                <span
-                                                    class="text-[10px] text-blue-400 font-medium uppercase">Building</span>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
-                                            api.empresa.com
-                                        </div>
-                                        <div class="col-span-2 text-sm text-tertiary">Agora</div>
-                                        <div class="col-span-1 text-sm text-tertiary text-right">-</div>
-                                    </div>
-
-                                    <!-- Row 3 -->
-                                    <div
-                                        class="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
-                                        <div class="col-span-4 flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
-                                                <i data-lucide="circle" class="w-4 h-4 text-primary"></i>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span class="text-sm font-medium text-primary">blog-estatico</span>
-                                                <span class="text-xs text-secondary flex items-center gap-1">
-                                                    <svg viewBox="0 0 24 24" fill="currentColor"
-                                                        xmlns="http://www.w3.org/2000/svg" class="w-3 h-3">
-                                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                                            d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                                        </path>
-                                                    </svg> main
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-2">
-                                            <div
-                                                class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accentMuted/50 border border-accent/10">
-                                                <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
-                                                <span
-                                                    class="text-[10px] text-accent font-medium uppercase">Online</span>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
-                                            blog.deploy.app
-                                        </div>
-                                        <div class="col-span-2 text-sm text-tertiary">Ontem</div>
-                                        <div class="col-span-1 text-sm text-tertiary text-right">18s</div>
-                                    </div>
+                        <div class="p-4 rounded-xl bg-[#0F0F0F] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono font-bold text-white text-sm">
+                                    LP
                                 </div>
+                                <div>
+                                    <div class="text-sm font-bold text-white">landing-page-v2</div>
+                                    <div class="text-xs font-mono text-neutral-400">landing-page-v2.vercel.app</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-medium flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>ONLINE</span>
+                                </div>
+                                <a href="./deploy/" class="text-xs font-mono text-neutral-400 hover:text-white transition-colors">Editar &rarr;</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- VELOCIDADE -->
-        <section class="py-24 md:py-32 px-6 border-y border-white/[0.03] bg-surface/30 relative overflow-hidden">
-            <!-- decorative blur -->
-            <div
-                class="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none">
-            </div>
-
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-16">
-                <div class="md:w-1/2 reveal">
-                    <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-6">Velocidade <br><span
-                            class="text-secondary">na essência.</span></h2>
-                    <p class="text-secondary text-lg font-light leading-relaxed mb-8 max-w-md">
-                        Integração nativa perfeita. O ecossistema do GitHub combinado com a Edge Network da Vercel reduz
-                        o tempo de build e latência ao mínimo físico possível.
-                    </p>
-
-                    <ul class="flex flex-col gap-4 text-sm font-medium text-primary">
-                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
-                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
-                                    class="w-4 h-4 text-primary">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                            Sincronização em tempo real com GitHub
-                        </li>
-                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="w-3.5 h-3.5 text-primary">
-                                    <path d="M12 2L24 22H0L12 2Z" />
-                                </svg>
-                            </div>
-                            Infraestrutura global Vercel Edge
-                        </li>
-                        <li class="flex items-center gap-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
-                                <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
-                            </div>
-                            CI/CD automático a cada commit
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="md:w-1/2 flex justify-center md:justify-end reveal reveal-delay-1">
-                    <div class="flex flex-col items-end">
-                        <!-- Animated Timer -->
-                        <div
-                            class="text-7xl md:text-[8rem] font-light font-mono tracking-tighter text-primary flex items-baseline">
-                            <span id="speed-counter">0.0</span>
-                            <span class="text-3xl md:text-5xl text-tertiary ml-2">s</span>
-                        </div>
-                        <div class="text-secondary text-sm uppercase tracking-widest mt-2">
-                            Tempo médio de deploy estático
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PARA QUEM É -->
-        <section id="casos-de-uso" class="py-24 md:py-32 px-6">
-            <div class="max-w-7xl mx-auto">
-                <div class="mb-16 reveal">
-                    <h2 class="text-sm font-medium text-secondary uppercase tracking-widest mb-4">Feito para</h2>
-                    <p class="text-2xl md:text-3xl font-light">Qualquer projeto web.<br>Qualquer framework.</p>
-                </div>
-
-                <div class="flex flex-col reveal reveal-delay-1">
-                    <!-- List Item 1 -->
-                    <div
-                        class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span
-                            class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Sites
-                            e Portfólios</span>
-                        <i data-lucide="arrow-up-right"
-                            class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
-                    </div>
-                    <!-- List Item 2 -->
-                    <div
-                        class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span
-                            class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Landing
-                            Pages Alta Conversão</span>
-                        <i data-lucide="arrow-up-right"
-                            class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
-                    </div>
-                    <!-- List Item 3 -->
-                    <div
-                        class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span
-                            class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Aplicações
-                            Web Complexas</span>
-                        <i data-lucide="arrow-up-right"
-                            class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
-                    </div>
-                    <!-- List Item 4 -->
-                    <div
-                        class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
-                        <span
-                            class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Projetos
-                            Gerados por IA</span>
-                        <i data-lucide="arrow-up-right"
-                            class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
-                    </div>
-                </div>
             </div>
         </section>
 
         <!-- CTA FINAL -->
-        <section id="cta" class="py-32 px-6 relative overflow-hidden">
-            <!-- Decorative circle -->
-            <div
-                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl aspect-square bg-white/[0.02] rounded-full blur-[100px] pointer-events-none">
-            </div>
-
-            <div class="max-w-4xl mx-auto text-center relative z-10 flex flex-col items-center reveal">
-                <div
-                    class="w-16 h-16 mb-8 rounded-2xl bg-surface border border-border flex items-center justify-center">
-                    <i data-lucide="rocket" class="w-8 h-8 text-primary"></i>
+        <section class="py-24 sm:py-32 px-4 sm:px-6 relative overflow-hidden">
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 text-emerald-400">
+                    <i data-lucide="sparkles" class="w-7 h-7"></i>
                 </div>
-                <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-6">
-                    Seu próximo projeto pode estar online <span class="text-secondary italic">agora</span>.
+                <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4">
+                    Pronto para colocar seu projeto online?
                 </h2>
-                <p class="text-secondary text-lg mb-10 max-w-xl mx-auto font-light">
-                    Abandone a complexidade da infraestrutura tradicional. Use o Deploymaster diretamente do seu
-                    terminal ou navegador.
+                <p class="text-neutral-400 text-base sm:text-lg max-w-xl mx-auto font-light mb-8">
+                    Abandone comandos complexos e configurações pesadas. Use o DeployMaster agora mesmo direto do navegador.
                 </p>
-                <a href="./deploy/"
-                    class="inline-block bg-white text-black px-8 py-4 rounded-md font-medium text-lg hover:bg-neutral-200 transition-colors active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                    Usar Deploymaster
+                <a href="./deploy/" class="inline-flex items-center gap-2.5 bg-white text-black px-8 py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-neutral-200 transition-all active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.25)]">
+                    <i data-lucide="rocket" class="w-5 h-5"></i>
+                    <span>Abrir DeployMaster Agora</span>
                 </a>
-                <p class="mt-6 text-sm text-tertiary">Projeto 100% gratuito e sem necessidade de cadastro.</p>
+                <p class="text-xs text-neutral-400 font-mono mt-4">100% Gratuito • Sem necessidade de servidor</p>
             </div>
         </section>
+
     </main>
 
     <!-- FOOTER -->
-    <footer class="border-t border-white/5 pt-16 pb-8 px-6 bg-surface/50">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
-
-                <div class="col-span-2 lg:col-span-2 flex flex-col gap-4">
-                    <div class="flex items-center gap-2">
-                        <div
-                            class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" data-lucide="triangle" aria-hidden="true"
-                                class="lucide lucide-triangle w-3 h-3 fill-current rotate-180">
-                                <path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                            </svg>
-                        </div>
-                        <span class="font-semibold tracking-tight text-primary">Deploymaster</span>
-                    </div>
-                    <p class="text-sm text-secondary font-light max-w-xs">
-                        A plataforma definitiva para publicar seus projetos web com velocidade e controle. 100%
-                        gratuita.
-                    </p>
+    <footer class="border-t border-white/5 py-12 px-4 sm:px-6 bg-[#030303] text-xs text-neutral-400">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-md bg-white flex items-center justify-center text-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
                 </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-primary font-medium text-sm">Produto</h4>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Features</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Integrações</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Changelog</a>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-primary font-medium text-sm">Recursos</h4>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Documentação</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Guias</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Comunidade</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Blog</a>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-primary font-medium text-sm">Legal</h4>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Termos</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Privacidade</a>
-                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Contato</a>
-                </div>
+                <span class="font-bold text-white text-sm">DeployMaster</span>
+                <span class="text-neutral-600">|</span>
+                <span>Deploy Engine v2.0</span>
             </div>
 
-            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="text-xs text-tertiary">
-                    &copy; 2026 Deploymaster. Um projeto open-source sem fins lucrativos.
-                </p>
-                <div class="flex items-center gap-4 text-tertiary">
-                    <a href="#" class="hover:text-primary transition-colors"><i data-lucide="twitter"
-                            class="w-4 h-4"></i></a>
-                    <a href="#" class="hover:text-primary transition-colors"><svg viewBox="0 0 24 24"
-                            fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z">
-                            </path>
-                        </svg></a>
-                </div>
+            <div class="flex items-center gap-6">
+                <a href="#recursos" class="hover:text-white transition-colors">Recursos</a>
+                <a href="#como-funciona" class="hover:text-white transition-colors">Como Funciona</a>
+                <a href="./deploy/" class="hover:text-white transition-colors">Abrir IDE</a>
+                <a href="https://github.com/BETOgm-edt/DeployMaster" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                    <span>GitHub</span>
+                </a>
             </div>
+
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script>
-        // Initialize Icons
+        // Lucide Icons
         lucide.createIcons();
 
-        // Scroll Reveal Animation Observer
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.15
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
+        // Scroll Reveal Observer
+        const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                    // Unobserve to animate only once
-                    observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.1 });
 
-        document.querySelectorAll('.reveal').forEach((element) => {
-            observer.observe(element);
-        });
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-        // Navbar scroll effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) {
-                navbar.classList.add('shadow-md', 'border-b', 'border-white/5');
-            } else {
-                navbar.classList.remove('shadow-md', 'border-b', 'border-white/5');
-            }
-        });
-
-        // Hero Terminal Typing Animation
-        const terminalContent = document.getElementById('terminal-content');
-        const commands = [
-            { text: '> github.com/user/project', color: 'text-primary' },
-            { text: 'Sincronizando repositório...', color: 'text-tertiary' },
-            { text: 'Iniciando build na infraestrutura Vercel...', color: 'text-secondary' },
-            { text: 'Distribuindo na Edge Network...', color: 'text-secondary' },
-            { text: 'Success! Ready in 0.8s.', color: 'text-accent' }
+        // Animated Terminal Loop
+        const terminalEl = document.getElementById('terminal-content');
+        const logs = [
+            { text: '> git commit -m "Deploy v2.0"', color: 'text-white font-bold' },
+            { text: '[GitHub] Sincronizando repositório...', color: 'text-neutral-400' },
+            { text: '[Vercel] Disparando build de produção...', color: 'text-amber-400' },
+            { text: '[Vercel] Otimizando assets HTML/CSS/JS...', color: 'text-neutral-400' },
+            { text: '[Vercel Edge] SSL ativado com sucesso!', color: 'text-blue-400' },
+            { text: '✔ SUCCESS! Ready in 0.8s', color: 'text-emerald-400 font-bold' }
         ];
 
-        let commandIndex = 0;
-        let charIndex = 0;
-        let isTyping = true;
-        let currentLineElement = null;
-
-        function renderTerminal() {
-            if (commandIndex >= commands.length) {
-                // Reset to loop
+        let logIdx = 0;
+        function runLogSequence() {
+            if (logIdx >= logs.length) {
                 setTimeout(() => {
-                    terminalContent.innerHTML = '';
-                    commandIndex = 0;
-                    renderTerminal();
-                }, 3000);
+                    terminalEl.innerHTML = '';
+                    logIdx = 0;
+                    runLogSequence();
+                }, 3500);
                 return;
             }
+            const log = logs[logIdx];
+            const div = document.createElement('div');
+            div.className = `${log.color} transition-all duration-300 transform translate-y-1 opacity-0`;
+            div.innerHTML = log.text;
+            terminalEl.appendChild(div);
+            
+            // Trigger animation
+            setTimeout(() => {
+                div.classList.remove('translate-y-1', 'opacity-0');
+            }, 50);
 
-            const currentCommand = commands[commandIndex];
-
-            // Setup new line
-            if (charIndex === 0) {
-                currentLineElement = document.createElement('div');
-                currentLineElement.className = currentCommand.color;
-
-                // Keep only last 3 lines visible
-                if (terminalContent.children.length >= 3) {
-                    terminalContent.removeChild(terminalContent.firstChild);
-                }
-
-                terminalContent.appendChild(currentLineElement);
-
-                // If it's not a user command (>), show instantly
-                if (!currentCommand.text.startsWith('>')) {
-                    currentLineElement.innerHTML = currentCommand.text;
-                    commandIndex++;
-                    setTimeout(renderTerminal, 500);
-                    return;
-                }
+            if (terminalEl.children.length > 5) {
+                terminalEl.removeChild(terminalEl.firstChild);
             }
-
-            // Typing effect for user command
-            if (charIndex < currentCommand.text.length) {
-                currentLineElement.innerHTML = currentCommand.text.substring(0, charIndex + 1) + '<span class="cursor-blink"></span>';
-                charIndex++;
-                setTimeout(renderTerminal, Math.random() * 50 + 50); // Random typing speed
-            } else {
-                // Done typing line
-                currentLineElement.innerHTML = currentCommand.text; // remove cursor
-                commandIndex++;
-                charIndex = 0;
-                setTimeout(renderTerminal, 400); // Wait before next line
-            }
+            
+            logIdx++;
+            setTimeout(runLogSequence, logIdx === 1 ? 800 : 600);
         }
 
-        // Start terminal animation shortly after load
-        setTimeout(renderTerminal, 1000);
-
-        // Speed Counter Animation on Scroll
-        const speedCounter = document.getElementById('speed-counter');
-        let counterAnimated = false;
-
-        const counterObserver = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !counterAnimated) {
-                counterAnimated = true;
-                let start = 0.0;
-                const end = 0.8;
-                const duration = 1500;
-                const stepTime = 20;
-                const steps = duration / stepTime;
-                const increment = end / steps;
-
-                const timer = setInterval(() => {
-                    start += increment;
-                    if (start >= end) {
-                        clearInterval(timer);
-                        speedCounter.innerText = "0.8"; // Final value
-                    } else {
-                        speedCounter.innerText = start.toFixed(1);
-                    }
-                }, stepTime);
-            }
-        });
-
-        if (speedCounter) {
-            counterObserver.observe(speedCounter);
-        }
-
+        setTimeout(runLogSequence, 800);
     </script>
 </body>
-
 </html>
