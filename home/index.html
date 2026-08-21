@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploymaster | Seu projeto online. Sem complicação.</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        background: 'var(--color-background)',
+                        surface: 'var(--color-surface)',
+                        surfaceHover: 'var(--color-surfaceHover)',
+                        border: 'var(--color-border)',
+                        borderHover: 'var(--color-borderHover)',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        tertiary: 'var(--color-tertiary)',
+                        accent: 'var(--color-accent)',
+                        accentMuted: 'var(--color-accentMuted)',
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Animations and Specific Stylings -->
+    <style>
+        :root {
+            --color-background: #050505;
+            --color-surface: #0A0A0A;
+            --color-surfaceHover: #141414;
+            --color-border: rgba(255, 255, 255, 0.06);
+            --color-borderHover: rgba(255, 255, 255, 0.15);
+            --color-primary: #FFFFFF;
+            --color-secondary: #A3A3A3;
+            --color-tertiary: #525252;
+            --color-accent: #34D399; /* Emerald for success/tech vibe */
+            --color-accentMuted: rgba(52, 211, 153, 0.2);
+        }
+
+        body {
+            background-color: var(--color-background);
+            color: var(--color-primary);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Scroll Reveal Utility Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* Glowing background effects */
+        .glow-bg {
+            position: absolute;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.03) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            top: -20%;
+            left: -10%;
+        }
+
+        /* Dashboard & Code Blocks */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid theme('colors.border');
+        }
+
+        /* Subtle floating animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: float 6s ease-in-out 3s infinite;
+        }
+
+        /* Terminal Typing Cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: theme('colors.secondary');
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Progress Bar Animation */
+        @keyframes fillProgress {
+            0% { width: 0%; opacity: 1;}
+            80% { width: 100%; opacity: 1;}
+            100% { width: 100%; opacity: 0;}
+        }
+        .animate-progress {
+            animation: fillProgress 4s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-background);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-tertiary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-secondary);
+        }
+
+        /* Subtle line grid pattern */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="relative bg-background text-primary">
+
+    <div class="glow-bg"></div>
+
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b-0 border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 cursor-pointer group">
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="triangle" aria-hidden="true" class="lucide lucide-triangle w-4 h-4 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+                </div>
+                <span class="font-semibold tracking-tight text-lg">Deploymaster</span>
+            </div>
+
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-secondary">
+                <a href="#como-funciona" class="hover:text-primary transition-colors">Como funciona</a>
+                <a href="#interface" class="hover:text-primary transition-colors">Interface</a>
+                <a href="#casos-de-uso" class="hover:text-primary transition-colors">Casos de uso</a>
+            </div>
+
+            <!-- CTA -->
+            <div class="flex items-center gap-4">
+                <a href="#cta" class="text-sm font-medium bg-white text-black px-5 py-2 rounded-md hover:bg-neutral-200 transition-colors active:scale-95">
+                    Acessar ferramenta
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="relative pt-40 pb-20 md:pt-52 md:pb-32 overflow-hidden px-6">
+            <div class="absolute inset-0 bg-grid z-[-1] pointer-events-none"></div>
+            
+            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+                
+                <!-- Text Content -->
+                <div class="flex flex-col gap-8 reveal z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-surface w-fit">
+                        <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                        <span class="text-xs font-medium text-secondary tracking-wide uppercase">Deploy Engine v2.0 Live</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.1] text-primary">
+                        Seu projeto.<br>
+                        <span class="text-secondary">Online.</span><br>
+                        Sem complicação.
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl text-secondary max-w-lg font-light leading-relaxed">
+                        A ponte perfeita entre o seu código e o mundo. Conecte seu repositório do GitHub e aproveite o poder da infraestrutura Vercel com zero configuração.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <a href="#cta" class="flex items-center justify-center gap-2 bg-white text-black px-6 py-3.5 rounded-md font-medium hover:bg-neutral-200 transition-colors active:scale-95">
+                            Acessar ferramenta
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#como-funciona" class="flex items-center justify-center gap-2 px-6 py-3.5 rounded-md font-medium border border-border text-primary hover:bg-surfaceHover transition-colors active:scale-95">
+                            Ver como funciona
+                        </a>
+                    </div>
+
+                    <div class="flex flex-col gap-3 pt-8 mt-4 border-t border-white/5 reveal reveal-delay-1">
+                        <span class="text-[10px] font-medium text-tertiary uppercase tracking-widest">Infraestrutura nativa</span>
+                        <div class="flex items-center gap-6 text-secondary">
+                            <div class="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                                <span class="text-sm font-medium">GitHub</span>
+                            </div>
+                            <div class="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2L24 22H0L12 2Z"/></svg>
+                                <span class="text-sm font-medium">Vercel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Composition (Code -> Deploy -> Online) -->
+                <div class="relative w-full aspect-square md:aspect-[4/3] flex items-center justify-center reveal reveal-delay-2 lg:ml-auto max-w-[500px]">
+                    
+                    <!-- Decorative background blur -->
+                    <div class="absolute w-full h-full bg-accentMuted blur-[100px] rounded-full opacity-30"></div>
+
+                    <!-- Flow Container -->
+                    <div class="relative w-full h-full flex flex-col items-center justify-between py-8">
+                        
+                        <!-- Connection Line -->
+                        <div class="absolute top-[20%] bottom-[20%] w-[1px] bg-gradient-to-b from-transparent via-border to-transparent left-1/2 -translate-x-1/2">
+                            <!-- Animated data dot moving down -->
+                            <div class="w-1 h-8 bg-accent shadow-[0_0_10px_rgba(52,211,153,0.5)] rounded-full absolute -left-[1px] animate-[slideDown_3s_ease-in-out_infinite]"></div>
+                        </div>
+
+                        <!-- 1. Code / Project -->
+                        <div class="glass-panel w-full sm:w-[85%] p-4 rounded-xl flex flex-col gap-3 relative z-10 animate-float shadow-2xl">
+                            <div class="flex items-center gap-2 text-xs text-tertiary border-b border-white/5 pb-2">
+                                <i data-lucide="file-code-2" class="w-4 h-4"></i>
+                                <span>app.tsx</span>
+                                <span class="ml-auto">Main</span>
+                            </div>
+                            <div class="font-mono text-xs text-secondary opacity-70">
+                                <p><span class="text-blue-400">export default</span> <span class="text-purple-400">function</span> App() {</p>
+                                <p class="pl-4">return (</p>
+                                <p class="pl-8 text-white">&lt;Deploymaster /&gt;</p>
+                                <p class="pl-4">);</p>
+                                <p>}</p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Deploy Terminal -->
+                        <div class="bg-[#050505] border border-border w-full sm:w-[95%] p-4 rounded-xl flex flex-col gap-3 relative z-10 shadow-2xl">
+                            <div class="flex items-center gap-2 text-xs text-tertiary border-b border-white/5 pb-2">
+                                <i data-lucide="terminal" class="w-4 h-4"></i>
+                                <span>Deploy Process</span>
+                            </div>
+                            <div class="font-mono text-xs text-secondary h-[60px] overflow-hidden flex flex-col justify-end">
+                                <div id="terminal-content">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="h-1 w-full bg-surface rounded-full overflow-hidden mt-1">
+                                <div class="h-full bg-primary animate-progress rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Online Status -->
+                        <div class="glass-panel w-full sm:w-[85%] p-4 rounded-xl flex items-center justify-between relative z-10 animate-float-delayed shadow-2xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center">
+                                    <i data-lucide="globe" class="w-5 h-5 text-primary"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium">project.app</span>
+                                    <span class="text-xs text-secondary">Produção</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accentMuted border border-accent/20">
+                                <div class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
+                                <span class="text-[10px] font-medium text-accent uppercase tracking-wider">Online</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section id="como-funciona" class="py-24 md:py-32 px-6 relative">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-20 max-w-2xl reveal">
+                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-6">Três etapas.<br>Zero infraestrutura.</h2>
+                    <p class="text-secondary text-lg font-light">Desenhamos um fluxo focado no que importa: seu código rodando no mundo real o mais rápido possível.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-12 lg:gap-8 relative">
+                    <!-- Background connecting line for desktop -->
+                    <div class="hidden md:block absolute top-[24px] left-[10%] right-[10%] h-[1px] bg-border z-0"></div>
+
+                    <!-- Step 1 -->
+                    <div class="flex flex-col gap-6 relative z-10 reveal">
+                        <div class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-secondary mb-4">
+                            01
+                        </div>
+                        <h3 class="text-xl font-medium flex items-center gap-2">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                            Conecte seu GitHub
+                        </h3>
+                        <p class="text-secondary font-light text-sm leading-relaxed">Vincule sua conta, selecione o repositório do seu projeto. O Deploymaster identifica o framework (React, Vue, Node, etc.) e configura o pipeline automaticamente.</p>
+                        
+                        <!-- Visual -->
+                        <div class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div class="font-mono text-xs text-secondary flex items-center gap-2">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                                <span class="text-white font-medium">git push origin main</span>
+                            </div>
+                            <div class="font-mono text-xs text-tertiary mt-2">
+                                Webhook disparado...<br>
+                                Repositório sincronizado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col gap-6 relative z-10 reveal reveal-delay-1">
+                        <div class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-secondary mb-4">
+                            02
+                        </div>
+                        <h3 class="text-xl font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2L24 22H0L12 2Z"/></svg>
+                            Deploy via Vercel
+                        </h3>
+                        <p class="text-secondary font-light text-sm leading-relaxed">Utilizamos a engine da Vercel por baixo dos panos. Seu app é construído com máxima performance e distribuído na Edge Network.</p>
+                        
+                        <!-- Visual -->
+                        <div class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center relative group">
+                             <div class="flex justify-between items-center mb-2">
+                                 <span class="text-xs font-mono text-secondary">Building...</span>
+                                 <span class="text-xs font-mono text-white">45s</span>
+                             </div>
+                             <div class="h-1 w-full bg-border rounded-full overflow-hidden">
+                                 <div class="h-full bg-white w-2/3 rounded-full relative">
+                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2s_infinite]"></div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col gap-6 relative z-10 reveal reveal-delay-2">
+                        <div class="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center text-xl font-mono text-primary mb-4 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            03
+                        </div>
+                        <h3 class="text-xl font-medium">Seu projeto está online</h3>
+                        <p class="text-secondary font-light text-sm leading-relaxed">URL segura gerada, certificado SSL aplicado e cache global distribuído instantaneamente.</p>
+                        
+                        <!-- Visual -->
+                        <div class="mt-4 h-32 rounded-lg border border-border bg-surface/50 flex flex-col p-4 justify-center items-center relative group">
+                            <div class="px-4 py-2 rounded-md bg-[#050505] border border-border flex items-center gap-2 group-hover:border-white/20 transition-colors">
+                                <i data-lucide="lock" class="w-3 h-3 text-secondary"></i>
+                                <span class="text-xs text-primary">seu-projeto.deploy.app</span>
+                                <i data-lucide="external-link" class="w-3 h-3 text-secondary ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERFACE / PRODUTO -->
+        <section id="interface" class="py-24 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-4">Controle absoluto.</h2>
+                    <p class="text-secondary text-lg font-light max-w-2xl mx-auto">Uma interface desenhada para clareza. Tenha visão completa de todos os seus deployments, métricas e domínios em um só lugar.</p>
+                </div>
+
+                <!-- Dashboard Mockup -->
+                <div class="reveal reveal-delay-1 relative rounded-2xl border border-border bg-[#030303] shadow-2xl overflow-hidden max-w-5xl mx-auto">
+                    
+                    <!-- Top Window Controls -->
+                    <div class="h-10 border-b border-border bg-surface flex items-center px-4 gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
+                        <div class="mx-auto text-[11px] text-tertiary font-mono tracking-widest uppercase">Deploymaster Console</div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row h-auto md:h-[500px]">
+                        
+                        <!-- Sidebar (Hidden on mobile) -->
+                        <div class="hidden md:flex flex-col w-64 border-r border-border p-4 gap-6 bg-surface/30">
+                            <div class="flex items-center gap-3 px-2 py-1.5 rounded-md bg-white/5 text-primary">
+                                <i data-lucide="box" class="w-4 h-4"></i>
+                                <span class="text-sm font-medium">Projetos</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer">
+                                <i data-lucide="activity" class="w-4 h-4"></i>
+                                <span class="text-sm">Monitoramento</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer">
+                                <i data-lucide="globe" class="w-4 h-4"></i>
+                                <span class="text-sm">Domínios</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-2 py-1.5 text-secondary hover:text-primary transition-colors cursor-pointer mt-auto">
+                                <i data-lucide="settings" class="w-4 h-4"></i>
+                                <span class="text-sm">Configurações</span>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Area -->
+                        <div class="flex-1 p-6 md:p-8 flex flex-col gap-6 overflow-x-auto">
+                            
+                            <!-- Header -->
+                            <div class="flex justify-between items-center min-w-[600px]">
+                                <div>
+                                    <h3 class="text-xl font-medium text-primary">Projetos Ativos</h3>
+                                    <p class="text-sm text-secondary">Gerencie suas aplicações e ambientes.</p>
+                                </div>
+                                <button class="bg-white text-black text-sm px-4 py-2 rounded font-medium hover:bg-neutral-200 transition-colors">
+                                    Novo Projeto
+                                </button>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="border border-border rounded-lg bg-surface/50 overflow-hidden min-w-[600px]">
+                                <!-- Table Head -->
+                                <div class="grid grid-cols-12 gap-4 p-4 border-b border-border text-xs text-tertiary font-medium uppercase tracking-wider">
+                                    <div class="col-span-4">Projeto / Repo</div>
+                                    <div class="col-span-2">Status</div>
+                                    <div class="col-span-3">URL</div>
+                                    <div class="col-span-2">Atualizado</div>
+                                    <div class="col-span-1 text-right">Tempo</div>
+                                </div>
+
+                                <!-- Rows -->
+                                <div class="flex flex-col">
+                                    <!-- Row 1 -->
+                                    <div class="grid grid-cols-12 gap-4 p-4 border-b border-border/50 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
+                                        <div class="col-span-4 flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
+                                                <i data-lucide="hexagon" class="w-4 h-4 text-primary"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-primary">landing-page-v3</span>
+                                                <span class="text-xs text-secondary flex items-center gap-1">
+                                                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg> main
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accentMuted/50 border border-accent/10">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                                                <span class="text-[10px] text-accent font-medium uppercase">Online</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
+                                            landing-page.deploy.app
+                                        </div>
+                                        <div class="col-span-2 text-sm text-tertiary">2 min atrás</div>
+                                        <div class="col-span-1 text-sm text-tertiary text-right">42s</div>
+                                    </div>
+
+                                    <!-- Row 2 -->
+                                    <div class="grid grid-cols-12 gap-4 p-4 border-b border-border/50 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
+                                        <div class="col-span-4 flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
+                                                <i data-lucide="triangle" class="w-4 h-4 text-primary"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-primary">api-core-service</span>
+                                                <span class="text-xs text-secondary flex items-center gap-1">
+                                                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg> production
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                                <i data-lucide="loader" class="w-2.5 h-2.5 text-blue-400 animate-spin"></i>
+                                                <span class="text-[10px] text-blue-400 font-medium uppercase">Building</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
+                                            api.empresa.com
+                                        </div>
+                                        <div class="col-span-2 text-sm text-tertiary">Agora</div>
+                                        <div class="col-span-1 text-sm text-tertiary text-right">-</div>
+                                    </div>
+
+                                    <!-- Row 3 -->
+                                    <div class="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors group cursor-pointer">
+                                        <div class="col-span-4 flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded bg-border flex items-center justify-center">
+                                                <i data-lucide="circle" class="w-4 h-4 text-primary"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-primary">blog-estatico</span>
+                                                <span class="text-xs text-secondary flex items-center gap-1">
+                                                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg> main
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accentMuted/50 border border-accent/10">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                                                <span class="text-[10px] text-accent font-medium uppercase">Online</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-3 text-sm text-secondary group-hover:text-primary transition-colors">
+                                            blog.deploy.app
+                                        </div>
+                                        <div class="col-span-2 text-sm text-tertiary">Ontem</div>
+                                        <div class="col-span-1 text-sm text-tertiary text-right">18s</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VELOCIDADE -->
+        <section class="py-24 md:py-32 px-6 border-y border-white/[0.03] bg-surface/30 relative overflow-hidden">
+            <!-- decorative blur -->
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-16">
+                <div class="md:w-1/2 reveal">
+                    <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-6">Velocidade <br><span class="text-secondary">na essência.</span></h2>
+                    <p class="text-secondary text-lg font-light leading-relaxed mb-8 max-w-md">
+                        Integração nativa perfeita. O ecossistema do GitHub combinado com a Edge Network da Vercel reduz o tempo de build e latência ao mínimo físico possível.
+                    </p>
+                    
+                    <ul class="flex flex-col gap-4 text-sm font-medium text-primary">
+                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
+                            <div class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg>
+                            </div>
+                            Sincronização em tempo real com GitHub
+                        </li>
+                        <li class="flex items-center gap-4 border-b border-white/5 pb-4">
+                            <div class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-primary"><path d="M12 2L24 22H0L12 2Z"/></svg>
+                            </div>
+                            Infraestrutura global Vercel Edge
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shadow-lg">
+                                <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            CI/CD automático a cada commit
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="md:w-1/2 flex justify-center md:justify-end reveal reveal-delay-1">
+                    <div class="flex flex-col items-end">
+                        <!-- Animated Timer -->
+                        <div class="text-7xl md:text-[8rem] font-light font-mono tracking-tighter text-primary flex items-baseline">
+                            <span id="speed-counter">0.0</span>
+                            <span class="text-3xl md:text-5xl text-tertiary ml-2">s</span>
+                        </div>
+                        <div class="text-secondary text-sm uppercase tracking-widest mt-2">
+                            Tempo médio de deploy estático
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARA QUEM É -->
+        <section id="casos-de-uso" class="py-24 md:py-32 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16 reveal">
+                    <h2 class="text-sm font-medium text-secondary uppercase tracking-widest mb-4">Feito para</h2>
+                    <p class="text-2xl md:text-3xl font-light">Qualquer projeto web.<br>Qualquer framework.</p>
+                </div>
+
+                <div class="flex flex-col reveal reveal-delay-1">
+                    <!-- List Item 1 -->
+                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
+                        <span class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Sites e Portfólios</span>
+                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    </div>
+                    <!-- List Item 2 -->
+                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
+                        <span class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Landing Pages Alta Conversão</span>
+                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    </div>
+                    <!-- List Item 3 -->
+                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
+                        <span class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Aplicações Web Complexas</span>
+                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    </div>
+                    <!-- List Item 4 -->
+                    <div class="group border-b border-white/5 py-8 flex items-center justify-between cursor-default transition-colors hover:border-white/20">
+                        <span class="text-2xl md:text-4xl font-light text-tertiary group-hover:text-primary transition-colors duration-300">Projetos Gerados por IA</span>
+                        <i data-lucide="arrow-up-right" class="w-6 h-6 text-tertiary group-hover:text-primary transition-colors duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA FINAL -->
+        <section id="cta" class="py-32 px-6 relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl aspect-square bg-white/[0.02] rounded-full blur-[100px] pointer-events-none"></div>
+
+            <div class="max-w-4xl mx-auto text-center relative z-10 flex flex-col items-center reveal">
+                <div class="w-16 h-16 mb-8 rounded-2xl bg-surface border border-border flex items-center justify-center">
+                    <i data-lucide="rocket" class="w-8 h-8 text-primary"></i>
+                </div>
+                <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-6">
+                    Seu próximo projeto pode estar online <span class="text-secondary italic">agora</span>.
+                </h2>
+                <p class="text-secondary text-lg mb-10 max-w-xl mx-auto font-light">
+                    Abandone a complexidade da infraestrutura tradicional. Use o Deploymaster diretamente do seu terminal ou navegador.
+                </p>
+                <button class="bg-white text-black px-8 py-4 rounded-md font-medium text-lg hover:bg-neutral-200 transition-colors active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    Usar Deploymaster
+                </button>
+                <p class="mt-6 text-sm text-tertiary">Projeto 100% gratuito e sem necessidade de cadastro.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 pt-16 pb-8 px-6 bg-surface/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
+                
+                <div class="col-span-2 lg:col-span-2 flex flex-col gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="triangle" aria-hidden="true" class="lucide lucide-triangle w-3 h-3 fill-current rotate-180"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+                        </div>
+                        <span class="font-semibold tracking-tight text-primary">Deploymaster</span>
+                    </div>
+                    <p class="text-sm text-secondary font-light max-w-xs">
+                        A plataforma definitiva para publicar seus projetos web com velocidade e controle. 100% gratuita.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-primary font-medium text-sm">Produto</h4>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Features</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Integrações</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Changelog</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-primary font-medium text-sm">Recursos</h4>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Documentação</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Guias</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Comunidade</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Blog</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-primary font-medium text-sm">Legal</h4>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Termos</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Privacidade</a>
+                    <a href="#" class="text-secondary text-sm hover:text-primary transition-colors">Contato</a>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-tertiary">
+                    &copy; 2026 Deploymaster. Um projeto open-source sem fins lucrativos.
+                </p>
+                <div class="flex items-center gap-4 text-tertiary">
+                    <a href="#" class="hover:text-primary transition-colors"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                    <a href="#" class="hover:text-primary transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path></svg></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Scroll Reveal Animation Observer
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // Unobserve to animate only once
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach((element) => {
+            observer.observe(element);
+        });
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('shadow-md', 'border-b', 'border-white/5');
+            } else {
+                navbar.classList.remove('shadow-md', 'border-b', 'border-white/5');
+            }
+        });
+
+        // Hero Terminal Typing Animation
+        const terminalContent = document.getElementById('terminal-content');
+        const commands = [
+            { text: '> github.com/user/project', color: 'text-primary' },
+            { text: 'Sincronizando repositório...', color: 'text-tertiary' },
+            { text: 'Iniciando build na infraestrutura Vercel...', color: 'text-secondary' },
+            { text: 'Distribuindo na Edge Network...', color: 'text-secondary' },
+            { text: 'Success! Ready in 0.8s.', color: 'text-accent' }
+        ];
+
+        let commandIndex = 0;
+        let charIndex = 0;
+        let isTyping = true;
+        let currentLineElement = null;
+
+        function renderTerminal() {
+            if (commandIndex >= commands.length) {
+                // Reset to loop
+                setTimeout(() => {
+                    terminalContent.innerHTML = '';
+                    commandIndex = 0;
+                    renderTerminal();
+                }, 3000);
+                return;
+            }
+
+            const currentCommand = commands[commandIndex];
+
+            // Setup new line
+            if (charIndex === 0) {
+                currentLineElement = document.createElement('div');
+                currentLineElement.className = currentCommand.color;
+                
+                // Keep only last 3 lines visible
+                if(terminalContent.children.length >= 3) {
+                    terminalContent.removeChild(terminalContent.firstChild);
+                }
+                
+                terminalContent.appendChild(currentLineElement);
+                
+                // If it's not a user command (>), show instantly
+                if (!currentCommand.text.startsWith('>')) {
+                    currentLineElement.innerHTML = currentCommand.text;
+                    commandIndex++;
+                    setTimeout(renderTerminal, 500);
+                    return;
+                }
+            }
+
+            // Typing effect for user command
+            if (charIndex < currentCommand.text.length) {
+                currentLineElement.innerHTML = currentCommand.text.substring(0, charIndex + 1) + '<span class="cursor-blink"></span>';
+                charIndex++;
+                setTimeout(renderTerminal, Math.random() * 50 + 50); // Random typing speed
+            } else {
+                // Done typing line
+                currentLineElement.innerHTML = currentCommand.text; // remove cursor
+                commandIndex++;
+                charIndex = 0;
+                setTimeout(renderTerminal, 400); // Wait before next line
+            }
+        }
+        
+        // Start terminal animation shortly after load
+        setTimeout(renderTerminal, 1000);
+
+        // Speed Counter Animation on Scroll
+        const speedCounter = document.getElementById('speed-counter');
+        let counterAnimated = false;
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !counterAnimated) {
+                counterAnimated = true;
+                let start = 0.0;
+                const end = 0.8;
+                const duration = 1500;
+                const stepTime = 20;
+                const steps = duration / stepTime;
+                const increment = end / steps;
+                
+                const timer = setInterval(() => {
+                    start += increment;
+                    if (start >= end) {
+                        clearInterval(timer);
+                        speedCounter.innerText = "0.8"; // Final value
+                    } else {
+                        speedCounter.innerText = start.toFixed(1);
+                    }
+                }, stepTime);
+            }
+        });
+
+        if(speedCounter) {
+            counterObserver.observe(speedCounter);
+        }
+
+    </script>
+</body>
+</html>
