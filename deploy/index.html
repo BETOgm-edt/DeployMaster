@@ -242,6 +242,46 @@
         </div>
     </div>
 
+    <!-- Modal Seleção de Repositórios do GitHub (Importar Repositório) -->
+    <div id="github-repo-picker-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
+        <div class="bg-[#0A0A0A] border border-[#222] rounded-2xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative flex flex-col max-h-[85vh]">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-[#222] pb-4 mb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-white shrink-0">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-medium text-white tracking-tight">Importar Repositório do GitHub</h2>
+                        <p class="text-xs text-[#777]">Selecione um repositório existente da sua conta para conectar e editar.</p>
+                    </div>
+                </div>
+                <button onclick="closeRepoPickerModal()" class="text-[#666] hover:text-white transition p-1.5 rounded-lg hover:bg-[#151515]">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Search Bar & Refresh -->
+            <div class="flex items-center gap-3 mb-4 shrink-0">
+                <div class="relative flex-grow">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-[#555]"></i>
+                    <input type="text" id="repo-picker-search" oninput="filterRepoPickerList()" placeholder="Filtrar repositórios..." 
+                           class="w-full bg-[#111] border border-[#222] focus:border-amber-500/50 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-[#555] outline-none transition">
+                </div>
+                <button onclick="loadAndRenderRepoPickerList(true)" class="p-2.5 bg-[#111] border border-[#222] hover:bg-[#181818] text-[#888] hover:text-white rounded-xl transition" title="Atualizar lista">
+                    <i data-lucide="refresh-cw" class="w-4 h-4" id="repo-picker-refresh-icon"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Repo List Container -->
+            <div id="repo-picker-list" class="overflow-y-auto flex-grow space-y-2 pr-1 custom-scrollbar min-h-[220px]">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- Editor IDE Modal (VS Code Style) -->
     <div id="editor-modal" class="fixed inset-0 z-[100] hidden flex-col bg-[#050505]/95 backdrop-blur-md animate-fade-in p-0 sm:p-2 md:p-6 lg:p-10 transition-all duration-300">
         <div class="flex-grow flex flex-col bg-[#0A0A0A] sm:border border-[#222] sm:rounded-xl shadow-2xl overflow-hidden w-full h-full max-h-[100dvh]">
@@ -913,8 +953,160 @@
 
         function selectProjectCreationOption(option) {
             closeNewProjectChoiceModal();
+            if (option === 'new') {
+                openEditorModal(false);
+                setRepoSourceMode('new');
+            } else if (option === 'existing') {
+                openRepoPickerModal();
+            }
+        }
+
+        function openRepoPickerModal() {
+            const modal = document.getElementById('github-repo-picker-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            loadAndRenderRepoPickerList();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function closeRepoPickerModal() {
+            const modal = document.getElementById('github-repo-picker-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        async function loadAndRenderRepoPickerList(forceReload = false) {
+            const ghToken = localStorage.getItem('dm_gh_token');
+            const container = document.getElementById('repo-picker-list');
+            const refreshIcon = document.getElementById('repo-picker-refresh-icon');
+
+            if (!container) return;
+
+            if (!ghToken) {
+                container.innerHTML = `
+                    <div class="text-center py-10 px-4 bg-[#111] rounded-xl border border-[#222]">
+                        <i data-lucide="key" class="w-8 h-8 text-amber-400 mx-auto mb-2"></i>
+                        <p class="text-sm text-white font-medium">Token do GitHub Necessário</p>
+                        <p class="text-xs text-[#777] mt-1 max-w-xs mx-auto">Para listar e importar seus repositórios, configure seu Personal Access Token do GitHub.</p>
+                        <button onclick="closeRepoPickerModal(); toggleSettings();" class="mt-4 px-4 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-mono transition">
+                            Configurar Token Agora
+                        </button>
+                    </div>
+                `;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+            if (userGitHubRepos.length === 0 || forceReload) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-[#666]">
+                        <i data-lucide="refresh-cw" class="w-6 h-6 animate-spin mx-auto mb-2 text-amber-400"></i>
+                        <p class="text-xs font-mono">Buscando repositórios no GitHub...</p>
+                    </div>
+                `;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                try {
+                    const res = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
+                        headers: { Authorization: `token ${ghToken}` }
+                    });
+                    if (!res.ok) throw new Error('Erro na requisição');
+                    userGitHubRepos = await res.json();
+                } catch (e) {
+                    console.error(e);
+                    container.innerHTML = `
+                        <div class="text-center py-10 text-red-400 text-xs">
+                            Erro ao carregar repositórios do GitHub. Verifique seu Token.
+                        </div>
+                    `;
+                    if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                    return;
+                }
+            }
+
+            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+            renderRepoPickerItems(userGitHubRepos);
+        }
+
+        function renderRepoPickerItems(repos) {
+            const container = document.getElementById('repo-picker-list');
+            if (!container) return;
+
+            if (!repos || repos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-[#666] text-xs font-mono">
+                        Nenhum repositório encontrado.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = repos.map(r => {
+                const isPriv = r.private;
+                const updatedDate = r.updated_at ? new Date(r.updated_at).toLocaleDateString('pt-BR') : '';
+                return `
+                    <div onclick="selectRepoFromPicker('${escapeHTML(r.full_name)}', '${escapeHTML(r.name)}', ${isPriv})" 
+                         class="group p-4 bg-[#111] hover:bg-[#161616] border border-[#222] hover:border-amber-500/50 rounded-xl transition-all cursor-pointer flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                                <i data-lucide="folder-git-2" class="w-4 h-4 text-amber-400"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors">${escapeHTML(r.full_name)}</span>
+                                    <span class="px-1.5 py-0.5 text-[9px] font-mono rounded ${isPriv ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                                        ${isPriv ? 'Privado' : 'Público'}
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-[#666] mt-0.5 flex items-center gap-2">
+                                    <span>Branch: <code class="text-[#888] font-mono">${escapeHTML(r.default_branch || 'main')}</code></span>
+                                    ${updatedDate ? `<span>• ${updatedDate}</span>` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs text-amber-400 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity font-mono shrink-0 ml-2">
+                            <span>Importar</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function filterRepoPickerList() {
+            const query = (document.getElementById('repo-picker-search')?.value || '').toLowerCase();
+            const filtered = userGitHubRepos.filter(r => r.full_name.toLowerCase().includes(query) || (r.description && r.description.toLowerCase().includes(query)));
+            renderRepoPickerItems(filtered);
+        }
+
+        async function selectRepoFromPicker(fullName, repoName, isPrivate) {
+            closeRepoPickerModal();
             openEditorModal(false);
-            setRepoSourceMode(option);
+            setRepoSourceMode('existing');
+
+            const select = document.getElementById('existing-repo-select');
+            if (select) {
+                let existingOpt = Array.from(select.options).find(o => o.value === fullName);
+                if (!existingOpt) {
+                    existingOpt = document.createElement('option');
+                    existingOpt.value = fullName;
+                    existingOpt.dataset.name = repoName;
+                    existingOpt.dataset.private = isPrivate;
+                    existingOpt.text = `${fullName} ${isPrivate ? '(Privado)' : '(Público)'}`;
+                    select.appendChild(existingOpt);
+                }
+                select.value = fullName;
+            }
+
+            await onExistingRepoSelected();
         }
 
         function openEditorModal(isEdit = false, name = '') {
