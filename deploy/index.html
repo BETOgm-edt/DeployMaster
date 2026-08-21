@@ -208,14 +208,35 @@
                      </h2>
                      <div class="h-4 w-[1px] bg-[#333]"></div>
                      
+                     <!-- Source Mode Toggle (Novo vs Existente) -->
+                     <div id="repo-source-toggle" class="flex items-center gap-1 bg-[#111] rounded p-0.5 border border-[#222]">
+                         <button type="button" id="btn-source-new" onclick="setRepoSourceMode('new')" class="px-2.5 py-1 rounded text-white bg-[#222] text-[10px] font-medium transition-all" title="Criar Novo Repositório GitHub">
+                             <i data-lucide="plus-circle" class="w-3 h-3 inline mr-1 text-blue-400"></i>Novo Repo
+                         </button>
+                         <button type="button" id="btn-source-existing" onclick="setRepoSourceMode('existing')" class="px-2.5 py-1 rounded text-[#666] text-[10px] font-medium transition-all hover:text-white" title="Usar Repositório Existente do GitHub">
+                             <i data-lucide="link-2" class="w-3 h-3 inline mr-1 text-amber-400"></i>Repo Existente
+                         </button>
+                     </div>
+
                      <!-- Project Form inside Header -->
                      <form id="deploy-form" onsubmit="handleDeploy(event)" class="flex items-center gap-3">
-                         <div class="relative group">
+                         <!-- Input Novo Repo -->
+                         <div id="new-repo-name-container" class="relative group">
                              <input type="text" id="project-name" required pattern="[a-z0-9-]+" 
                                  placeholder="nome-do-projeto"
-                                 class="input-field rounded-md px-3 py-1 text-xs font-mono w-40 sm:w-48 border-none bg-[#111] hover:bg-[#151515] focus:bg-[#1a1a1a]">
+                                 class="input-field rounded-md px-3 py-1 text-xs font-mono w-36 sm:w-44 border-none bg-[#111] hover:bg-[#151515] focus:bg-[#1a1a1a]">
                          </div>
                          
+                         <!-- Dropdown Repo Existente -->
+                         <div id="existing-repo-container" class="hidden flex items-center gap-1.5">
+                             <select id="existing-repo-select" onchange="onExistingRepoSelected()" class="input-field rounded-md px-2.5 py-1 text-xs font-mono w-48 sm:w-56 bg-[#111] text-white border-none focus:bg-[#1a1a1a] cursor-pointer">
+                                 <option value="">Carregando repositórios...</option>
+                             </select>
+                             <button type="button" onclick="loadUserGitHubRepos(true)" class="p-1 text-[#666] hover:text-white transition rounded bg-[#111]" title="Recarregar Repositórios">
+                                 <i data-lucide="rotate-cw" class="w-3 h-3"></i>
+                             </button>
+                         </div>
+
                          <div id="visibility-container" class="flex items-center gap-1 bg-[#111] rounded p-0.5 border border-[#222]">
                              <label class="cursor-pointer">
                                  <input type="radio" name="visibility" value="public" class="peer sr-only" checked>
@@ -250,19 +271,27 @@
                 <!-- Sidebar Explorer -->
                 <div id="editor-sidebar" class="w-64 flex-shrink-0 bg-[#080808] border-r border-[#222] flex flex-col transition-transform duration-300 absolute md:relative z-40 h-full -translate-x-full md:translate-x-0">
                     <div class="p-3 border-b border-[#222] flex justify-between items-center bg-[#050505]">
-                        <span class="text-[10px] font-mono text-[#666] uppercase tracking-wider">Explorer</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="toggleNewFileMode()" id="btn-new-file" class="text-[#666] hover:text-white transition" title="Novo Arquivo">
+                        <span class="text-[10px] font-mono text-[#666] uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="folder-tree" class="w-3.5 h-3.5 text-blue-400"></i> Explorer
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="promptNewFile()" class="p-1 text-[#666] hover:text-white transition rounded hover:bg-[#151515]" title="Novo Arquivo (Windows Style)">
                                 <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button onclick="toggleSidebar()" class="md:hidden text-[#666] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            <button type="button" onclick="promptNewFolder()" class="p-1 text-[#666] hover:text-white transition rounded hover:bg-[#151515]" title="Nova Pasta (Windows Style)">
+                                <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button type="button" onclick="refreshExplorer()" class="p-1 text-[#666] hover:text-white transition rounded hover:bg-[#151515]" title="Recarregar Árvore de Arquivos">
+                                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="toggleSidebar()" class="md:hidden p-1 text-[#666] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                     
                     <div class="p-2 border-b border-[#222]">
                         <div class="relative">
                             <i data-lucide="search" class="absolute left-2 top-1.5 w-3 h-3 text-[#555]"></i>
-                            <input type="text" id="file-search" onkeyup="filterFiles()" placeholder="Buscar arquivos..." 
+                            <input type="text" id="file-search" onkeyup="filterFiles()" placeholder="Buscar arquivos ou pastas..." 
                                 class="w-full bg-[#111] rounded pl-7 pr-2 py-1 text-xs font-mono text-white border-none focus:bg-[#1a1a1a] placeholder-[#444]">
                         </div>
                     </div>
@@ -275,22 +304,46 @@
                         </div>
                     </div>
 
-                    <div id="file-list" class="flex-grow overflow-y-auto p-1 space-y-0.5">
+                    <!-- Tree View List -->
+                    <div id="file-list" oncontextmenu="handleExplorerRootContextMenu(event)" class="flex-grow overflow-y-auto p-1 space-y-0.5 select-none">
                         <!-- Arquivos renderizados aqui -->
                     </div>
                     <input type="hidden" id="file-select">
                 </div>
+
+                <!-- Custom Windows Context Menu -->
+                <div id="explorer-context-menu" class="fixed z-[300] hidden bg-[#0D0D0D] border border-[#2B2B2B] rounded-lg shadow-2xl py-1 text-xs font-mono w-48 text-[#CCCCCC]">
+                    <button type="button" onclick="contextAction('new-file')" class="w-full px-3 py-1.5 text-left hover:bg-[#222] hover:text-white flex items-center gap-2">
+                        <i data-lucide="file-plus" class="w-3.5 h-3.5 text-blue-400"></i> Novo Arquivo
+                    </button>
+                    <button type="button" onclick="contextAction('new-folder')" class="w-full px-3 py-1.5 text-left hover:bg-[#222] hover:text-white flex items-center gap-2">
+                        <i data-lucide="folder-plus" class="w-3.5 h-3.5 text-amber-400"></i> Nova Pasta
+                    </button>
+                    <div class="my-1 border-t border-[#222]"></div>
+                    <button type="button" id="ctx-rename-btn" onclick="contextAction('rename')" class="w-full px-3 py-1.5 text-left hover:bg-[#222] hover:text-white flex items-center gap-2">
+                        <i data-lucide="edit-2" class="w-3.5 h-3.5 text-gray-400"></i> Renomear
+                    </button>
+                    <button type="button" id="ctx-delete-btn" onclick="contextAction('delete')" class="w-full px-3 py-1.5 text-left hover:bg-[#ff4444]/10 hover:text-red-400 text-red-400 flex items-center gap-2">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Excluir
+                    </button>
+                </div>
                 
                 <!-- Main Editor Area -->
                 <div class="flex-grow flex flex-col bg-[#050505] min-w-0">
-                    <!-- Editor Tabs -->
-                    <div class="h-9 min-h-[36px] bg-[#0A0A0A] flex border-b border-[#222] overflow-x-auto no-scrollbar">
-                         <div class="px-4 py-1.5 bg-[#050505] border-r border-[#222] border-t-2 border-t-blue-500 text-xs font-mono text-white flex items-center gap-2 shrink-0">
-                              <i data-lucide="file-code" class="w-3.5 h-3.5 text-blue-400"></i>
-                              <span id="active-file-name">index.html</span>
+                    <!-- Editor Tabs & Breadcrumbs -->
+                    <div class="h-9 min-h-[36px] bg-[#0A0A0A] flex border-b border-[#222] overflow-x-auto no-scrollbar justify-between items-center px-2">
+                         <div class="flex items-center gap-2 shrink-0">
+                             <div class="px-3 py-1 bg-[#050505] border-r border-[#222] border-t-2 border-t-blue-500 text-xs font-mono text-white flex items-center gap-2">
+                                  <i data-lucide="file-code" class="w-3.5 h-3.5 text-blue-400"></i>
+                                  <span id="active-file-name">index.html</span>
+                             </div>
+                             <div id="file-breadcrumbs" class="hidden sm:flex items-center gap-1 text-[11px] font-mono text-[#666] pl-2">
+                                 <!-- Breadcrumbs inseridos via JS -->
+                             </div>
                          </div>
-                         <div class="flex-grow flex justify-end items-center px-2">
-                             <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono" title="Resetar código inicial">RESET TEMPLATE</button>
+                         
+                         <div class="flex items-center gap-2 shrink-0">
+                             <button type="button" onclick="loadTemplate()" class="text-[10px] text-[#444] hover:text-white transition font-mono px-2 py-0.5 rounded hover:bg-[#151515]" title="Resetar código inicial">RESET TEMPLATE</button>
                          </div>
                     </div>
                     
@@ -347,10 +400,16 @@
         let allRepoFiles = [];
         let monacoEditor = null;
         let expandedFolders = new Set(); // Stores paths of expanded folders
+        let repoSourceMode = 'new'; // 'new' or 'existing'
+        let userGitHubRepos = [];
+        let selectedContextNode = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadKeys();
+            
+            // Fechar menu de contexto ao clicar fora
+            document.addEventListener('click', closeContextMenu);
             
             // Initialize Monaco
             require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
@@ -468,24 +527,148 @@
             }
         }
 
+        function setRepoSourceMode(mode) {
+            repoSourceMode = mode;
+            const btnNew = document.getElementById('btn-source-new');
+            const btnExisting = document.getElementById('btn-source-existing');
+            const newContainer = document.getElementById('new-repo-name-container');
+            const existingContainer = document.getElementById('existing-repo-container');
+            const visibilityContainer = document.getElementById('visibility-container');
+            const deployBtnText = document.getElementById('deploy-btn-text');
+
+            if (mode === 'new') {
+                btnNew.classList.add('bg-[#222]', 'text-white');
+                btnNew.classList.remove('text-[#666]');
+                btnExisting.classList.remove('bg-[#222]', 'text-white');
+                btnExisting.classList.add('text-[#666]');
+                
+                newContainer.classList.remove('hidden');
+                existingContainer.classList.add('hidden');
+                visibilityContainer.classList.remove('hidden');
+
+                document.getElementById('project-name').required = true;
+                document.getElementById('project-name').disabled = false;
+                document.getElementById('project-name').classList.remove('opacity-50', 'cursor-not-allowed');
+                if (deployBtnText) deployBtnText.innerText = "Deploy";
+            } else {
+                btnExisting.classList.add('bg-[#222]', 'text-white');
+                btnExisting.classList.remove('text-[#666]');
+                btnNew.classList.remove('bg-[#222]', 'text-white');
+                btnNew.classList.add('text-[#666]');
+                
+                newContainer.classList.add('hidden');
+                existingContainer.classList.remove('hidden');
+                visibilityContainer.classList.add('hidden');
+
+                document.getElementById('project-name').required = false;
+                if (deployBtnText) deployBtnText.innerText = "Deploy & Conectar";
+
+                loadUserGitHubRepos();
+            }
+            lucide.createIcons();
+        }
+
+        async function loadUserGitHubRepos(forceReload = false) {
+            const ghToken = localStorage.getItem('dm_gh_token');
+            const select = document.getElementById('existing-repo-select');
+            if (!ghToken) {
+                if (select) select.innerHTML = '<option value="">Token GitHub necessário</option>';
+                return;
+            }
+
+            if (userGitHubRepos.length > 0 && !forceReload) {
+                renderUserGitHubRepoOptions();
+                return;
+            }
+
+            if (select) select.innerHTML = '<option value="">Carregando repositórios...</option>';
+
+            try {
+                const res = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
+                    headers: { Authorization: `token ${ghToken}` }
+                });
+                if (!res.ok) throw new Error('Erro ao buscar repositórios');
+                userGitHubRepos = await res.json();
+                renderUserGitHubRepoOptions();
+            } catch (e) {
+                console.error(e);
+                if (select) select.innerHTML = '<option value="">Erro ao carregar repositórios</option>';
+            }
+        }
+
+        function renderUserGitHubRepoOptions() {
+            const select = document.getElementById('existing-repo-select');
+            if (!select) return;
+            if (userGitHubRepos.length === 0) {
+                select.innerHTML = '<option value="">Nenhum repositório encontrado</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">-- Selecione um Repositório --</option>' +
+                userGitHubRepos.map(r => `<option value="${escapeHTML(r.full_name)}" data-name="${escapeHTML(r.name)}" data-private="${r.private}">${escapeHTML(r.full_name)} ${r.private ? '(Privado)' : '(Público)'}</option>`).join('');
+        }
+
+        async function onExistingRepoSelected() {
+            const select = document.getElementById('existing-repo-select');
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption || !selectedOption.value) return;
+
+            const fullName = selectedOption.value; // "owner/repo"
+            const repoName = selectedOption.dataset.name;
+            const isPrivate = selectedOption.dataset.private === "true";
+
+            document.getElementById('project-name').value = repoName;
+            document.querySelector(`input[name="visibility"][value="${isPrivate ? 'private' : 'public'}"]`).checked = true;
+
+            const [owner, name] = fullName.split('/');
+            setLoading(true, "Carregando arquivos...");
+            try {
+                const ghToken = localStorage.getItem('dm_gh_token');
+                const repoRes = await fetch(`https://api.github.com/repos/${owner}/${name}`, { headers: { Authorization: `token ${ghToken}` } });
+                if (repoRes.ok) {
+                    const repoData = await repoRes.json();
+                    const branch = repoData.default_branch || 'main';
+                    const treeRes = await fetch(`https://api.github.com/repos/${owner}/${name}/git/trees/${branch}?recursive=1`, { headers: { Authorization: `token ${ghToken}` } });
+                    if (treeRes.ok) {
+                        const treeData = await treeRes.json();
+                        allRepoFiles = treeData.tree.filter(i => i.type === 'blob').sort((a,b) => a.path.localeCompare(b.path));
+                        renderFileOptions(allRepoFiles);
+                        let targetFile = allRepoFiles.some(f => f.path === 'index.html') ? 'index.html' : (allRepoFiles[0]?.path || '');
+                        if (targetFile) await selectFile(targetFile, name);
+                        log('System', `Repositório ${fullName} carregado no editor.`, 'success');
+                    }
+                }
+            } catch (e) {
+                log('ERROR', 'Falha ao ler arquivos: ' + e.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
         async function handleDeploy(e) {
             e.preventDefault();
             const ghToken = localStorage.getItem('dm_gh_token');
             const vcToken = localStorage.getItem('dm_vc_token');
             if (!ghToken || !vcToken) { toggleSettings(); return; }
 
-            const projectName = document.getElementById('project-name').value.trim().toLowerCase();
-            const content = monacoEditor ? monacoEditor.getValue() : '';
-            
             const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
+            let projectName = document.getElementById('project-name').value.trim().toLowerCase();
+            let fullGitRepo = '';
+            
+            if (!isUpdate && repoSourceMode === 'existing') {
+                const select = document.getElementById('existing-repo-select');
+                if (!select || !select.value) return alert("Selecione um repositório existente na lista");
+                fullGitRepo = select.value;
+                projectName = select.options[select.selectedIndex].dataset.name;
+            }
+
+            if (!projectName) return alert("Informe o nome do projeto");
+
+            const content = monacoEditor ? monacoEditor.getValue() : '';
             const isPrivate = document.querySelector('input[name="visibility"]:checked').value === 'private';
             
-            let fileName = 'index.html';
-            if (isUpdate) {
-                const isNewFile = !document.getElementById('new-file-input-container').classList.contains('hidden');
-                fileName = isNewFile ? document.getElementById('new-file-path').value.trim() : document.getElementById('file-select').value;
-                if(!fileName) return alert("Nome do arquivo inválido");
-            }
+            let fileName = document.getElementById('active-file-name')?.innerText || 'index.html';
+            if (fileName === '(Sem arquivo)') fileName = 'index.html';
 
             setLoading(true, "Processando...");
             clearLogs();
@@ -497,18 +680,21 @@
                 cachedGhUser = ghUser;
                 const userLogin = ghUser.login;
 
-                log('GitHub', `Verificando repositório ${projectName}...`);
-                if (!isUpdate) {
+                if (!fullGitRepo) fullGitRepo = `${userLogin}/${projectName}`;
+
+                if (!isUpdate && repoSourceMode === 'new') {
+                    log('GitHub', `Criando repositório ${projectName}...`);
                     await ensureGitHubRepo(ghToken, projectName, isPrivate);
-                } else {
+                } else if (isUpdate) {
                     await updateGitHubRepoVisibility(ghToken, userLogin, projectName, isPrivate);
                 }
 
-                log('Vercel', `Configurando projeto e vínculo Git...`);
-                await ensureVercelProjectLinked(vcToken, projectName, `${userLogin}/${projectName}`);
+                log('Vercel', `Configurando projeto Vercel e vinculando a ${fullGitRepo}...`);
+                await ensureVercelProjectLinked(vcToken, projectName, fullGitRepo);
 
                 log('GitHub', `Enviando código para ${fileName}...`);
-                await uploadToGitHub(ghToken, userLogin, projectName, content, fileName);
+                const [targetOwner, targetRepo] = fullGitRepo.split('/');
+                await uploadToGitHub(ghToken, targetOwner, targetRepo, content, fileName);
                 log('GitHub', 'Código enviado (Push).', 'success');
                 
                 log('Vercel', 'Deploy automático iniciado via Git Integration.', 'success');
@@ -643,6 +829,22 @@
             if (!res.ok) throw new Error('Falha no upload para o GitHub');
         }
 
+        function resetForm() {
+            document.getElementById('deploy-form').reset();
+            document.getElementById('deploy-form').dataset.isUpdate = "false";
+            document.getElementById('project-name').disabled = false;
+            document.getElementById('project-name').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('form-title').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-blue-400"></i> <span>Novo Projeto</span>`;
+            document.getElementById('deploy-btn-text').innerText = "Deploy";
+            document.getElementById('active-file-name').innerText = 'index.html';
+            allRepoFiles = [];
+            renderFileOptions([]);
+            setRepoSourceMode('new');
+            const repoToggle = document.getElementById('repo-source-toggle');
+            if (repoToggle) repoToggle.classList.remove('hidden');
+            loadTemplate();
+        }
+
         function openEditorModal(isEdit = false, name = '') {
             const modal = document.getElementById('editor-modal');
             modal.classList.remove('hidden');
@@ -676,12 +878,15 @@
 
             openEditorModal(true, name);
 
+            const repoToggle = document.getElementById('repo-source-toggle');
+            if (repoToggle) repoToggle.classList.add('hidden');
+
             document.getElementById('project-name').value = name;
             document.getElementById('project-name').disabled = true;
             document.getElementById('project-name').classList.add('opacity-50', 'cursor-not-allowed');
             document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> <span>Editando: ${escapeHTML(name)}</span>`;
             document.getElementById('deploy-btn-text').innerText = "Atualizar";
-            // Set flag on cancel button even though it's hidden now, handleDeploy checks it
+            
             const form = document.getElementById('deploy-form');
             form.dataset.isUpdate = "true";
 
@@ -734,12 +939,12 @@
             const list = document.getElementById('file-list');
             list.innerHTML = '';
             if(files.length === 0) {
-                list.innerHTML = `<div class="text-[10px] text-[#666] p-2 text-center">(Vazio)</div>`;
+                list.innerHTML = `<div class="text-[10px] text-[#666] p-4 text-center select-none font-mono">Nenhum arquivo no workspace<br><span class="text-[#444] text-[9px]">Clique com botão direito para criar</span></div>`;
                 return;
             }
             
             // Construir árvore de arquivos
-            const root = { name: 'root', path: 'root', isFolder: true, children: {} };
+            const root = { name: 'root', path: '', isFolder: true, children: {} };
             files.forEach(f => {
                 const parts = f.path.split('/');
                 let current = root;
@@ -778,14 +983,15 @@
                     const item = document.createElement('div');
                     
                     const inner = document.createElement('div');
-                    inner.className = 'flex items-center gap-1 py-1 hover:bg-[#222] transition cursor-pointer text-xs font-mono group';
+                    inner.className = 'flex items-center gap-1 py-1 hover:bg-[#1a1a1a] rounded transition cursor-pointer text-xs font-mono group';
                     inner.style.paddingLeft = `${level * 12 + 8}px`;
                     inner.style.paddingRight = '8px';
                     
                     const isExpanded = child.isFolder && expandedFolders.has(child.path);
                     
                     if (child.isFolder) {
-                        inner.classList.add('text-[#CCC]');
+                        inner.classList.add('text-[#CCC]', 'folder-item');
+                        inner.dataset.path = child.path;
                     } else {
                         inner.classList.add('text-[#888]', 'file-item');
                         inner.dataset.path = child.path;
@@ -795,13 +1001,19 @@
                         ? `<i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-3 h-3 text-[#666] group-hover:text-white transition-transform"></i>`
                         : `<div class="w-3 h-3"></div>`;
                         
-                    const iconColor = child.isFolder ? 'text-blue-400 opacity-80' : 'opacity-70 group-hover:opacity-100 group-hover:text-blue-400';
+                    const iconColor = child.isFolder ? 'text-amber-400 opacity-90' : 'opacity-70 group-hover:opacity-100 group-hover:text-blue-400';
 
                     inner.innerHTML = `
                         ${chevron}
                         <i data-lucide="${getIcon(child.path, child.isFolder, isExpanded)}" class="w-3.5 h-3.5 ${iconColor}"></i>
                         <span class="truncate w-full select-none">${escapeHTML(child.name)}</span>
                     `;
+
+                    inner.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openContextMenu(e, child.path, child.isFolder);
+                    };
 
                     item.appendChild(inner);
                     container.appendChild(item);
@@ -815,7 +1027,7 @@
                             e.stopPropagation();
                             if (expandedFolders.has(child.path)) expandedFolders.delete(child.path);
                             else expandedFolders.add(child.path);
-                            renderFileOptions(files); // Re-renderiza para atualizar ícones
+                            renderFileOptions(files);
                         };
                         
                         renderNode(child, childrenContainer, level + 1);
@@ -832,7 +1044,7 @@
             
             // Restaura a seleção visual
             const activePath = document.getElementById('active-file-name')?.innerText;
-            if (activePath && activePath !== 'index.html') {
+            if (activePath && activePath !== 'index.html' && activePath !== '(Sem arquivo)') {
                 document.querySelectorAll('.file-item').forEach(el => {
                     if (el.dataset.path === activePath) {
                         el.classList.add('bg-[#222]', 'text-white', 'border-l-2', 'border-blue-500');
@@ -856,18 +1068,237 @@
             });
             
             document.getElementById('active-file-name').innerText = path;
+            updateBreadcrumbs(path);
             
             if (monacoEditor) {
                 const ext = path.split('.').pop().toLowerCase();
                 const langMap = { 'html':'html', 'css':'css', 'js':'javascript', 'json':'json', 'ts':'typescript' };
                 monaco.editor.setModelLanguage(monacoEditor.getModel(), langMap[ext] || 'plaintext');
-                // hide sidebar on mobile after selecting
                 if (window.innerWidth < 768) {
                     document.getElementById('editor-sidebar').classList.add('-translate-x-full');
                 }
             }
             
             await loadFileContent(path, projOverride);
+        }
+
+        async function deleteFromGitHub(token, owner, repo, filename) {
+            try {
+                const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, { headers: { Authorization: `token ${token}` } });
+                if (!check.ok) return;
+                const sha = (await check.json()).sha;
+                await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: `Excluindo ${filename}`, sha })
+                });
+            } catch (e) {
+                console.error('Erro ao excluir no GitHub:', e);
+            }
+        }
+
+        function handleExplorerRootContextMenu(e) {
+            if (e.target.closest('.file-item') || e.target.closest('.folder-item')) return;
+            e.preventDefault();
+            openContextMenu(e, '', true);
+        }
+
+        function openContextMenu(e, path, isFolder) {
+            selectedContextNode = { path, isFolder };
+            const menu = document.getElementById('explorer-context-menu');
+            if (!menu) return;
+            
+            menu.style.left = `${Math.min(e.clientX, window.innerWidth - 200)}px`;
+            menu.style.top = `${Math.min(e.clientY, window.innerHeight - 180)}px`;
+            menu.classList.remove('hidden');
+
+            const renameBtn = document.getElementById('ctx-rename-btn');
+            const deleteBtn = document.getElementById('ctx-delete-btn');
+            if (renameBtn) renameBtn.style.display = path ? 'flex' : 'none';
+            if (deleteBtn) deleteBtn.style.display = path ? 'flex' : 'none';
+            
+            lucide.createIcons();
+        }
+
+        function closeContextMenu() {
+            const menu = document.getElementById('explorer-context-menu');
+            if (menu) menu.classList.add('hidden');
+        }
+
+        async function contextAction(action) {
+            closeContextMenu();
+            const node = selectedContextNode || { path: '', isFolder: true };
+            const targetFolder = node.isFolder ? node.path : (node.path.includes('/') ? node.path.substring(0, node.path.lastIndexOf('/')) : '');
+            
+            if (action === 'new-file') {
+                promptNewFile(targetFolder);
+            } else if (action === 'new-folder') {
+                promptNewFolder(targetFolder);
+            } else if (action === 'rename' && node.path) {
+                promptRename(node.path, node.isFolder);
+            } else if (action === 'delete' && node.path) {
+                promptDelete(node.path, node.isFolder);
+            }
+        }
+
+        function promptNewFile(targetFolder = '') {
+            const defaultPath = targetFolder ? `${targetFolder}/novo-arquivo.js` : 'novo-arquivo.js';
+            const filePath = prompt("Digite o nome ou caminho do novo arquivo:", defaultPath);
+            if (!filePath || !filePath.trim()) return;
+
+            const cleanPath = filePath.trim().replace(/^\/+/, '');
+            if (!allRepoFiles.some(f => f.path === cleanPath)) {
+                allRepoFiles.push({ path: cleanPath, type: 'blob' });
+                allRepoFiles.sort((a,b) => a.path.localeCompare(b.path));
+            }
+
+            if (cleanPath.includes('/')) {
+                const parts = cleanPath.split('/');
+                let current = '';
+                for (let i = 0; i < parts.length - 1; i++) {
+                    current = current ? `${current}/${parts[i]}` : parts[i];
+                    expandedFolders.add(current);
+                }
+            }
+
+            renderFileOptions(allRepoFiles);
+            selectFile(cleanPath);
+            if (monacoEditor) monacoEditor.setValue('');
+            log('System', `Novo arquivo "${cleanPath}" criado no workspace.`, 'info');
+        }
+
+        function promptNewFolder(targetFolder = '') {
+            const defaultName = targetFolder ? `${targetFolder}/nova-pasta` : 'nova-pasta';
+            const folderPath = prompt("Digite o nome da nova pasta:", defaultName);
+            if (!folderPath || !folderPath.trim()) return;
+
+            const cleanFolderPath = folderPath.trim().replace(/^\/+|\/+$/g, '');
+            const keepFilePath = `${cleanFolderPath}/.gitkeep`;
+
+            if (!allRepoFiles.some(f => f.path === keepFilePath)) {
+                allRepoFiles.push({ path: keepFilePath, type: 'blob' });
+                allRepoFiles.sort((a,b) => a.path.localeCompare(b.path));
+            }
+
+            expandedFolders.add(cleanFolderPath);
+            if (cleanFolderPath.includes('/')) {
+                const parts = cleanFolderPath.split('/');
+                let current = '';
+                for (let i = 0; i < parts.length - 1; i++) {
+                    current = current ? `${current}/${parts[i]}` : parts[i];
+                    expandedFolders.add(current);
+                }
+            }
+
+            renderFileOptions(allRepoFiles);
+            log('System', `Nova pasta "${cleanFolderPath}" criada no workspace.`, 'info');
+        }
+
+        async function promptRename(oldPath, isFolder) {
+            const newPathInput = prompt(`Renomear ${isFolder ? 'pasta' : 'arquivo'}:`, oldPath);
+            if (!newPathInput || !newPathInput.trim() || newPathInput.trim() === oldPath) return;
+            const newPath = newPathInput.trim();
+
+            const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
+            const ghToken = localStorage.getItem('dm_gh_token');
+
+            if (isUpdate && ghToken && !isFolder) {
+                setLoading(true, `Renomeando no GitHub...`);
+                try {
+                    const user = cachedGhUser ? cachedGhUser.login : (await fetchGitHubUser(ghToken)).login;
+                    const projectName = document.getElementById('project-name').value;
+                    const content = monacoEditor ? monacoEditor.getValue() : '';
+
+                    await uploadToGitHub(ghToken, user, projectName, content, newPath);
+                    await deleteFromGitHub(ghToken, user, projectName, oldPath);
+                    log('GitHub', `Renomeado de ${oldPath} para ${newPath}`, 'success');
+                } catch (e) {
+                    log('ERROR', 'Erro ao renomear: ' + e.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            allRepoFiles = allRepoFiles.map(f => {
+                if (f.path === oldPath) return { ...f, path: newPath };
+                if (isFolder && f.path.startsWith(oldPath + '/')) {
+                    return { ...f, path: f.path.replace(oldPath + '/', newPath + '/') };
+                }
+                return f;
+            });
+
+            renderFileOptions(allRepoFiles);
+            selectFile(newPath);
+        }
+
+        async function promptDelete(path, isFolder) {
+            if (!confirm(`Tem certeza que deseja excluir ${isFolder ? 'a pasta' : 'o arquivo'} "${path}"?`)) return;
+
+            const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
+            const ghToken = localStorage.getItem('dm_gh_token');
+
+            if (isUpdate && ghToken) {
+                setLoading(true, `Excluindo no GitHub...`);
+                try {
+                    const user = cachedGhUser ? cachedGhUser.login : (await fetchGitHubUser(ghToken)).login;
+                    const projectName = document.getElementById('project-name').value;
+                    const filesToDelete = isFolder ? allRepoFiles.filter(f => f.path.startsWith(path + '/')) : allRepoFiles.filter(f => f.path === path);
+
+                    for (const f of filesToDelete) {
+                        await deleteFromGitHub(ghToken, user, projectName, f.path);
+                    }
+                    log('GitHub', `Excluído: ${path}`, 'success');
+                } catch (e) {
+                    log('ERROR', 'Erro ao excluir: ' + e.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            allRepoFiles = allRepoFiles.filter(f => isFolder ? !f.path.startsWith(path + '/') : f.path !== path);
+
+            renderFileOptions(allRepoFiles);
+            if (allRepoFiles.length > 0) {
+                selectFile(allRepoFiles[0].path);
+            } else {
+                document.getElementById('active-file-name').innerText = '(Sem arquivo)';
+                updateBreadcrumbs('');
+                if (monacoEditor) monacoEditor.setValue('');
+            }
+        }
+
+        function refreshExplorer() {
+            const projectName = document.getElementById('project-name').value;
+            if (projectName && document.getElementById('deploy-form').dataset.isUpdate === "true") {
+                editProject(projectName);
+            } else {
+                renderFileOptions(allRepoFiles);
+            }
+        }
+
+        function updateBreadcrumbs(path) {
+            const breadcrumbsContainer = document.getElementById('file-breadcrumbs');
+            if (!breadcrumbsContainer) return;
+            if (!path) {
+                breadcrumbsContainer.innerHTML = '';
+                return;
+            }
+
+            const projName = document.getElementById('project-name').value || 'projeto';
+            const parts = [projName, ...path.split('/')];
+            
+            breadcrumbsContainer.innerHTML = parts.map((part, index) => {
+                const isLast = index === parts.length - 1;
+                const icon = index === 0 ? '<i data-lucide="box" class="w-3 h-3 text-gray-500"></i>' : (isLast ? '<i data-lucide="file-text" class="w-3 h-3 text-blue-400"></i>' : '<i data-lucide="folder" class="w-3 h-3 text-amber-400/80"></i>');
+                return `
+                    <div class="flex items-center gap-1 ${isLast ? 'text-gray-200 font-medium' : 'text-[#777]'}">
+                        ${icon}
+                        <span>${escapeHTML(part)}</span>
+                    </div>
+                    ${!isLast ? '<span class="text-[#444] text-[10px]">></span>' : ''}
+                `;
+            }).join('');
+            lucide.createIcons();
         }
 
         function filterFiles() {
