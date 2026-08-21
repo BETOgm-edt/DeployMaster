@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Repo Analyzer AI</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            /* slate-900 */
+            color: #f8fafc;
+            /* slate-50 */
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const Icon = ({ name, className = "", size = 24 }) => {
+            const iconRef = useRef(null);
+
+            useEffect(() => {
+                if (iconRef.current) {
+                    // Limpa o conteúdo anterior para evitar duplicação em re-renders
+                    iconRef.current.innerHTML = '';
+                    // Cria o ícone usando a API do Lucide
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', name);
+                    if (className) iconElement.setAttribute('class', className);
+                    iconElement.style.width = `${size}px`;
+                    iconElement.style.height = `${size}px`;
+                    iconRef.current.appendChild(iconElement);
+                    lucide.createIcons({ root: iconRef.current });
+                }
+            }, [name, className, size]);
+
+            return <span ref={iconRef} className="inline-flex items-center justify-center"></span>;
+        };
+
+        // Função para buscar repositórios no GitHub
+        const fetchGitHubRepos = async (username, token = "") => {
+            const headers = {
+                "Accept": "application/vnd.github.v3+json"
+            };
+            if (token) {
+                headers["Authorization"] = `token ${token}`;
+            }
+
+            const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers });
+
+            if (!response.ok) {
+                if (response.status === 404) throw new Error("Usuário não encontrado.");
+                if (response.status === 403) throw new Error("Limite de requisições do GitHub excedido. Tente usar um Token.");
+                throw new Error("Erro ao buscar repositórios do GitHub.");
+            }
+
+            return await response.json();
+        };
+
+        // Função para analisar repos com Gemini
+        const analyzeReposWithAI = async (repos) => {
+            // Prepara um array enxuto para economizar tokens
+            const reposData = repos.map(r => ({
+                name: r.name,
+                description: r.description || "Sem descrição",
+                language: r.language || "Desconhecida",
+                topics: r.topics || []
+            }));
+
+            const systemPrompt = `Você é um Engenheiro de Software Sênior e um Curador de Open Source.
+Vou fornecer uma lista de repositórios do GitHub em formato JSON (com nome, descrição, linguagens e tópicos).
+Sua tarefa é analisar cada um, deduzir seu funcionamento e RANQUEAR o potencial de interesse e utilidade para a comunidade de desenvolvedores. O objetivo do usuário é saber quais repositórios valem a pena ser públicos.
+
+Regras importantes:
+1. "objective": Explique qual o objetivo central/proposta de valor do projeto.
+2. "direct_description": Explique o que o projeto FAZ de forma prática (ex: "API em Node.js para gestão de tarefas").
+3. "public_utility_score": Dê uma nota de 1 a 10 avaliando o quão útil/interessante este código seria para outras pessoas.
+    - Notas 1 a 3: Projetos muito pessoais, clones genéricos (Netflix clone), cursos básicos (Hello World, calculadoras simples).
+    - Notas 4 a 6: Ferramentas úteis mas comuns, bibliotecas simples, scripts de automação do dia a dia.
+    - Notas 7 a 10: Ferramentas inovadoras, arquiteturas complexas, soluções para problemas reais, componentes muito reutilizáveis.
+4. "utility_reason": Uma frase explicando o PORQUÊ dessa nota e como outros criadores poderiam se interessar ou usar isso.
+
+O retorno DEVE ser OBRIGATORIAMENTE um JSON válido com o schema abaixo:`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: systemPrompt },
+                        { text: "Repositórios:\n" + JSON.stringify(reposData) }
+                    ]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "name": { type: "STRING" },
+                                "objective": { type: "STRING" },
+                                "direct_description": { type: "STRING" },
+                                "public_utility_score": { type: "INTEGER" },
+                                "utility_reason": { type: "STRING" }
+                            },
+                            required: ["name", "objective", "direct_description", "public_utility_score", "utility_reason"]
+                        }
+                    }
+                }
+            };
+
+            const apiKey = ""; // Canvas will inject API Key automatically
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0) {
+                const jsonString = result.candidates[0].content.parts[0].text;
+                try {
+                    return JSON.parse(jsonString);
+                } catch (e) {
+                    console.error("Erro ao fazer parse do JSON do Gemini:", e);
+                    throw new Error("A IA retornou um formato inválido.");
+                }
+            } else {
+                throw new Error("A IA não retornou resultados.");
+            }
+        };
+
+        const App = () => {
+            const [username, setUsername] = useState("");
+            const [token, setToken] = useState("");
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+            const [statusText, setStatusText] = useState("");
+            const [error, setError] = useState("");
+            const [results, setResults] = useState([]);
+            const [originalRepos, setOriginalRepos] = useState([]);
+            const [showTokenSettings, setShowTokenSettings] = useState(false);
+
+            const [searchTerm, setSearchTerm] = useState("");
+            const [togglingRepo, setTogglingRepo] = useState(null);
+
+            const [repoToDelete, setRepoToDelete] = useState(null);
+            const [isDeleting, setIsDeleting] = useState(false);
+            const [deleteError, setDeleteError] = useState("");
+
+            const [visibilityFilter, setVisibilityFilter] = useState("all");
+
+            const handleToggleVisibility = async (repo) => {
+                if (!token) {
+                    setError("Você precisa fornecer o Token de Acesso nas Configurações Avançadas para alterar a visibilidade.");
+                    return;
+                }
+
+                setTogglingRepo(repo.name);
+                setError("");
+
+                try {
+                    const safeToken = token.trim();
+                    const response = await fetch(`https://api.github.com/repos/${username}/${repo.name}`, {
+                        method: 'PATCH',
+                        headers: {
+                            "Authorization": `Bearer ${safeToken}`,
+                            "Accept": "application/vnd.github.v3+json",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ name: repo.name, private: !repo.private })
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 403 || response.status === 404) {
+                            throw new Error("Sem permissão. Seu token precisa ter o escopo 'repo' marcado no GitHub.");
+                        }
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(`Falha ao alterar visibilidade (Status: ${response.status}). ${errData.message || ''}`);
+                    }
+
+                    // Atualiza o estado local para refletir a mudança
+                    setResults(prev => prev.map(r => r.name === repo.name ? { ...r, private: !r.private } : r));
+                    setOriginalRepos(prev => prev.map(r => r.name === repo.name ? { ...r, private: !r.private } : r));
+                } catch (err) {
+                    if (err.message === "Failed to fetch") {
+                        setError("Falha de rede (Failed to fetch). Verifique se o seu navegador (ex: Brave Shields) ou bloqueador de anúncios não está bloqueando a edição na API do GitHub.");
+                    } else {
+                        setError(err.message);
+                    }
+                } finally {
+                    setTogglingRepo(null);
+                }
+            };
+
+            const confirmDelete = async () => {
+                if (!token) {
+                    setDeleteError("Você precisa fornecer o Token de Acesso nas Configurações Avançadas.");
+                    return;
+                }
+
+                setIsDeleting(true);
+                setDeleteError("");
+
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${username}/${repoToDelete.name}`, {
+                        method: 'DELETE',
+                        headers: {
+                            "Authorization": `token ${token}`,
+                            "Accept": "application/vnd.github.v3+json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 403 || response.status === 404) {
+                            throw new Error("Sem permissão. Seu token precisa ter o escopo 'delete_repo' marcado no GitHub.");
+                        }
+                        throw new Error(`Falha ao excluir o repositório (Status: ${response.status}).`);
+                    }
+
+                    // Remove imediatamente da lista na tela após sucesso
+                    setResults(prev => prev.filter(r => r.name !== repoToDelete.name));
+                    setOriginalRepos(prev => prev.filter(r => r.name !== repoToDelete.name));
+                    setRepoToDelete(null); // Fecha o modal
+                } catch (err) {
+                    setDeleteError(err.message);
+                } finally {
+                    setIsDeleting(false);
+                }
+            };
+
+            const handleAnalyze = async (e) => {
+                e.preventDefault();
+                if (!username.trim()) {
+                    setError("Digite um nome de usuário.");
+                    return;
+                }
+
+                setIsAnalyzing(true);
+                setError("");
+                setResults([]);
+                setOriginalRepos([]);
+
+                try {
+                    // Passo 1: GitHub
+                    setStatusText("Conectando ao GitHub para buscar repositórios...");
+                    // Agora busca todos os repositórios, sejam públicos ou privados
+                    // IMPORTANTE: Para ver repositórios privados, o TOKEN É OBRIGATÓRIO!
+                    const headers = {
+                        "Accept": "application/vnd.github.v3+json"
+                    };
+                    if (token) {
+                        headers["Authorization"] = `token ${token}`;
+                    }
+
+                    let allRepos = [];
+                    let page = 1;
+                    let hasMore = true;
+
+                    // Loop para buscar todas as páginas de repositórios do GitHub
+                    while (hasMore) {
+                        setStatusText(`Buscando repositórios no GitHub (Página ${page})...`);
+                        const response = await fetch(`https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&affiliation=owner`, { headers });
+
+                        if (!response.ok) {
+                            if (response.status === 404) throw new Error("Usuário não encontrado.");
+                            if (response.status === 401 || response.status === 403) {
+                                throw new Error("Acesso negado. Para ver seus próprios repositórios (incluindo privados), você PRECISA fornecer um Personal Access Token válido em 'Configurações Avançadas'.");
+                            }
+                            throw new Error("Erro ao buscar repositórios do GitHub.");
+                        }
+
+                        const repos = await response.json();
+
+                        if (repos.length > 0) {
+                            allRepos = [...allRepos, ...repos];
+                        }
+
+                        // Se retornou menos de 100, é porque chegamos na última página
+                        if (repos.length < 100) {
+                            hasMore = false;
+                        } else {
+                            page++;
+                        }
+                    }
+
+                    if (allRepos.length === 0) {
+                        throw new Error("Nenhum repositório encontrado.");
+                    }
+
+                    setOriginalRepos(allRepos);
+
+                    // Passo 2: IA
+                    // Dividimos a requisição em lotes (chunks) para evitar que o LLM corte o JSON
+                    // e para respeitar os limites de tokens de saída de uma única requisição.
+                    const CHUNK_SIZE = 40;
+                    const totalChunks = Math.ceil(allRepos.length / CHUNK_SIZE);
+                    let allAiResults = [];
+
+                    for (let i = 0; i < totalChunks; i++) {
+                        setStatusText(`Analisando com IA: Processando lote ${i + 1} de ${totalChunks}... (${allRepos.length} repos no total)`);
+                        const chunk = allRepos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                        const aiChunkResults = await analyzeReposWithAI(chunk);
+                        allAiResults = [...allAiResults, ...aiChunkResults];
+                    }
+
+                    setStatusText("Organizando resultados...");
+
+                    // Fazer merge dos resultados da IA com os dados originais (url, stars, etc)
+                    const mergedResults = allAiResults.map(aiRepo => {
+                        const original = allRepos.find(r => r.name === aiRepo.name);
+                        return {
+                            ...aiRepo,
+                            url: original?.html_url,
+                            stars: original?.stargazers_count || 0,
+                            language: original?.language || "N/A",
+                            private: original?.private || false // Adiciona flag de privado
+                        };
+                    });
+
+                    // Ordena os resultados pela nota de utilidade pública (maior para menor)
+                    mergedResults.sort((a, b) => (b.public_utility_score || 0) - (a.public_utility_score || 0));
+
+                    setResults(mergedResults);
+                    setStatusText("");
+                    setSearchTerm(""); // Limpa a pesquisa ao fazer nova análise
+
+                } catch (err) {
+                    console.error(err);
+                    setError(err.message || "Ocorreu um erro inesperado.");
+                    setStatusText("");
+                } finally {
+                    setIsAnalyzing(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+                    {/* Notificação de Erro (Toast Flutuante) */}
+                    {error && (
+                        <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10 bg-red-900/95 border border-red-500/50 backdrop-blur-md text-white px-4 py-3 md:px-6 md:py-4 rounded-xl shadow-2xl z-50 flex items-start max-w-sm animate-in slide-in-from-bottom-4 fade-in">
+                            <Icon name="alert-circle" className="mr-3 mt-0.5 text-red-400 shrink-0" size={20} />
+                            <div className="flex-1 pr-2">
+                                <h4 className="font-semibold text-sm mb-1 text-red-200">Atenção</h4>
+                                <p className="text-sm text-red-100/80">{error}</p>
+                            </div>
+                            <button onClick={() => setError("")} className="text-red-400 hover:text-white transition-colors shrink-0">
+                                <Icon name="x" size={18} />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="w-full max-w-4xl text-center space-y-4 mb-10">
+                        <div className="inline-flex items-center justify-center p-4 bg-blue-500/10 rounded-full mb-2">
+                            <Icon name="bot" className="text-blue-400" size={48} />
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                            GitHub Repo Analyzer
+                        </h1>
+                        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                            Digite seu usuário do GitHub e deixe a IA ler, interpretar e explicar cada um dos seus projetos de forma direta e inteligente.
+                        </p>
+                    </div>
+
+                    {/* Input Form */}
+                    <div className="w-full max-w-2xl bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl mb-12">
+                        <form onSubmit={handleAnalyze} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">
+                                    Usuário do GitHub
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Icon name="github" className="text-slate-500" size={20} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="ex: torvalds"
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        disabled={isAnalyzing}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Advanced Options Toggle */}
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTokenSettings(!showTokenSettings)}
+                                    className="text-sm text-slate-400 hover:text-blue-400 flex items-center transition-colors"
+                                >
+                                    <Icon name={showTokenSettings ? "chevron-up" : "chevron-down"} size={16} className="mr-1" />
+                                    Configurações Avançadas (Rate Limit)
+                                </button>
+                            </div>
+
+                            {showTokenSettings && (
+                                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">
+                                        Personal Access Token (Obrigatório para repos privados e exclusão)
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={token}
+                                        onChange={(e) => setToken(e.target.value)}
+                                        placeholder="ghp_..."
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        disabled={isAnalyzing}
+                                    />
+                                    <p className="text-xs text-slate-500 mt-2">
+                                        Para que a ferramenta acesse <b>todos os seus repositórios</b> (incluindo os privados), você deve fornecer um token gerado com a permissão "repo".<br />
+                                        <strong className="text-red-400">Para excluir projetos:</strong> O token precisa, obrigatoriamente, ter a permissão <b>"delete_repo"</b>.
+                                        <br /><strong className="text-blue-400">Para alterar visibilidade:</strong> O token precisa ter a permissão <b>"repo"</b>.
+                                    </p>
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={isAnalyzing}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                            >
+                                {isAnalyzing ? (
+                                    <>
+                                        <Icon name="loader-2" className="animate-spin" size={20} />
+                                        <span>Analisando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Icon name="search" size={20} />
+                                        <span>Analisar Repositórios</span>
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+
+                    {isAnalyzing && statusText && (
+                        <div className="w-full max-w-4xl flex flex-col items-center justify-center text-slate-400 my-8">
+                            <Icon name="cpu" className="animate-pulse text-blue-500 mb-4" size={32} />
+                            <p className="text-lg font-medium text-blue-300">{statusText}</p>
+                            <div className="w-64 h-1.5 bg-slate-800 rounded-full mt-4 overflow-hidden">
+                                <div className="h-full bg-blue-500 w-full animate-[progress_2s_ease-in-out_infinite] origin-left"></div>
+                            </div>
+                        </div>
+                    )}
+
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
+                        @keyframes progress {
+                            0% { transform: scaleX(0); }
+                            50% { transform: scaleX(1); }
+                            100% { transform: scaleX(0); transform-origin: right; }
+                        }
+                    `}} />
+
+                    { }
+                    {results.length > 0 && !isAnalyzing && (
+                        <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 border-b border-slate-700 pb-4 gap-4">
+                                <h2 className="text-2xl font-semibold flex items-center whitespace-nowrap">
+                                    <Icon name="folder-git-2" className="mr-2 text-blue-400" size={24} />
+                                    Resultados ({results.length})
+                                </h2>
+
+                                <div className="flex-1 flex flex-col xl:flex-row gap-3 items-center justify-end w-full">
+                                    {/* Filtro de Visibilidade */}
+                                    <div className="flex bg-slate-900/80 rounded-lg p-1 border border-slate-700 w-full xl:w-auto justify-center">
+                                        <button onClick={() => setVisibilityFilter('all')} className={`px-4 py-1.5 text-sm rounded-md transition-colors ${visibilityFilter === 'all' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>Todos</button>
+                                        <button onClick={() => setVisibilityFilter('public')} className={`px-4 py-1.5 text-sm rounded-md transition-colors ${visibilityFilter === 'public' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>Públicos</button>
+                                        <button onClick={() => setVisibilityFilter('private')} className={`px-4 py-1.5 text-sm rounded-md transition-colors ${visibilityFilter === 'private' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>Privados</button>
+                                    </div>
+
+                                    <div className="w-full xl:max-w-xs relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Icon name="search" className="text-slate-500" size={16} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            placeholder="Pesquisar projetos..."
+                                            className="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        />
+                                    </div>
+
+                                    <a
+                                        href={`https://github.com/${username}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-sm text-slate-400 hover:text-white flex items-center whitespace-nowrap"
+                                    >
+                                        Ver perfil <Icon name="external-link" className="ml-1" size={14} />
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {results.filter(repo => {
+                                    const matchesSearch = repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        repo.objective.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        repo.direct_description.toLowerCase().includes(searchTerm.toLowerCase());
+
+                                    let matchesFilter = true;
+                                    if (visibilityFilter === 'public') matchesFilter = !repo.private;
+                                    if (visibilityFilter === 'private') matchesFilter = repo.private;
+
+                                    return matchesSearch && matchesFilter;
+                                }).map((repo, index) => (
+                                    <div key={index} className="bg-slate-800/50 border border-slate-700 hover:border-slate-500 rounded-2xl p-6 transition-all hover:shadow-lg hover:-translate-y-1 group flex flex-col">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex flex-col pr-2">
+                                                <a
+                                                    href={repo.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="text-lg font-bold text-blue-400 hover:text-blue-300 flex items-center group-hover:underline break-all"
+                                                >
+                                                    {repo.name}
+                                                </a>
+                                                <div className="flex space-x-2 mt-2">
+                                                    { }
+                                                    <button
+                                                        onClick={() => handleToggleVisibility(repo)}
+                                                        disabled={togglingRepo === repo.name}
+                                                        className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border w-fit transition-all hover:opacity-80 disabled:opacity-50 cursor-pointer ${repo.private
+                                                                ? "bg-red-900/50 text-red-400 border-red-800/50 hover:bg-red-800/50"
+                                                                : "bg-emerald-900/50 text-emerald-400 border-emerald-800/50 hover:bg-emerald-800/50"
+                                                            }`}
+                                                        title={repo.private ? "Clique para tornar Público" : "Clique para tornar Privado"}
+                                                    >
+                                                        {togglingRepo === repo.name ? (
+                                                            <Icon name="loader-2" className="animate-spin mr-1" size={12} />
+                                                        ) : repo.private ? (
+                                                            <Icon name="lock" className="mr-1" size={12} />
+                                                        ) : (
+                                                            <Icon name="globe" className="mr-1" size={12} />
+                                                        )}
+                                                        {repo.private ? 'Privado' : 'Público'}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-end space-y-2 flex-shrink-0">
+                                                <button
+                                                    onClick={() => setRepoToDelete(repo)}
+                                                    className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-900/30 rounded-md transition-colors border border-transparent hover:border-red-800/50 flex items-center justify-center group/btn"
+                                                    title="Excluir Repositório"
+                                                >
+                                                    <Icon name="trash-2" size={16} className="group-hover/btn:scale-110 transition-transform" />
+                                                </button>
+
+                                                <div className="flex items-center space-x-2 text-xs text-slate-400">
+                                                    {repo.language && repo.language !== "N/A" && (
+                                                        <span className="flex items-center bg-slate-900 px-2 py-1 rounded-md border border-slate-700">
+                                                            <Icon name="code" className="mr-1" size={12} /> {repo.language}
+                                                        </span>
+                                                    )}
+                                                    <div className={`flex items-center px-2 py-1 rounded-md border font-bold ${repo.public_utility_score >= 8 ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50' :
+                                                            repo.public_utility_score >= 5 ? 'bg-yellow-900/30 text-yellow-400 border-yellow-800/50' :
+                                                                'bg-slate-900/50 text-slate-400 border-slate-700'
+                                                        }`}>
+                                                        <Icon name="star" className="mr-1" size={12} />
+                                                        Nota: {repo.public_utility_score}/10
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 flex-grow">
+                                            <div>
+                                                <h3 className="text-xs uppercase tracking-wider font-semibold text-blue-400 mb-1 flex items-center">
+                                                    <Icon name="target" className="mr-1" size={12} /> Objetivo Principal
+                                                </h3>
+                                                <p className="text-sm text-slate-300 leading-relaxed">
+                                                    {repo.objective}
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">
+                                                <h3 className="text-xs uppercase tracking-wider font-semibold text-purple-400 mb-1 flex items-center">
+                                                    <Icon name="zap" className="mr-1" size={12} /> O que faz?
+                                                </h3>
+                                                <p className="text-sm text-slate-400 font-mono text-xs">
+                                                    {repo.direct_description}
+                                                </p>
+                                            </div>
+
+                                            <div className={`p-3 rounded-xl border ${repo.public_utility_score >= 8 ? 'bg-emerald-900/10 border-emerald-500/30' :
+                                                    repo.public_utility_score >= 5 ? 'bg-yellow-900/10 border-yellow-500/30' :
+                                                        'bg-slate-800/50 border-slate-700'
+                                                } mt-auto`}>
+                                                <h3 className={`text-xs uppercase tracking-wider font-semibold mb-1 flex items-center ${repo.public_utility_score >= 8 ? 'text-emerald-400' :
+                                                        repo.public_utility_score >= 5 ? 'text-yellow-400' :
+                                                            'text-slate-400'
+                                                    }`}>
+                                                    <Icon name="lightbulb" className="mr-1" size={12} /> Por que compartilhar?
+                                                </h3>
+                                                <p className="text-sm text-slate-300">
+                                                    {repo.utility_reason}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    { }
+                    {repoToDelete && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+                            <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-900/30 text-red-500 mb-4 mx-auto">
+                                    <Icon name="alert-triangle" size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-center text-white mb-2">
+                                    Excluir Repositório?
+                                </h3>
+                                <p className="text-slate-300 text-center text-sm mb-6">
+                                    Você tem certeza que deseja excluir <strong className="text-red-400">{repoToDelete.name}</strong>? Esta ação é irreversível e apagará todo o código da sua conta do GitHub.
+                                </p>
+
+                                {deleteError && (
+                                    <div className="mb-6 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-sm text-red-400 text-center flex items-start">
+                                        <Icon name="x-circle" className="mr-2 flex-shrink-0 mt-0.5" size={16} />
+                                        <span>{deleteError}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex space-x-3">
+                                    <button
+                                        onClick={() => { setRepoToDelete(null); setDeleteError(""); }}
+                                        disabled={isDeleting}
+                                        className="flex-1 py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors disabled:opacity-50 font-medium"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={confirmDelete}
+                                        disabled={isDeleting}
+                                        className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center justify-center disabled:opacity-50"
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <Icon name="loader-2" className="animate-spin mr-2" size={18} />
+                                                Excluindo...
+                                            </>
+                                        ) : (
+                                            "Sim, Excluir"
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

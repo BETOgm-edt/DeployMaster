@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-21T16:41:00Z",
+  "title": "Design System: Deploymaster",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Obsidian Core White", "canonical": "#FFFFFF", "tonalRamp": ["#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#E6E6E6", "#F2F2F2", "#FFFFFF"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Void Background", "canonical": "#050505", "tonalRamp": ["#000000", "#050505", "#0A0A0A", "#141414", "#1F1F1F", "#2A2A2A", "#353535", "#404040"] },
+      "accent": { "role": "accent", "displayName": "Emerald Pulse", "canonical": "#34D399", "tonalRamp": ["#062A1E", "#0C543C", "#127E5A", "#18A878", "#24C48D", "#34D399", "#6EE7B7", "#A7F3D0"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines and high-impact titles." },
+      "mono": { "displayName": "Code Mono", "purpose": "Terminal outputs, status badges, CLI commands, and metrics." }
+    },
+    "shadows": [
+      { "name": "emerald-glow", "value": "0 0 25px rgba(52, 211, 153, 0.2)", "purpose": "Glow effect on active deploy CTAs and online status." }
+    ],
+    "motion": [
+      { "name": "reveal-smooth", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Scroll reveal easing for elements and sections." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main Call To Action button for deployment.",
+      "html": "<button class=\"ds-btn-primary\">Iniciar Deploy Agora</button>",
+      "css": ".ds-btn-primary { background-color: #ffffff; color: #050505; font-family: 'Inter', sans-serif; font-weight: 600; padding: 12px 24px; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(255,255,255,0.2); } .ds-btn-primary:hover { transform: scale(1.05); background-color: #f0f0f0; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "Live status indicator pill.",
+      "html": "<div class=\"ds-status-badge\"><span class=\"ds-pulse-dot\"></span> ONLINE</div>",
+      "css": ".ds-status-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(52, 211, 153, 0.1); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.2); padding: 4px 12px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; } .ds-pulse-dot { width: 6px; height: 6px; background-color: #34D399; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #34D399; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Obsidian Command Center",
+    "overview": "Deploymaster opera como um ambiente de comando minimalista de altíssima precisão. Sua estética combina a profundidade da cor obsidiana com superfícies de vidro fosco, realçadas por acentos em verde esmeralda para simbolizar o status ativo.",
+    "keyCharacteristics": [
+      "Fundo obsidian ultra-escuro com iluminação radial sutil",
+      "Panéis em vidro fosco com bordas de 1px",
+      "Contraste entre Inter e JetBrains Mono",
+      "Verde Esmeralda como acento funcional de status"
+    ],
+    "rules": [
+      { "name": "The Single Accent Rule", "body": "A cor verde esmeralda deve cobrir no máximo 5% da superfície visual da tela em qualquer momento.", "section": "colors" },
+      { "name": "The Monospaced Reality Rule", "body": "Todo dado dinâmico, tempo de execução, log de terminal ou métrica DEVE ser renderizado em JetBrains Mono.", "section": "typography" }
+    ],
+    "dos": [
+      "Do manter a interface limpa, focada em código e deploys reais.",
+      "Do usar animações suaves com cubic-bezier.",
+      "Do garantir que dados simulados pareçam autênticos."
+    ],
+    "donts": [
+      "Don't adicionar cores vibrantes fora da paleta.",
+      "Don't utilizar sombras pesadas ou estilos antigos.",
+      "Don't esconder as ações primárias de deploy."
+    ]
+  }
+}
