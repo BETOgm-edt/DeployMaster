@@ -1191,14 +1191,23 @@
             const repoToggle = document.getElementById('repo-source-toggle');
             if (repoToggle) repoToggle.classList.add('hidden');
 
-            document.getElementById('project-name').value = name;
-            document.getElementById('project-name').disabled = true;
-            document.getElementById('project-name').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> <span>Editando: ${escapeHTML(name)}</span>`;
-            document.getElementById('deploy-btn-text').innerText = "Atualizar";
+            const projInput = document.getElementById('project-name');
+            if (projInput) {
+                projInput.value = name;
+                projInput.disabled = true;
+                projInput.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            const formTitle = document.getElementById('form-title');
+            if (formTitle) {
+                formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> <span>Editando: ${escapeHTML(name)}</span>`;
+            }
+
+            const deployBtnText = document.getElementById('deploy-btn-text');
+            if (deployBtnText) deployBtnText.innerText = "Atualizar";
             
             const form = document.getElementById('deploy-form');
-            form.dataset.isUpdate = "true";
+            if (form) form.dataset.isUpdate = "true";
 
             setLoading(true, "Carregando...");
             clearLogs();
@@ -1651,26 +1660,31 @@
 
         function toggleNewFileMode(force) {
             const container = document.getElementById('new-file-input-container');
-            const search = document.getElementById('file-search').parentNode;
+            const searchInput = document.getElementById('file-search');
+            const search = searchInput ? searchInput.parentNode : null;
             const list = document.getElementById('file-list');
             const btn = document.getElementById('btn-new-file');
             
+            if (!container) return;
             const show = force !== undefined ? force : container.classList.contains('hidden');
             
             if(show) {
                 container.classList.remove('hidden');
-                search.classList.add('hidden');
-                list.style.opacity = '0.3';
-                btn.innerHTML = `<i data-lucide="x" class="w-3.5 h-3.5"></i>`;
+                if (search) search.classList.add('hidden');
+                if (list) list.style.opacity = '0.3';
+                if (btn) btn.innerHTML = `<i data-lucide="x" class="w-3.5 h-3.5"></i>`;
                 if (monacoEditor) monacoEditor.setValue('');
-                document.getElementById('new-file-path').focus();
+                const newFilePathInput = document.getElementById('new-file-path');
+                if (newFilePathInput) newFilePathInput.focus();
             } else {
                 container.classList.add('hidden');
-                search.classList.remove('hidden');
-                list.style.opacity = '1';
-                btn.innerHTML = `<i data-lucide="file-plus" class="w-3.5 h-3.5"></i>`;
+                if (search) search.classList.remove('hidden');
+                if (list) list.style.opacity = '1';
+                if (btn) btn.innerHTML = `<i data-lucide="file-plus" class="w-3.5 h-3.5"></i>`;
             }
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
 
         function resetForm() {
@@ -1778,15 +1792,19 @@
 
         function setLoading(isLoading, text="Deploying...") {
             const btn = document.getElementById('deploy-action-btn');
+            if (!btn) return;
             if(isLoading) {
                 btn.disabled = true;
-                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span id="deploy-btn-text">${text}</span>`;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span id="deploy-btn-text">${escapeHTML(text)}</span>`;
             } else {
                 btn.disabled = false;
-                const isUpdate = document.getElementById('deploy-form').dataset.isUpdate === "true";
+                const form = document.getElementById('deploy-form');
+                const isUpdate = form ? (form.dataset.isUpdate === "true") : false;
                 btn.innerHTML = `<span id="deploy-btn-text">${isUpdate ? "Atualizar" : "Deploy"}</span><i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>`;
             }
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
 
         function log(src, msg, type) {
