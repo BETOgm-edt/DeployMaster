@@ -2059,6 +2059,28 @@
                     toggleManualTokenField('vc');
                     syncProjects();
                 }
+        function showOAuthSetupModal(provider) {
+            const isGh = provider === 'github';
+            const name = isGh ? 'GitHub' : 'Vercel';
+            const clientIdKey = isGh ? 'dm_gh_client_id' : 'dm_vc_client_id';
+            
+            const existingId = localStorage.getItem(clientIdKey) || '';
+            const inputId = prompt(
+                `🔐 Configuração de Login OAuth (${name})\n\n` +
+                `Para conectar clicando em "Logar e Autorizar" sem precisar colar tokens, informe o OAuth Client ID do seu App (${name}).\n\n` +
+                `Se preferir usar Token de Acesso direto, cancele e use a opção "Token Manual".`,
+                existingId
+            );
+
+            if (inputId && inputId.trim()) {
+                localStorage.setItem(clientIdKey, inputId.trim());
+                if (isGh) {
+                    DeployMasterAuth.connectGitHub();
+                } else {
+                    DeployMasterAuth.connectVercel();
+                }
+            } else {
+                toggleManualTokenField(isGh ? 'gh' : 'vc');
             }
         }
     </script>
