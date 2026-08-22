@@ -188,8 +188,8 @@
 
 <body class="relative bg-[#050505] text-white selection:bg-emerald-500/30 selection:text-emerald-300">
 
-    <!-- Top Ambient Radial Glow & WebGL Background -->
-    <div id="acid-squares-bg" class="absolute top-0 left-0 w-full h-[850px] sm:h-[1000px] pointer-events-none z-0 overflow-hidden opacity-60 mix-blend-screen" style="mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);"></div>
+    <!-- Top Ambient Glow & Smooth Emerald Fluid Background -->
+    <div id="hero-bg-effect" class="absolute top-0 left-0 w-full h-[900px] pointer-events-none z-0 overflow-hidden opacity-80"></div>
     <div class="glow-top"></div>
 
     <!-- Navigation Header -->
@@ -801,34 +801,10 @@
         }
     </script>
 
-    <!-- AcidSquares WebGL Component Script -->
+    <!-- Smooth Emerald Fluid Background Script -->
     <script type="module">
-        import { initAcidSquares } from '../js/AcidSquares.js';
-
-        initAcidSquares('#acid-squares-bg', {
-            color1: "#050505",
-            color2: "#34D399",
-            color3: "#A7F3D0",
-            detail: "high",
-            speed: 0.15,
-            waveDepth: 2.5,
-            zoom: 1.2,
-            density: 8.0,
-            glow: 2.2,
-            exposure: 2200,
-            spread: 0.25,
-            stepSize: 0.008,
-            colorShift: 1.5,
-            contrast: 1.8,
-            brightness: 0.8,
-            opacity: 0.85,
-            mouseInteraction: true,
-            mouseStrength: 0.15,
-            mouseRadius: 0.4,
-            blur: 0,
-            grain: true,
-            grainIntensity: 0.03
-        });
+        import { initBackgroundEffect } from '../js/BackgroundEffect.js';
+        initBackgroundEffect('#hero-bg-effect');
     </script>
 </body>
 </html>
