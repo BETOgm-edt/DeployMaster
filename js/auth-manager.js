@@ -87,51 +87,93 @@
             return userProfile;
         }
 
-        getGitHubClientId() {
-            return window.DEPLOYMASTER_GH_CLIENT_ID || localStorage.getItem('dm_gh_client_id') || '';
-        }
-
-        getVercelClientId() {
-            return window.DEPLOYMASTER_VC_CLIENT_ID || localStorage.getItem('dm_vc_client_id') || '';
-        }
-
         /**
-         * Inicia o fluxo OAuth 2.0 (Logar e Autorizar) do GitHub.
-         * Se CLIENT_ID estiver disponível, abre o popup oficial da tela de autorização do GitHub.
+         * Inicia o fluxo 1-Click Connect do GitHub.
+         * Se CLIENT_ID estiver configurado, usa OAuth Web Flow via Popup.
+         * Caso contrário, usa o gerador preenchido de token oficial com 1 clique.
          */
         connectGitHub() {
-            const clientId = this.getGitHubClientId();
-            if (clientId) {
-                const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/github`);
+            if (GITHUB_CLIENT_ID) {
+                const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/github/callback`);
                 const scope = encodeURIComponent('repo delete_repo workflow user');
-                const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+                const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirectUri}&scope=${scope}`;
                 this.openOAuthPopup(authUrl, 'Conectar GitHub');
             } else {
-                if (typeof showOAuthSetupModal === 'function') {
-                    showOAuthSetupModal('github');
-                } else {
-                    const tokenGeneratorUrl = 'https://github.com/settings/tokens/new?description=DeployMaster+Integration&scopes=repo,workflow,delete_repo';
-                    window.open(tokenGeneratorUrl, '_blank');
-                }
+                // Atalho 1-Click: abre diretamente a criação do token no GitHub com permissões pré-selecionadas
+                const tokenGeneratorUrl = 'https://github.com/settings/tokens/new?description=DeployMaster+Integration&scopes=repo,workflow,delete_repo';
+                window.open(tokenGeneratorUrl, '_blank');
             }
         }
 
+        // --- VERCEL AUTHENTICATION ---
+
+        getVercelToken() {
+            return localStorage.getItem(this.vcTokenKey) || '';
+        }
+
+        getVercelUser() {
+            try {
+                return JSON.parse(localStorage.getItem(this.vcUserKey) || 'null');
+            } catch (e) {
+                return null;
+            }
+        }
+
+        isVercelConnected() {
+            return !!this.getVercelToken();
+        }
+
+        async setVercelAuth(token, user = null) {
+            localStorage.setItem(this.vcTokenKey, token);
+            if (!user) {
+                try {
+                    user = await this.fetchVercelUserProfile(token);
+                } catch (e) {
+                    console.error('Erro ao buscar perfil Vercel:', e);
+                }
+            }
+            if (user) {
+                localStorage.setItem(this.vcUserKey, JSON.stringify(user));
+            }
+            this.notifyStateChange('vercel', true);
+            return user;
+        }
+
+        disconnectVercel() {
+            localStorage.removeItem(this.vcTokenKey);
+            localStorage.removeItem(this.vcUserKey);
+            this.notifyStateChange('vercel', false);
+        }
+
+        async fetchVercelUserProfile(token = this.getVercelToken()) {
+            if (!token) throw new Error('Token da Vercel não fornecido');
+            const res = await fetch('https://api.vercel.com/v2/user', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Token da Vercel inválido ou expirado');
+            const data = await res.json();
+            const userProfile = {
+                username: data.user.username,
+                email: data.user.email,
+                name: data.user.name || data.user.username,
+                avatar: data.user.avatar ? `https://vercel.com/api/www/avatar/${data.user.avatar}` : null
+            };
+            localStorage.setItem(this.vcUserKey, JSON.stringify(userProfile));
+            return userProfile;
+        }
+
         /**
-         * Inicia o fluxo OAuth 2.0 (Logar e Autorizar) da Vercel.
+         * Inicia o fluxo 1-Click Connect da Vercel.
          */
         connectVercel() {
-            const clientId = this.getVercelClientId();
-            if (clientId) {
-                const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/vercel`);
-                const authUrl = `https://vercel.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}`;
+            if (VERCEL_CLIENT_ID) {
+                const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/vercel/callback`);
+                const authUrl = `https://vercel.com/oauth/authorize?client_id=${VERCEL_CLIENT_ID}&redirect_uri=${redirectUri}`;
                 this.openOAuthPopup(authUrl, 'Conectar Vercel');
             } else {
-                if (typeof showOAuthSetupModal === 'function') {
-                    showOAuthSetupModal('vercel');
-                } else {
-                    const tokenGeneratorUrl = 'https://vercel.com/account/tokens';
-                    window.open(tokenGeneratorUrl, '_blank');
-                }
+                // Atalho 1-Click: abre diretamente a criação do token de acesso na Vercel
+                const tokenGeneratorUrl = 'https://vercel.com/account/tokens';
+                window.open(tokenGeneratorUrl, '_blank');
             }
         }
 
