@@ -188,8 +188,8 @@
 
 <body class="relative bg-[#050505] text-white selection:bg-emerald-500/30 selection:text-emerald-300">
 
-    <!-- Top Ambient Radial Glow & WebGL Background -->
-    <div id="acid-squares-bg" class="absolute top-0 left-0 w-full h-[900px] pointer-events-none z-0 overflow-hidden opacity-50"></div>
+    <!-- Top Ambient Radial Glow & WebGL GridScan Background -->
+    <div id="grid-scan-bg" class="absolute top-0 left-0 w-full h-[900px] pointer-events-none z-0 overflow-hidden opacity-70"></div>
     <div class="glow-top"></div>
 
     <!-- Navigation Header -->
@@ -801,33 +801,26 @@
         }
     </script>
 
-    <!-- AcidSquares WebGL Component Script -->
+    <!-- GridScan WebGL Component Script (Emerald Pulse Theme) -->
     <script type="module">
-        import { initAcidSquares } from '../js/AcidSquares.js';
+        import { initGridScan } from '../js/GridScan.js';
 
-        initAcidSquares('#acid-squares-bg', {
-            color1: "#34D399",
-            color2: "#75ffcd",
-            color3: "#000000",
-            detail: "high",
-            speed: 0.15,
-            waveDepth: 4,
-            zoom: 1.4,
-            density: 12.5,
-            glow: 3,
-            exposure: 2700,
-            spread: 0.29,
-            stepSize: 0.013,
-            colorShift: 2,
-            contrast: 2.5,
-            brightness: 0.6,
-            opacity: 1,
-            mouseInteraction: true,
-            mouseStrength: 0,
-            mouseRadius: 1,
-            blur: 0,
-            grain: true,
-            grainIntensity: 0
+        initGridScan('#grid-scan-bg', {
+            sensitivity: 0.55,
+            lineThickness: 1,
+            linesColor: "#132b21",
+            scanColor: "#34D399",
+            gridScale: 0.1,
+            scanOpacity: 0.6,
+            bloomIntensity: 0.6,
+            chromaticAberration: 0.002,
+            noiseIntensity: 0.01,
+            scanGlow: 0.5,
+            scanSoftness: 2,
+            scanPhaseTaper: 0.9,
+            scanDuration: 2.0,
+            scanDelay: 1.5,
+            snapBackDelay: 250
         });
     </script>
 </body>
